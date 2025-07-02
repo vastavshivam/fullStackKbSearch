@@ -1,0 +1,268 @@
+{"prompt": "How to reset password?", "response": "Go to settings and click 'Reset Password'.", "sentiment": "positive"}
+{"prompt": "App is crashing", "response": "Please reinstall the app and clear cache.", "sentiment": "neutral"}
+{"prompt": "How to change language?", "response": "Go to settings and select 'Language'.", "sentiment": "positive"}
+{"prompt": "App is slow", "response": "Try clearing cache or reinstalling the app.", "sentiment": "negative"}
+{"prompt": "How to delete account?", "response": "Go to settings and click 'Delete Account'.", "sentiment": "neutral"}
+{"prompt": "App not responding", "response": "Please restart the app or your device.", "sentiment": "negative"}
+{"prompt": "How to update profile?", "response": "Go to profile settings and edit your information.", "sentiment": "positive"}
+{"prompt": "App features are great", "response": "Thank you! We're glad you like them.", "sentiment": "positive"}   
+{"prompt": "How to report a bug?", "response": "Please use the 'Report Bug' feature in settings.", "sentiment": "neutral"}
+{"prompt": "App is not loading", "response": "Check your internet connection or try again later.", "sentiment": "negative"}
+{"prompt": "How to contact support?", "response": "You can contact support via email or through the app.", "sentiment": "positive"}
+{"prompt": "App is too complicated", "response": "We are working on making it more user-friendly.", "sentiment": "negative"}
+{"prompt": "How to enable notifications?", "response": "Go to settings and turn on notifications.", "sentiment": "positive"}
+{"prompt": "App is crashing on startup", "response": "Please clear cache and try again.", "sentiment": "negative"}
+{"prompt": "How to change password?", "response": "Go to settings and click 'Change Password'.", "sentiment": "positive"}
+{"prompt": "App is not saving changes", "response": "Please ensure you have a stable internet connection.", "sentiment": "negative"}
+{"prompt": "How to log out?", "response": "Go to settings and click 'Log Out'.", "sentiment": "neutral"}
+{"prompt": "App is very useful", "response": "Thank you for your feedback!", "sentiment": "positive"}
+{"prompt": "How to customize notifications?", "response": "Go to settings and select 'Notifications'.", "sentiment": "positive"}
+{"prompt": "App is not working on my device", "response": "Please check compatibility or contact support.", "sentiment": "negative"}
+{"prompt": "How to view app history?", "response": "Go to settings and click 'App History'.", "sentiment": "positive"}
+{"prompt": "App is not syncing data", "response": "Please check your internet connection and try again.", "sentiment": "negative"}
+{"prompt": "How to change email?", "response": "Go to settings and click 'Change Email'.", "sentiment": "positive"}
+{"prompt": "App is too slow", "response": "We are working on performance improvements.", "sentiment": "negative"}
+{"prompt": "How to enable dark mode?", "response": "Go to settings and turn on dark mode.", "sentiment": "positive"}
+{"prompt": "App is not showing notifications", "response": "Please check notification settings in the app.", "sentiment": "negative"}
+{"prompt": "How to reset app settings?", "response": "Go to settings and click 'Reset Settings'.", "sentiment": "neutral"}
+{"prompt": "App is very intuitive", "response": "Thank you! We strive to make it user-friendly.", "sentiment": "positive"}
+{"prompt": "How to change app theme?", "response": "Go to settings and select 'Theme'.", "sentiment": "positive"}
+{"prompt": "App is not updating", "response": "Please check for updates in the app store.", "sentiment": "negative"}
+{"prompt": "How to manage subscriptions?", "response": "Go to settings and click 'Subscriptions'.", "sentiment": "positive"}
+{"prompt": "App is crashing frequently", "response": "Please report the issue through the app.", "sentiment": "negative"}
+{"prompt": "How to share app feedback?", "response": "You can share feedback through the 'Feedback' section in settings.", "sentiment": "positive"}
+{"prompt": "App is not responding to clicks", "response": "Please restart the app or your device.", "sentiment": "negative"}
+{"prompt": "How to access help center?", "response": "Go to settings and click 'Help Center'.", "sentiment": "positive"}
+{"prompt": "App is very helpful", "response": "Thank you! We're glad to hear that.", "sentiment": "positive"}
+{"prompt": "How to change app language?", "response": "Go to settings and select 'Language'.", "sentiment": "positive"}
+{"prompt": "App is not loading images", "response": "Please check your internet connection and try again.", "sentiment": "negative"}
+{"prompt": "How to enable location services?", "response": "Go to settings and turn on location services.", "sentiment": "positive"}
+{"prompt": "App is not working properly", "response": "Please report the issue through the app.", "sentiment": "negative"}
+{"prompt": "How to change app icon?", "response": "Go to settings and select 'App Icon'.", "sentiment": "positive"}
+{"prompt": "App is not responding", "response": "Please restart the app or your device.", "sentiment": "negative"}
+{"prompt": "How to view app permissions?", "response": "Go to settings and click 'App Permissions'.", "sentiment": "positive"}
+{"prompt": "App is very user-friendly", "response": "Thank you! We appreciate your feedback.", "sentiment": "positive"}
+{"prompt": "How to report a feature request?", "response": "You can submit feature requests through the 'Feedback' section in settings.", "sentiment": "positive"}
+{"prompt": "App is not functioning", "response": "Please check for updates or contact support.", "sentiment": "negative"}
+{"prompt": "How to change app notifications?", "response": "Go to settings and select 'Notifications'.", "sentiment": "positive"}
+{"prompt": "App is crashing on my device", "response": "Please report the issue through the app.", "sentiment": "negative"}
+{"prompt": "How to access app tutorials?", "response": "Go to settings and click 'Tutorials'.", "sentiment": "positive"}
+{"prompt": "App is very responsive", "response": "Thank you! We're glad you like it.", "sentiment": "positive"}
+{"prompt": "How to change app settings?", "response": "Go to settings and adjust your preferences.", "sentiment": "positive"}
+{"prompt": "App is not working on my phone", "response": "Please check compatibility or contact support.", "sentiment": "negative"}
+{"prompt": "How to enable app updates?", "response": "Go to settings and turn on automatic updates.", "sentiment": "positive"}
+{"prompt": "App is not saving my data", "response": "Please ensure you have a stable internet connection.", "sentiment": "negative"}
+{"prompt": "How to customize app layout?", "response": "Go to settings and select 'Layout'.", "sentiment": "positive"}
+{"prompt": "App is very slow", "response": "We are working on performance improvements.", "sentiment": "negative"}
+{"prompt": "How to access app support?", "response": "You can access support through the 'Support' section in settings.", "sentiment": "positive"}
+{"prompt": "App is not responding to commands", "response": "Please restart the app or your device.", "sentiment": "negative"}
+{"prompt": "How to change app appearance?", "response": "Go to settings and select 'Appearance'.", "sentiment": "positive"}
+{"prompt": "App is very efficient", "response": "Thank you! We appreciate your feedback.", "sentiment": "positive"}
+{"prompt": "How to manage app data?", "response": "Go to settings and click 'Data Management'.", "sentiment": "positive"}
+{"prompt": "App is not functioning correctly", "response": "Please report the issue through the app.", "sentiment": "negative"}
+{"prompt": "How to enable app features?", "response": "Go to settings and turn on desired features.", "sentiment": "positive"}
+{"prompt": "App is crashing during use", "response": "Please report the issue through the app.", "sentiment": "negative"}
+{"prompt": "How to access app settings?", "response": "Go to the main menu and click 'Settings'.", "sentiment": "positive"}
+{"prompt": "App is very reliable", "response": "Thank you! We're glad to hear that.", "sentiment": "positive"}
+{"prompt": "How to change app preferences?", "response": "Go to settings and adjust your preferences.", "sentiment": "positive"}
+{"prompt": "App is not loading properly", "response": "Please check your internet connection and try again.", "sentiment": "negative"}
+{"prompt": "How to enable app notifications?", "response": "Go to settings and turn on notifications.", "sentiment": "positive"}
+{"prompt": "App is not working as expected", "response": "Please report the issue through the app.", "sentiment": "negative"}
+{"prompt": "How to customize app features?", "response": "Go to settings and select 'Features'.", "sentiment": "positive"}
+{"prompt": "App is very helpful for daily tasks", "response": "Thank you! We're glad to assist you.", "sentiment": "positive"}
+{"prompt": "How to change app settings?", "response": "Go to settings and adjust your preferences.", "sentiment": "positive"}
+{"prompt": "App is not responding to inputs", "response": "Please restart the app or your device.", "sentiment": "negative"}
+{"prompt": "How to access app updates?", "response": "Go to settings and check for updates.", "sentiment": "positive"}
+{"prompt": "App is very useful for productivity", "response": "Thank you! We're glad you find it helpful.", "sentiment": "positive"}
+{"prompt": "How to manage app notifications?", "response": "Go to settings and select 'Notifications'.", "sentiment": "positive"}
+{"prompt": "App is not functioning properly", "response": "Please report the issue through the app.", "sentiment": "negative"}
+{"prompt": "How to change app language settings?", "response": "Go to settings and select 'Language'.", "sentiment": "positive"}
+{"prompt": "App is very intuitive and easy to use", "response": "Thank you! We appreciate your feedback.", "sentiment": "positive"}
+{"prompt": "How to enable app features?", "response": "Go to settings and turn on desired features.", "sentiment": "positive"}
+{"prompt": "App is not loading content", "response": "Please check your internet connection and try again.", "sentiment": "negative"}
+{"prompt": "How to access app help?", "response": "Go to settings and click 'Help'.", "sentiment": "positive"}
+{"prompt": "App is very responsive and fast", "response": "Thank you! We're glad you like it.", "sentiment": "positive"}
+{"prompt": "How to change app theme settings?", "response": "Go to settings and select 'Theme'.", "sentiment": "positive"}
+{"prompt": "App is not functioning as expected", "response": "Please report the issue through the app.", "sentiment": "negative"}
+{"prompt": "How to customize app notifications?", "response": "Go to settings and select 'Notifications'.", "sentiment": "positive"}
+{"prompt": "App is very efficient for my needs", "response": "Thank you! We're glad to assist you.", "sentiment": "positive"}
+{"prompt": "How to change app preferences?", "response": "Go to settings and adjust your preferences.", "sentiment": "positive"}
+{"prompt": "App is not responding to my actions", "response": "Please restart the app or your device.", "sentiment": "negative"}
+{"prompt": "How to access app support?", "response": "You can access support through the 'Support' section in settings.", "sentiment": "positive"}
+{"prompt": "App is very user-friendly and helpful", "response": "Thank you! We appreciate your feedback.", "sentiment": "positive"}
+{"prompt": "How to manage app data settings?", "response": "Go to settings and click 'Data Management'.", "sentiment": "positive"}
+{"prompt": "App is not functioning correctly", "response": "Please report the issue through the app.", "sentiment": "negative"}
+{"prompt": "How to enable app updates?", "response": "Go to settings and turn on automatic updates.", "sentiment": "positive"}
+{"prompt": "App is very reliable and efficient", "response": "Thank you! We're glad to hear that.", "sentiment": "positive"}
+{"prompt": "How to change app appearance settings?", "response": "Go to settings and select 'Appearance'.", "sentiment": "positive"}
+{"prompt": "App is not loading features", "response": "Please check your internet connection and try again.", "sentiment": "negative"}
+{"prompt": "How to customize app layout settings?", "response": "Go to settings and select 'Layout'.", "sentiment": "positive"}
+{"prompt": "App is very helpful for my tasks", "response": "Thank you! We're glad to assist you.", "sentiment": "positive"}
+{"prompt": "How to change app settings?", "response": "Go to settings and adjust your preferences.", "sentiment": "positive"}
+{"prompt": "App is not responding to my commands", "response": "Please restart the app or your device.", "sentiment": "negative"}
+{"prompt": "How to access app tutorials?", "response": "Go to settings and click 'Tutorials'.", "sentiment": "positive"}
+{"prompt": "App is very efficient and fast", "response": "Thank you! We're glad you like it.", "sentiment": "positive"}
+{"prompt": "How to manage app subscriptions?", "response": "Go to settings and click 'Subscriptions'.", "sentiment": "positive"}
+{"prompt": "App is not functioning as expected", "response": "Please report the issue through the app.", "sentiment": "negative"}
+{"prompt": "How to enable app features?", "response": "Go to settings and turn on desired features.", "sentiment": "positive"}
+{"prompt": "App is crashing during use", "response": "Please report the issue through the app.", "sentiment": "negative"}
+{"prompt": "How to access app settings?", "response": "Go to the main menu and click 'Settings'.", "sentiment": "positive"}
+{"prompt": "App is very reliable and helpful", "response": "Thank you! We're glad to hear that.", "sentiment": "positive"}
+{"prompt": "How to change app preferences?", "response": "Go to settings and adjust your preferences.", "sentiment": "positive"}
+{"prompt": "App is not loading properly", "response": "Please check your internet connection and try again.", "sentiment": "negative"}
+{"prompt": "How to enable app notifications?", "response": "Go to settings and turn on notifications.", "sentiment": "positive"}
+{"prompt": "App is not working as expected", "response": "Please report the issue through the app.", "sentiment": "negative"}
+{"prompt": "How to customize app features?", "response": "Go to settings and select 'Features'.", "sentiment": "positive"}
+{"prompt": "App is very helpful for daily tasks", "response": "Thank you! We're glad to assist you.", "sentiment": "positive"}
+{"prompt": "How to change app settings?", "response": "Go to settings and adjust your preferences.", "sentiment": "positive"}
+{"prompt": "App is not responding to inputs", "response": "Please restart the app or your device.", "sentiment": "negative"}
+{"prompt": "How to access app updates?", "response": "Go to settings and check for updates.", "sentiment": "positive"}
+{"prompt": "App is very useful for productivity", "response": "Thank you! We're glad you find it helpful.", "sentiment": "positive"}
+{"prompt": "How to manage app notifications?", "response": "Go to settings and select 'Notifications'.", "sentiment": "positive"}
+{"prompt": "App is not functioning properly", "response": "Please report the issue through the app.", "sentiment": "negative"}
+{"prompt": "How to change app language settings?", "response": "Go to settings and select 'Language'.", "sentiment": "positive"}
+{"prompt": "App is very intuitive and easy to use", "response": "Thank you! We appreciate your feedback.", "sentiment": "positive"}
+{"prompt": "How to enable app features?", "response": "Go to settings and turn on desired features.", "sentiment": "positive"}
+{"prompt": "App is not loading content", "response": "Please check your internet connection and try again.", "sentiment": "negative"}
+{"prompt": "How to access app help?", "response": "Go to settings and click 'Help'.", "sentiment": "positive"}
+{"prompt": "App is very responsive and fast", "response": "Thank you! We're glad you like it.", "sentiment": "positive"}
+{"prompt": "How to change app theme settings?", "response": "Go to settings and select 'Theme'.", "sentiment": "positive"}
+{"prompt": "App is not functioning as expected", "response": "Please report the issue through the app.", "sentiment": "negative"}
+{"prompt": "How to customize app notifications?", "response": "Go to settings and select 'Notifications'.", "sentiment": "positive"}
+{"prompt": "App is very efficient for my needs", "response": "Thank you! We're glad to assist you.", "sentiment": "positive"}
+{"prompt": "How to change app preferences?", "response": "Go to settings and adjust your preferences.", "sentiment": "positive"}
+{"prompt": "App is not responding to my actions", "response": "Please restart the app or your device.", "sentiment": "negative"}
+{"prompt": "How to access app support?", "response": "You can access support through the 'Support' section in settings.", "sentiment": "positive"}
+{"prompt": "App is very user-friendly and helpful", "response": "Thank you! We appreciate your feedback.", "sentiment": "positive"}
+{"prompt": "How to manage app data settings?", "response": "Go to settings and click 'Data Management'.", "sentiment": "positive"}
+{"prompt": "App is not functioning correctly", "response": "Please report the issue through the app.", "sentiment": "negative"}
+{"prompt": "How to enable app updates?", "response": "Go to settings and turn on automatic updates.", "sentiment": "positive"}
+{"prompt": "App is very reliable and efficient", "response": "Thank you! We're glad to hear that.", "sentiment": "positive"}
+{"prompt": "How to change app appearance settings?", "response": "Go to settings and select 'Appearance'.", "sentiment": "positive"}
+{"prompt": "App is not loading features", "response": "Please check your internet connection and try again.", "sentiment": "negative"}
+{"prompt": "How to customize app layout settings?", "response": "Go to settings and select 'Layout'.", "sentiment": "positive"}
+{"prompt": "App is very helpful for my tasks", "response": "Thank you! We're glad to assist you.", "sentiment": "positive"}
+{"prompt": "How to change app settings?", "response": "Go to settings and adjust your preferences.", "sentiment": "positive"}
+{"prompt": "App is not responding to my commands", "response": "Please restart the app or your device.", "sentiment": "negative"}
+{"prompt": "How to access app tutorials?", "response": "Go to settings and click 'Tutorials'.", "sentiment": "positive"}
+{"prompt": "App is very efficient and fast", "response": "Thank you! We're glad you like it.", "sentiment": "positive"}
+{"prompt": "How to manage app subscriptions?", "response": "Go to settings and click 'Subscriptions'.", "sentiment": "positive"}
+{"prompt": "App is not functioning as expected", "response": "Please report the issue through the app.", "sentiment": "negative"}
+{"prompt": "How to enable app features?", "response": "Go to settings and turn on desired features.", "sentiment": "positive"}
+{"prompt": "App is crashing during use", "response": "Please report the issue through the app.", "sentiment": "negative"}
+{"prompt": "How to access app settings?", "response": "Go to the main menu and click 'Settings'.", "sentiment": "positive"}
+{"prompt": "App is very reliable and helpful", "response": "Thank you! We're glad to hear that.", "sentiment": "positive"}
+{"prompt": "How to change app preferences?", "response": "Go to settings and adjust your preferences.", "sentiment": "positive"}
+{"prompt": "App is not loading properly", "response": "Please check your internet connection and try again.", "sentiment": "negative"}
+{"prompt": "How to enable app notifications?", "response": "Go to settings and turn on notifications.", "sentiment": "positive"}
+{"prompt": "App is not working as expected", "response": "Please report the issue through the app.", "sentiment": "negative"}
+{"prompt": "How to customize app features?", "response": "Go to settings and select 'Features'.", "sentiment": "positive"}
+{"prompt": "App is very helpful for daily tasks", "response": "Thank you! We're glad to assist you.", "sentiment": "positive"}
+{"prompt": "How to change app settings?", "response": "Go to settings and adjust your preferences.", "sentiment": "positive"}
+{"prompt": "App is not responding to inputs", "response": "Please restart the app or your device.", "sentiment": "negative"}
+{"prompt": "How to access app updates?", "response": "Go to settings and check for updates.", "sentiment": "positive"}
+{"prompt": "App is very useful for productivity", "response": "Thank you! We're glad you find it helpful.", "sentiment": "positive"}        
+{"prompt": "How to manage app notifications?", "response": "Go to settings and select 'Notifications'.", "sentiment": "positive"}
+{"prompt": "App is not functioning properly", "response": "Please report the issue through the app.", "sentiment": "negative"}
+{"prompt": "How to change app language settings?", "response": "Go to settings and select 'Language'.", "sentiment": "positive"}
+{"prompt": "App is very intuitive and easy to use", "response": "Thank you! We appreciate your feedback.", "sentiment": "positive"}
+{"prompt": "How to enable app features?", "response": "Go to settings and turn on desired features.", "sentiment": "positive"}
+{"prompt": "App is not loading content", "response": "Please check your internet connection and try again.", "sentiment": "negative"}
+{"prompt": "How to access app help?", "response": "Go to settings and click 'Help'.", "sentiment": "positive"}
+{"prompt": "App is very responsive and fast", "response": "Thank you! We're glad you like it.", "sentiment": "positive"}
+{"prompt": "How to change app theme settings?", "response": "Go to settings and select 'Theme'.", "sentiment": "positive"}
+{"prompt": "App is not functioning as expected", "response": "Please report the issue through the app.", "sentiment": "negative"}
+{"prompt": "How to customize app notifications?", "response": "Go to settings and select 'Notifications'.", "sentiment": "positive"}
+{"prompt": "App is very efficient for my needs", "response": "Thank you! We're glad to assist you.", "sentiment": "positive"}
+{"prompt": "How to change app preferences?", "response": "Go to settings and adjust your preferences.", "sentiment": "positive"}
+{"prompt": "App is not responding to my actions", "response": "Please restart the app or your device.", "sentiment": "negative"}
+{"prompt": "How to access app support?", "response": "You can access support through the 'Support' section in settings.", "sentiment": "positive"}
+{"prompt": "App is very user-friendly and helpful", "response": "Thank you! We appreciate your feedback.", "sentiment": "positive"}
+{"prompt": "How to manage app data settings?", "response": "Go to settings and click 'Data Management'.", "sentiment": "positive"}
+{"prompt": "App is not functioning correctly", "response": "Please report the issue through the app.", "sentiment": "negative"}
+{"prompt": "How to enable app updates?", "response": "Go to settings and turn on automatic updates.", "sentiment": "positive"}
+{"prompt": "App is very reliable and efficient", "response": "Thank you! We're glad to hear that.", "sentiment": "positive"}
+{"prompt": "How to change app appearance settings?", "response": "Go to settings and select 'Appearance'.", "sentiment": "positive"}
+{"prompt": "App is not loading features", "response": "Please check your internet connection and try again.", "sentiment": "negative"}
+{"prompt": "How to customize app layout settings?", "response": "Go to settings and select 'Layout'.", "sentiment": "positive"}
+{"prompt": "App is very helpful for my tasks", "response": "Thank you! We're glad to assist you.", "sentiment": "positive"}
+{"prompt": "How to change app settings?", "response": "Go to settings and adjust your preferences.", "sentiment": "positive"}
+{"prompt": "App is not responding to my commands", "response": "Please restart the app or your device.", "sentiment": "negative"}
+{"prompt": "How to access app tutorials?", "response": "Go to settings and click 'Tutorials'.", "sentiment": "positive"}
+{"prompt": "App is very efficient and fast", "response": "Thank you! We're glad you like it.", "sentiment": "positive"}
+{"prompt": "How to manage app subscriptions?", "response": "Go to settings and click 'Subscriptions'.", "sentiment": "positive"}
+{"prompt": "App is not functioning as expected", "response": "Please report the issue through the app.", "sentiment": "negative"}
+{"prompt": "How to enable app features?", "response": "Go to settings and turn on desired features.", "sentiment": "positive"}  
+{"prompt": "App is crashing during use", "response": "Please report the issue through the app.", "sentiment": "negative"}
+{"prompt": "How to access app settings?", "response": "Go to the main menu and click 'Settings'.", "sentiment": "positive"}
+{"prompt": "App is very reliable and helpful", "response": "Thank you! We're glad to hear that.", "sentiment": "positive"}
+{"prompt": "How to change app preferences?", "response": "Go to settings and adjust your preferences.", "sentiment": "positive"}
+{"prompt": "App is not loading properly", "response": "Please check your internet connection and try again.", "sentiment": "negative"}
+{"prompt": "How to enable app notifications?", "response": "Go to settings and turn on notifications.", "sentiment": "positive"}
+{"prompt": "App is not working as expected", "response": "Please report the issue through the app.", "sentiment": "negative"}
+{"prompt": "How to customize app features?", "response": "Go to settings and select 'Features'.", "sentiment": "positive"}
+{"prompt": "App is very helpful for daily tasks", "response": "Thank you! We're glad to assist you.", "sentiment": "positive"}
+{"prompt": "How to change app settings?", "response": "Go to settings and adjust your preferences.", "sentiment": "positive"}
+{"prompt": "App is not responding to inputs", "response": "Please restart the app or your device.", "sentiment": "negative"}
+{"prompt": "How to access app updates?", "response": "Go to settings and check for updates.", "sentiment": "positive"}
+{"prompt": "App is very useful for productivity", "response": "Thank you! We're glad you find it helpful.", "sentiment": "positive"}
+{"prompt": "How to manage app notifications?", "response": "Go to settings and select 'Notifications'.", "sentiment": "positive"}
+{"prompt": "App is not functioning properly", "response": "Please report the issue through the app.", "sentiment": "negative"}
+{"prompt": "How to change app language settings?", "response": "Go to settings and select 'Language'.", "sentiment": "positive"}
+{"prompt": "App is very intuitive and easy to use", "response": "Thank you! We appreciate your feedback.", "sentiment": "positive"}
+{"prompt": "How to enable app features?", "response": "Go to settings and turn on desired features.", "sentiment": "positive"}
+{"prompt": "App is not loading content", "response": "Please check your internet connection and try again.", "sentiment": "negative"}
+{"prompt": "How to access app help?", "response": "Go to settings and click 'Help'.", "sentiment": "positive"}
+{"prompt": "App is very responsive and fast", "response": "Thank you! We're glad you like it.", "sentiment": "positive"}    
+{"prompt": "How to change app theme settings?", "response": "Go to settings and select 'Theme'.", "sentiment": "positive"}
+{"prompt": "App is not functioning as expected", "response": "Please report the issue through the app.", "sentiment": "negative"}
+{"prompt": "How to customize app notifications?", "response": "Go to settings and select 'Notifications'.", "sentiment": "positive"}
+{"prompt": "App is very efficient for my needs", "response": "Thank you! We're glad to assist you.", "sentiment": "positive"}
+{"prompt": "How to change app preferences?", "response": "Go to settings and adjust your preferences.", "sentiment": "positive"}
+{"prompt": "App is not responding to my actions", "response": "Please restart the app or your device.", "sentiment": "negative"}
+{"prompt": "How to access app support?", "response": "You can access support through the 'Support' section in settings.", "sentiment": "positive"}
+{"prompt": "App is very user-friendly and helpful", "response": "Thank you! We appreciate your feedback.", "sentiment": "positive"}
+{"prompt": "How to manage app data settings?", "response": "Go to settings and click 'Data Management'.", "sentiment": "positive"}
+{"prompt": "App is not functioning correctly", "response": "Please report the issue through the app.", "sentiment": "negative"}
+{"prompt": "How to enable app updates?", "response": "Go to settings and turn on automatic updates.", "sentiment": "positive"}
+{"prompt": "App is very reliable and efficient", "response": "Thank you! We're glad to hear that.", "sentiment": "positive"}
+{"prompt": "How to change app appearance settings?", "response": "Go to settings and select 'Appearance'.", "sentiment": "positive"}
+{"prompt": "App is not loading features", "response": "Please check your internet connection and try again.", "sentiment": "negative"}
+{"prompt": "How to customize app layout settings?", "response": "Go to settings and select 'Layout'.", "sentiment": "positive"}
+{"prompt": "App is very helpful for my tasks", "response": "Thank you! We're glad to assist you.", "sentiment": "positive"}
+{"prompt": "How to change app settings?", "response": "Go to settings and adjust your preferences.", "sentiment": "positive"}
+{"prompt": "App is not responding to my commands", "response": "Please restart the app or your device.", "sentiment": "negative"}
+{"prompt": "How to access app tutorials?", "response": "Go to settings and click 'Tutorials'.", "sentiment": "positive"}
+{"prompt": "App is very efficient and fast", "response": "Thank you! We're glad you like it.", "sentiment": "positive"}
+{"prompt": "How to manage app subscriptions?", "response": "Go to settings and click 'Subscriptions'.", "sentiment": "positive"}
+{"prompt": "App is not functioning as expected", "response": "Please report the issue through the app.", "sentiment": "negative"}
+{"prompt": "How to enable app features?", "response": "Go to settings and turn on desired features.", "sentiment": "positive"}
+{"prompt": "App is crashing during use", "response": "Please report the issue through the app.", "sentiment": "negative"}
+{"prompt": "How to access app settings?", "response": "Go to the main menu and click 'Settings'.", "sentiment": "positive"}
+{"prompt": "App is very reliable and helpful", "response": "Thank you! We're glad to hear that.", "sentiment": "positive"}
+{"prompt": "How to change app preferences?", "response": "Go to settings and adjust your preferences.", "sentiment": "positive"}
+{"prompt": "App is not loading properly", "response": "Please check your internet connection and try again.", "sentiment": "negative"}
+{"prompt": "How to enable app notifications?", "response": "Go to settings and turn on notifications.", "sentiment": "positive"}
+{"prompt": "App is not working as expected", "response": "Please report the issue through the app.", "sentiment": "negative"}
+{"prompt": "How to customize app features?", "response": "Go to settings and select 'Features'.", "sentiment": "positive"}
+{"prompt": "App is very helpful for daily tasks", "response": "Thank you! We're glad to assist you.", "sentiment": "positive"}
+{"prompt": "How to change app settings?", "response": "Go to settings and adjust your preferences.", "sentiment": "positive"}
+{"prompt": "App is not responding to inputs", "response": "Please restart the app or your device.", "sentiment": "negative"}
+{"prompt": "How to access app updates?", "response": "Go to settings and check for updates.", "sentiment": "positive"}
+{"prompt": "App is very useful for productivity", "response": "Thank you! We're glad you find it helpful.", "sentiment": "positive"}
+{"prompt": "How to manage app notifications?", "response": "Go to settings and select 'Notifications'.", "sentiment": "positive"}
+{"prompt": "App is not functioning properly", "response": "Please report the issue through the app.", "sentiment": "negative"}
+{"prompt": "How to change app language settings?", "response": "Go to settings and select 'Language'.", "sentiment": "positive"}
+{"prompt": "App is very intuitive and easy to use", "response": "Thank you! We appreciate your feedback.", "sentiment": "positive"}
+{"prompt": "How to enable app features?", "response": "Go to settings and turn on desired features.", "sentiment": "positive"}
+{"prompt": "App is not loading content", "response": "Please check your internet connection and try again.", "sentiment": "negative"}
+{"prompt": "How to access app help?", "response": "Go to settings and click 'Help'.", "sentiment": "positive"}
+{"prompt": "App is very responsive and fast", "response": "Thank you! We're glad you like it.", "sentiment": "positive"}
+{"prompt": "How to change app theme settings?", "response": "Go to settings and select 'Theme'.", "sentiment": "positive"}
+{"prompt": "App is not functioning as expected", "response": "Please report the issue through the app.", "sentiment": "negative"}
+{"prompt": "How to customize app notifications?", "response": "Go to settings and select 'Notifications'.", "sentiment": "positive"}
+{"prompt": "App is very efficient for my needs", "response": "Thank you! We're glad to assist you.", "sentiment": "positive"}
+{"prompt": "How to change app preferences?", "response": "Go to settings and adjust your preferences.", "sentiment": "positive"}
+{"prompt": "App is not responding to my actions", "response": "Please restart the app or your device.", "sentiment": "negative"}
+{"prompt": "How to access app support?", "response": "You can access support through the 'Support' section in settings.", "sentiment": "positive"}
+{"prompt": "App is very user-friendly and helpful", "response": "Thank you! We appreciate your feedback.", "sentiment": "positive"}
