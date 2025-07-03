@@ -21,7 +21,8 @@ class UserResponse(UserBase):
     is_active: bool
 
     class Config:
-        orm_mode = True
+        # orm_mode = True
+        from_attributes = True
 
 
 # ----------------------------- ITEM SCHEMAS ----------------------------- #
@@ -40,7 +41,8 @@ class ItemResponse(ItemBase):
     owner_id: int
 
     class Config:
-        orm_mode = True
+        # orm_mode = True
+        from_attributes = True
 
 
 # -------------------------- AUTH & TOKEN SCHEMAS ------------------------ #
@@ -64,7 +66,8 @@ class ChatMessage(BaseModel):
     session_id: str
 
     class Config:
-        orm_mode = True
+        # orm_mode = True
+        from_attributes = True
 
 
 # ---------------------------- TICKET SCHEMAS ---------------------------- #
@@ -86,7 +89,8 @@ class TicketResponse(TicketBase):
     description: str
 
     class Config:
-        orm_mode = True
+        # orm_mode = True
+        from_attributes = True
 
 
 # -------------------------- FEEDBACK SCHEMAS ---------------------------- #
@@ -98,7 +102,8 @@ class FeedbackCreate(BaseModel):
     sentiment: Optional[str] = None
 
     class Config:
-        orm_mode = True
+        # orm_mode = True
+        from_attributes = True
 
 
 # -------------------------- ESCALATION SCHEMAS -------------------------- #
@@ -110,7 +115,8 @@ class EscalationCreate(BaseModel):
     timestamp: Optional[datetime] = None
 
     class Config:
-        orm_mode = True
+        # orm_mode = True
+        from_attributes = True
 
 
 class UserCreate(BaseModel):
@@ -125,7 +131,8 @@ class UserOut(BaseModel):
     is_active: bool
 
     class Config:
-        orm_mode = True
+        # orm_mode = True
+        from_attributes = True
 
 
 class AskRequest(BaseModel):
