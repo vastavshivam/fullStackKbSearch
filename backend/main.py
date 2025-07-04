@@ -33,7 +33,7 @@ app.add_middleware(
 )
 
 # ✅ API routers 
-app.include_router(auth.router, prefix="/api/auth", tags=["Auth"])
+# app.include_router(auth.router, prefix="/api/auth", tags=["Auth"])
 app.include_router(chat.router, prefix="/api/chat", tags=["Chat"])
 app.include_router(files.router, prefix="/api/files", tags=["Files"])
 app.include_router(qa_router, prefix="/api/qa", tags=["Q&A"])
@@ -44,10 +44,10 @@ app.include_router(websocket.router, tags=["WebSocket"])
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 # ✅ Startup/shutdown tasks
-@app.on_event("startup")
-async def startup():
-    await database.init_db()
-    setup_email_notifications()
+# @app.on_event("startup")
+# async def startup():
+#     await database.init_db()
+#     setup_email_notifications()
 
 @app.on_event("shutdown")
 async def shutdown():
@@ -59,9 +59,9 @@ def root():
     return {"message": "✅ Support Assistant API is live."}
 
 
-@app.on_event("startup")
-async def startup_event():
-    await database.init_db()
+# @app.on_event("startup")
+# async def startup_event():
+#     await database.init_db()
 # from fastapi import FastAPI
 # from routes import admin, token
 # from fastapi.middleware.cors import CORSMiddleware
