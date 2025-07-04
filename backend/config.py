@@ -5,7 +5,7 @@ import os
 # MODEL_NAME = os.getenv("MODEL_NAME", "tiiuae/falcon-rw-1b")
 
 MODEL_NAME = "tiiuae/falcon-rw-1b"  # or "distilgpt2"
-OUTPUT_DIR = "uploaded_kbs/falcon-rw-1b"
+OUTPUT_DIR = "vector_stores/falcon-rw-1b"
 
 # Directory to store the fine-tuned model checkpoints
 # OUTPUT_DIR = os.getenv("OUTPUT_DIR", "training/checkpoints/mistral-finetuned")
