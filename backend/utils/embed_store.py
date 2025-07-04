@@ -46,8 +46,9 @@ def embed_question(question: str) -> np.ndarray:
 def query_embeddings(file_id, query, top_k=5):
     index_path = f"{VECTOR_DIR}/{file_id}.index"
     data_path = f"{VECTOR_DIR}/{file_id}_chunks.pkl"
-
+    print(f"filepath: {index_path}, data_path: {data_path}")
     if not os.path.exists(index_path) or not os.path.exists(data_path):
+        
         raise FileNotFoundError("Vector index or chunk file not found.")
 
     index = faiss.read_index(index_path)
