@@ -1,28 +1,30 @@
 import os
 import json
 import asyncio
-from datasets import load_dataset, Dataset
-from transformers import AutoTokenizer, AutoModelForCausalLM, TrainingArguments, Trainer, DataCollatorForLanguageModeling
-from transformers import TextIteratorStreamer
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends, Request, APIRouter, BackgroundTasks
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from fastapi.responses import HTMLResponse, JSONResponse
-from threading import Thread
+import logging
 import redis
 import uuid
 import jwt
-from langchain.memory import RedisChatMessageHistory
-from langchain.schema import messages_from_dict, messages_to_dict
-from langchain.prompts import ChatPromptTemplate
-
 import pandas as pd
-import json
-import os
-from transformers import AutoTokenizer, AutoModelForCausalLM, TrainingArguments, Trainer
+
 from datasets import Dataset
-from transformers import pipeline
-from utils.embed_store import chunk_text, save_embeddings, load_index, embed_question, query_embeddings
- 
+from transformers import (
+    AutoTokenizer,
+    AutoModelForCausalLM,
+    TrainingArguments,
+    Trainer,
+    DataCollatorForLanguageModeling,
+    TextIteratorStreamer,
+    pipeline
+)
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
+from fastapi.responses import JSONResponse
+from threading import Thread
+from langchain.memory import RedisChatMessageHistory
+
+# Logging setup
+logging.basicConfig(level=logging.INFO)
+log = logging.getLogger(__name__)
 
 MODEL_NAME = os.getenv("MODEL_NAME", "tiiuae/falcon-rw-1b")
 DATA_PATH = "training/data/train.jsonl"
@@ -33,7 +35,7 @@ JWT_SECRET = os.getenv("JWT_SECRET", "your-secret-key")
 app = FastAPI()
 redis_client = redis.Redis.from_url(REDIS_URL)
 
- 
+
 def verify_jwt(token: str):
     try:
         payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
@@ -43,61 +45,18 @@ def verify_jwt(token: str):
     except jwt.InvalidTokenError:
         raise WebSocketDisconnect(code=4002)
 
-# router = APIRouter()
 
 @app.post("/auth/token")
 async def generate_token(request: Request):
+    log.info("Received request for token generation")
     body = await request.json()
     user_id = body.get("user_id")
+    log.info(f"user_id received: {user_id}")
     if not user_id:
         return JSONResponse(status_code=400, content={"error": "Missing user_id"})
     token = jwt.encode({"user_id": user_id}, JWT_SECRET, algorithm="HS256")
+    log.info(f"Generated token for user_id {user_id}")
     return {"token": token}
-
-
-def load_data():
-    with open(DATA_PATH, 'r') as f:
-        data = [json.loads(line) for line in f if line.strip()]
-    formatted = [{"text": f"<s>[INST] {ex['prompt']} [/INST] {ex['response']} </s>"} for ex in data]
-    return Dataset.from_list(formatted)
-
-
-def tokenize(example, tokenizer):
-    return tokenizer(example["text"], truncation=True, padding="max_length", max_length=512)
-
-
-# def fine_tune():
-#     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, use_fast=True)
-#     model = AutoModelForCausalLM.from_pretrained(MODEL_NAME)
-
-#     dataset = load_data()
-#     tokenized_dataset = dataset.map(lambda x: tokenize(x, tokenizer), batched=True)
-#     data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
-
-#     training_args = TrainingArguments(
-#         output_dir=OUTPUT_DIR,
-#         per_device_train_batch_size=1,
-#         gradient_accumulation_steps=2,
-#         num_train_epochs=3,
-#         save_steps=50,
-#         logging_steps=25,
-#         learning_rate=5e-5,
-#         weight_decay=0.01,
-#         save_total_limit=1,
-#         report_to="none"
-#     )
-
-#     trainer = Trainer(
-#         model=model,
-#         args=training_args,
-#         train_dataset=tokenized_dataset,
-#         tokenizer=tokenizer,
-#         data_collator=data_collator
-#     )
-
-#     trainer.train()
-#     trainer.save_model(OUTPUT_DIR)
-#     tokenizer.save_pretrained(OUTPUT_DIR)
 
 
 def auto_detect_fields(df):
@@ -105,12 +64,15 @@ def auto_detect_fields(df):
     response_cols = [col for col in df.columns if 'response' in col.lower() or 'status' in col.lower() or 'remark' in col.lower()]
     return text_cols[0], response_cols[0] if response_cols else None
 
+
 def summarize_response(text):
     summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
     result = summarizer(text[:1024], max_length=60, min_length=20, do_sample=False)
     return result[0]['summary_text']
 
+
 def convert_to_jsonl(file_path, output_path):
+    log.info(f"Converting {file_path} to {output_path}")
     ext = file_path.split('.')[-1]
     if ext == "csv":
         df = pd.read_csv(file_path)
@@ -122,6 +84,8 @@ def convert_to_jsonl(file_path, output_path):
         raise ValueError("Unsupported format")
 
     prompt_col, response_col = auto_detect_fields(df)
+    log.info(f"Auto-detected prompt: {prompt_col}, response: {response_col}")
+
     records = []
     for _, row in df.iterrows():
         prompt = row[prompt_col]
@@ -132,22 +96,27 @@ def convert_to_jsonl(file_path, output_path):
         for r in records:
             json.dump(r, f)
             f.write("\n")
+    log.info("Conversion complete")
     return output_path
 
-# def fine_tune(model_name="tiiuae/falcon-7b-instruct", jsonl_path="training/data/fine_tune.jsonl"): 
-def fine_tune(model_name=MODEL_NAME, jsonl_path="training/data/fine_tune.jsonl"): 
-    print(f"Starting fine-tuning with model: {model_name} and data: {jsonl_path}")
+
+def fine_tune(model_name=MODEL_NAME, jsonl_path="training/data/fine_tune.jsonl"):
+    log.info(f"Starting fine-tuning with model: {model_name} and data: {jsonl_path}")
     with open(jsonl_path, 'r') as f:
         data = [json.loads(line) for line in f.readlines()]
+    log.info(f"Loaded {len(data)} training records")
 
     dataset = Dataset.from_list(data)
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForCausalLM.from_pretrained(model_name)
+    log.info("Model and tokenizer loaded")
 
     def tokenize(example):
         return tokenizer("<s>" + example["prompt"] + "\n" + example["response"] + "</s>", truncation=True)
 
     tokenized = dataset.map(tokenize)
+    log.info("Tokenization complete")
+
     args = TrainingArguments(
         output_dir="training/checkpoints",
         per_device_train_batch_size=2,
@@ -156,44 +125,46 @@ def fine_tune(model_name=MODEL_NAME, jsonl_path="training/data/fine_tune.jsonl")
         logging_steps=10,
         save_total_limit=1,
         save_strategy="epoch",
-        pad_token_id=tokenizer.eos_token_id # Use EOS token as padding
-
+        pad_token_id=tokenizer.eos_token_id
     )
 
-    trainer = Trainer(
-        model=model,
-        args=args,
-        train_dataset=tokenized
-    )
+    trainer = Trainer(model=model, args=args, train_dataset=tokenized)
+    log.info("Trainer initialized. Starting training...")
     trainer.train()
+    log.info("Training complete")
 
 
-
-# 🔁 Token-level streaming response over WebSocket with LangChain memory, JWT auth, and context injection
 @app.websocket("/ws/chat")
 async def websocket_endpoint(websocket: WebSocket):
+    log.info("WebSocket connection initiated")
     token = websocket.query_params.get("token")
     user_id = verify_jwt(token)
+    log.info(f"Authenticated user_id: {user_id}")
     await websocket.accept()
     session_id = str(uuid.uuid4())
+    log.info(f"Session ID: {session_id}")
+
     try:
         tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
         model = AutoModelForCausalLM.from_pretrained(MODEL_NAME)
         memory = RedisChatMessageHistory(session_id=session_id, url=REDIS_URL)
+        log.info("Model, tokenizer, and Redis memory initialized")
 
         while True:
             user_input = await websocket.receive_text()
+            log.info(f"User message: {user_input}")
             memory.add_user_message(user_input)
 
-            # Inject last 5 messages as context
-            history_msgs = memory.messages[-5:]  # list of BaseMessage
+            history_msgs = memory.messages[-5:]
             history_text = "\n".join([f"{m.type.upper()}: {m.content}" for m in history_msgs])
             full_prompt = f"Here is the recent chat history:\n{history_text}\n\nUser: {user_input}\nAssistant:"
+            log.info("Prompt constructed")
 
             inputs = tokenizer(full_prompt, return_tensors="pt")
             streamer = TextIteratorStreamer(tokenizer, skip_prompt=True, skip_special_tokens=True)
 
             def generate():
+                log.info("Starting token generation")
                 model.generate(**inputs, streamer=streamer, max_new_tokens=150, do_sample=True)
 
             thread = Thread(target=generate)
@@ -205,14 +176,16 @@ async def websocket_endpoint(websocket: WebSocket):
                 await websocket.send_text(token)
 
             memory.add_ai_message(response_text)
+            log.info(f"AI response: {response_text}")
             await websocket.send_text("[END]")
 
     except WebSocketDisconnect:
-        print("WebSocket disconnected")
+        log.warning("WebSocket disconnected")
     except Exception as e:
+        log.error(f"Error: {str(e)}")
         await websocket.send_text(f"[ERROR]: {str(e)}")
         await websocket.close()
 
 
-if __name__ == "__main__":
-    fine_tune()
+# if __name__ == "__main__":
+#     fine_tune()
