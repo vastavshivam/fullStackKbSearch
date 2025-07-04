@@ -1,5 +1,7 @@
 import React, { useState } from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router";
 import { askQuestion, uploadFile, generateToken, startTraining } from "./services/api";
+import Ask from "./Ask";
 
 function App() {
   const [question, setQuestion] = useState("");
@@ -19,6 +21,11 @@ function App() {
   };
 
   return (
+/* <Router>
+      <Routes>
+ <Route path="/ask" element={<Ask />} />
+      </Routes>
+</Router> */
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Support Assistant</h1>
       <input type="file" onChange={(e) => setFile(e.target.files[0])} />
