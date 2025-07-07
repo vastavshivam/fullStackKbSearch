@@ -1,0 +1,303 @@
+/* Journeys.css */
+
+:root {
+  --bg-white: #ffffff;
+  --bg-light: #f7f9fb;
+  --text-primary: #1a1a1a;
+  --text-secondary: #555;
+  --accent: #1da1f2;
+  --border-color: #e0e0e0;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  --card-radius: 16px;
+}
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background-color: var(--bg-white);
+  color: var(--text-primary);
+}
+
+.journey-wrapper {
+  padding: 40px;
+  background-color: var(--bg-white);
+  min-height: 100vh;
+}
+
+.journey-header {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.journey-headline h1 {
+  font-size: 34px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.journey-headline p {
+  margin-top: 6px;
+  font-size: 16px;
+  color: var(--text-secondary);
+}
+
+.journey-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.search-input {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--bg-light);
+  max-width: 250px;
+}
+
+.search-input input {
+  border: none;
+  outline: none;
+  background: transparent;
+  margin-left: 8px;
+  width: 100%;
+  font-size: 14px;
+}
+
+.new-journey-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: var(--accent);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.new-journey-btn:hover {
+  background-color: #1991da;
+}
+
+.view-toggle button {
+  background: white;
+  border: 1px solid var(--border-color);
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.view-toggle .active {
+  background-color: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.journey-summary {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.summary-card {
+  flex: 1 1 200px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: var(--bg-light);
+  border-radius: var(--card-radius);
+  padding: 16px 20px;
+  box-shadow: var(--shadow);
+  transition: all 0.2s;
+}
+
+.summary-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+}
+
+.summary-card h4 {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.summary-card p {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 4px 0 0;
+}
+
+.journey-list.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.journey-list.list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.journey-card {
+  background: var(--bg-light);
+  border-radius: var(--card-radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+}
+
+.journey-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+}
+
+.journey-icon {
+  font-size: 36px;
+  margin-top: 6px;
+}
+
+.journey-content h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.journey-content p {
+  margin: 6px 0 14px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.journey-cta {
+  background-color: var(--accent);
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.journey-cta:hover {
+  background-color: #178cd8;
+}
+
+.journey-delete {
+  background: #ff4d4f;
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-left: 10px;
+}
+
+.journey-delete:hover {
+  background: #d9363e;
+}
+
+.no-results {
+  text-align: center;
+  color: #888;
+  font-size: 16px;
+  padding: 40px;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.edit-modal {
+  background: #fff;
+  padding: 24px 28px;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  animation: slideUp 0.4s ease-in-out;
+  position: relative;
+}
+
+.edit-modal h2 {
+  margin-top: 0;
+  font-size: 22px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.edit-modal input,
+.edit-modal textarea {
+  width: 100%;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  font-family: 'Segoe UI', sans-serif;
+  resize: none;
+}
+
+.modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #999;
+  transition: color 0.2s ease;
+}
+
+.modal-close:hover {
+  color: #111;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
