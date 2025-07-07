@@ -1,0 +1,62 @@
+.journey-detail {
+  padding: 40px;
+  background: #fff;
+  min-height: 100vh;
+  font-family: 'Segoe UI', sans-serif;
+  color: #1a1a1a;
+}
+
+.journey-detail h1 {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.journey-detail p {
+  font-size: 16px;
+  color: #444;
+  margin-bottom: 24px;
+}
+
+.journey-info-card {
+  background: #f7f9fb;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  margin-bottom: 30px;
+}
+
+.journey-info-card h3 {
+  margin-top: 0;
+  font-size: 18px;
+  color: #333;
+}
+
+.journey-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.journey-actions button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.journey-actions button:first-child {
+  background: #eee;
+  color: #333;
+}
+
+.journey-actions .journey-cta {
+  background-color: #1da1f2;
+  color: white;
+  transition: background 0.2s;
+}
+
+.journey-actions .journey-cta:hover {
+  background-color: #178cd8;
+}

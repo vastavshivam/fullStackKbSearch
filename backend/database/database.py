@@ -44,7 +44,7 @@ async def get_db():
     try:
         yield db
     finally:
-        await db.close()
+        db.close()
 
 async def init_db():
     """
