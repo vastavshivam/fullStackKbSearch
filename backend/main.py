@@ -10,7 +10,7 @@ from database import database  # Assuming you have a database module for initial
 from db import *
 from api import chat, auth, files, training, websocket
 from utils.email_notify import setup_email_notifications
-from backend.routes import whatsapp_routes as whatsapp
+from routes import whatsapp_routes as whatsapp
 Base = declarative_base()
 
 app = FastAPI(
