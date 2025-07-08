@@ -1,4 +1,4 @@
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 from config import MODEL_NAME, OUTPUT_DIR
 import torch
 import os
@@ -22,6 +22,9 @@ model = AutoModelForCausalLM.from_pretrained(model_path)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = model.to(device)
 
+classifier = pipeline("sentiment-analysis", model="distilbert-base-uncased-finetuned-sst-2-english")
+
+
 def get_mistral_response(prompt: str, max_new_tokens: int = 100) -> str:
     inputs = tokenizer.encode(prompt, return_tensors="pt").to(device)
     with torch.no_grad():
@@ -35,6 +38,15 @@ def get_mistral_response(prompt: str, max_new_tokens: int = 100) -> str:
         )
     decoded = tokenizer.decode(outputs[0], skip_special_tokens=True)
     return decoded[len(prompt):].strip()
+
+
+def classify_sentiment(text: str) -> str:
+    """
+    Returns 'positive' or 'negative'
+    """
+    result = classifier(text)[0]
+    label = result["label"].lower()  # 'positive' or 'negative'
+    return label
 
 
 # def get_mistral_response(prompt: str, max_new_tokens: int = 100) -> str:

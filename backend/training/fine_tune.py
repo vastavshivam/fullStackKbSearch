@@ -7,7 +7,7 @@ import uuid
 import jwt
 import pandas as pd
 
-from datasets import Dataset
+from datasets import Dataset, load_dataset
 from transformers import (
     AutoTokenizer,
     AutoModelForCausalLM,
@@ -101,6 +101,9 @@ def convert_to_jsonl(file_path, output_path):
 
 
 def fine_tune(model_name=MODEL_NAME, jsonl_path="training/data/fine_tune.jsonl"):
+    """
+    Standard Trainer-based fine-tuning
+    """
     log.info(f"Starting fine-tuning with model: {model_name} and data: {jsonl_path}")
     with open(jsonl_path, 'r') as f:
         data = [json.loads(line) for line in f.readlines()]
@@ -132,6 +135,77 @@ def fine_tune(model_name=MODEL_NAME, jsonl_path="training/data/fine_tune.jsonl")
     log.info("Trainer initialized. Starting training...")
     trainer.train()
     log.info("Training complete")
+
+
+def fine_tune_with_ppo(model_name=MODEL_NAME, jsonl_path="training/data/fine_tune_reward.jsonl"):
+    """
+    PPO fine-tuning with TRL
+    """
+    log.info(f"Starting TRL PPO fine-tuning with model: {model_name} and data: {jsonl_path}")
+
+    import torch
+    from trl import PPOTrainer, PPOConfig, AutoModelForCausalLMWithValueHead
+
+    dataset = load_dataset("json", data_files=jsonl_path)["train"]
+    log.info(f"Loaded {len(dataset)} records")
+
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = AutoModelForCausalLMWithValueHead.from_pretrained(model_name)
+    log.info("Tokenizer and model with value head loaded")
+
+    config = PPOConfig(
+        model_name=model_name,
+        learning_rate=1.41e-5,
+        batch_size=2,
+        log_with=None,
+    )
+
+    ppo_trainer = PPOTrainer(
+        model=model,
+        tokenizer=tokenizer,
+        config=config,
+    )
+
+    generation_kwargs = {
+        "max_new_tokens": 50,
+        "do_sample": True,
+        "top_k": 50,
+        "top_p": 0.95,
+        "pad_token_id": tokenizer.eos_token_id,
+    }
+
+    log.info("Starting PPO training loop...")
+    for record in dataset:
+        prompt = record["prompt"]
+        response = record["response"]
+        reward = record.get("reward", 0.0)
+
+        query_tensor = tokenizer(prompt, return_tensors="pt").input_ids.to(ppo_trainer.accelerator.device)
+
+        response_tensor = ppo_trainer.model.generate(
+            query_tensor,
+            **generation_kwargs,
+        )
+
+        response_text = tokenizer.decode(response_tensor[0], skip_special_tokens=True)
+        rewards = torch.tensor([reward]).to(ppo_trainer.accelerator.device)
+
+        log.info("-----------")
+        log.info(f"Prompt: {prompt}")
+        log.info(f"Generated response: {response_text}")
+        log.info(f"Reward: {reward}")
+
+        ppo_trainer.step(
+            queries=[query_tensor.squeeze(0)],
+            responses=[response_tensor.squeeze(0)],
+            rewards=rewards,
+        )
+
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    model.save_pretrained(OUTPUT_DIR)
+    tokenizer.save_pretrained(OUTPUT_DIR)
+
+    log.info("PPO fine-tuning complete and model saved.")
 
 
 @app.websocket("/ws/chat")
@@ -187,5 +261,8 @@ async def websocket_endpoint(websocket: WebSocket):
         await websocket.close()
 
 
-# if __name__ == "__main__":
-#     fine_tune()
+if __name__ == "__main__":
+    # Uncomment whichever you want to run:
+    # fine_tune()
+    # fine_tune_with_ppo()
+    pass
