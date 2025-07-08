@@ -11,7 +11,7 @@ from pathlib import Path
 from utils.embed_store import chunk_text, save_embeddings
 import shutil
 import os
-
+from training.fine_tune import fine_tune
 from utils.file_parser import parse_file, clean_json
 from utils.email_notify import send_upload_notification
 
@@ -59,6 +59,9 @@ async def upload_file(file: UploadFile = File(...)):
         save_embeddings(file_id=file.filename, chunks=chunks)
     except Exception as e:
         print(f"[Embedding Error]: {e}")  # or raise a warning log
+
+    # ✅ Start training automatically after embeddings
+    background_tasks.add_task(fine_tune)
 
     # Optional: send email/slack alert to admin
     send_upload_notification("vastavshivam@gmai.com", "uploaded successfully.", body="File uploaded ...")

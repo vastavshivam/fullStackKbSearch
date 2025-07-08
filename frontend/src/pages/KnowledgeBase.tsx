@@ -3,55 +3,78 @@ import '../pages/KnowledgeBase.css';
 
 type KBEntry = { question: string; answer: string };
 
-const mockKB: KBEntry[] = [
-  { question: 'How to reset my password?', answer: 'Click on Forgot Password on the login page.' },
-  { question: 'How to contact support?', answer: 'Email us at support@example.com.' },
-];
-
-
 export default function KnowledgeBase() {
-  const [entries, setEntries] = useState<KBEntry[]>(mockKB);
+  const [entries, setEntries] = useState<KBEntry[]>([]);
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [uploadStatus, setUploadStatus] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log('KnowledgeBase.tsx component mounted');
+    const fetchEntries = async () => {
+      try {
+        const res = await fetch('http://localhost:8000/api/ask');
+        const data = await res.json();
+        if (res.ok) {
+          setEntries(data); // assuming data is array of { question, answer }
+        } else {
+          console.error('Failed to load KB:', data.detail || res.statusText);
+        }
+      } catch (err: any) {
+        console.error('Error loading KB:', err.message);
+      }
+    };
+
+    fetchEntries();
   }, []);
 
-  const handleAdd = (e: React.FormEvent) => {
+  const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!question.trim() || !answer.trim()) return;
-    setEntries([...entries, { question, answer }]);
-    setQuestion('');
-    setAnswer('');
-  };
 
+    try {
+      const res = await fetch('http://localhost:8000/api/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question, answer }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setEntries(prev => [...prev, data]);
+        setQuestion('');
+        setAnswer('');
+      } else {
+        alert('❌ Failed to add entry: ' + (data.detail || res.statusText));
+      }
+    } catch (err: any) {
+      alert('❌ Network error: ' + err.message);
+    }
+  };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setUploadedFile(file);
       setUploadStatus('Uploading...');
+
       try {
         const formData = new FormData();
         formData.append('file', file);
 
-        // If you need to add auth, add headers here
-        const response = await fetch('/api/kb/upload', {
+        const response = await fetch('http://localhost:8000/api/files', {
           method: 'POST',
           body: formData,
-          // credentials: 'include', // if using cookies for auth
         });
+
         if (!response.ok) {
           const err = await response.json();
           setUploadStatus('Upload failed: ' + (err.detail || response.statusText));
         } else {
-          setUploadStatus('Upload successful!');
+          setUploadStatus('✅ Upload successful!');
         }
       } catch (err: any) {
-        setUploadStatus('Upload failed: ' + err.message);
+        setUploadStatus('❌ Upload failed: ' + err.message);
       }
     }
   };
@@ -59,7 +82,6 @@ export default function KnowledgeBase() {
   return (
     <div className="kb-layout">
       <h1 className="kb-title">📚 Knowledge Base</h1>
-
 
       <div className="kb-card upload-card">
         <h3>Upload Dataset</h3>

@@ -24,7 +24,7 @@ const UserDashboard = () => {
     formData.append('file', file);
     formData.append('user', '1'); // Replace with actual user id
     try {
-      const res = await fetch('http://localhost:8000/kb/upload-knowledge-base', {
+      const res = await fetch('http://localhost:8000//api/files', {
         method: 'POST',
         body: formData
       });

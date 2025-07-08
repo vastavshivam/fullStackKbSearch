@@ -1,12 +1,12 @@
 # api/qa.py
 from fastapi import APIRouter, HTTPException
 from models.schemas import AskRequest, AskResponse
-from utils.embed_store import load_index, embed_question,query_embeddings
+from utils.embed_store import load_index, embed_question, query_embeddings
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
+import os
 
 from utils.embed_store import VECTOR_DIR
-import os
 
 router = APIRouter()
 
@@ -28,7 +28,8 @@ async def ask_question(data: AskRequest):
     D, I = index.search(q_embedding, k=3)
 
     retrieved = [chunks[i] for i in I[0]]
-    prompt = f"Context:\n{'\n'.join(retrieved)}\n\nUser: {question}\nAI:"
+    joined_context = "\n".join(retrieved)
+    prompt = f"Context:\n{joined_context}\n\nUser: {question}\nAI:"
 
     inputs = tokenizer(prompt, return_tensors="pt")
     output = model.generate(**inputs, max_new_tokens=150)
