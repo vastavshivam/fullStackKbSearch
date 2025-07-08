@@ -10,6 +10,7 @@ from database import database  # Assuming you have a database module for initial
 from db import *
 from api import chat, auth, files, training, websocket
 from utils.email_notify import setup_email_notifications
+from routes import whatsapp_routes as whatsapp
 Base = declarative_base()
 
 app = FastAPI(
@@ -33,12 +34,14 @@ app.add_middleware(
 )
 
 # ✅ API routers 
-# app.include_router(auth.router, prefix="/api/auth", tags=["Auth"])
+
+app.include_router(auth.router, prefix="/api/auth", tags=["Auth"])
 app.include_router(chat.router, prefix="/api/chat", tags=["Chat"])
 app.include_router(files.router, prefix="/api/files", tags=["Files"])
 app.include_router(qa_router, prefix="/api/qa", tags=["Q&A"])
 app.include_router(training.router, prefix="/api/training", tags=["Training"])
 app.include_router(websocket.router, tags=["WebSocket"])
+app.include_router(whatsapp.router, prefix="/whatsapp")
 
 # ✅ Static file serving (for uploaded images, previews, etc.)
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")

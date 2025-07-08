@@ -67,7 +67,7 @@ def save_feedback(db: Session, feedback: FeedbackCreate):
     db.refresh(fb)
     return fb
 
-# 📊 Get Feedback by Chat ID
+#  Get Feedback by Chat ID
 def get_feedback_for_chat(db: Session, chat_id: int):
     return db.query(UserFeedback).filter(UserFeedback.chat_id == chat_id).all()
 

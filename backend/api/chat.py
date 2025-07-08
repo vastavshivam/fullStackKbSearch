@@ -1,6 +1,6 @@
 # api/chat.py
 
-from fastapi import APIRouter, WebSocket, Depends
+from fastapi import APIRouter, WebSocket, Depends, HTTPException
 
 from fastapi.concurrency import run_in_threadpool
 
@@ -20,13 +20,14 @@ async def send_message(
 ):
     try:
         # offload the sync save_chat_message(db, msg)
+        print("saving chat message:", db)
         await save_chat_message(db, msg)
 
         # # offload your existing RAG function
         # # reply =run_in_threadpool(generate_response_with_rag, msg.message)
         # # If you need to await the result, use:
         reply = await generate_response_with_rag(msg.message)
-        print("🤖 Reply generated:", type(reply))
+        print(" Reply generated:", type(reply))
         return {"reply": reply}
     except Exception as e:
         print(" Chat error:", str(e))

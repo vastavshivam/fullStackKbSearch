@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy.pool import NullPool
 
+
 # Update with your local DB credentials
 DATABASE_URL = "postgresql+asyncpg://postgres:root@localhost:5432/support_db"
 
@@ -22,19 +23,28 @@ async_session = sessionmaker(
 
 # Base model class for ORM models
 Base = declarative_base() 
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+# async def get_db():
+#     """
+#     FastAPI dependency to get an async DB session.
+#     Usage in path operation:
+#         async def endpoint(db: AsyncSession = Depends(get_db)):
+#             ...
+#     """
+#     db = SessionLocal()
+#     async with async_session() as session:
+#         try:
+#             yield session
+#         finally:
+#             await session.close()
 
 async def get_db():
-    """
-    FastAPI dependency to get an async DB session.
-    Usage in path operation:
-        async def endpoint(db: AsyncSession = Depends(get_db)):
-            ...
-    """
-    async with async_session() as session:
-        try:
-            yield session
-        finally:
-            await session.close()
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 async def init_db():
     """

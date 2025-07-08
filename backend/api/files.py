@@ -27,6 +27,7 @@ MAX_FILE_SIZE_MB = 10
 async def upload_file(file: UploadFile = File(...)):
     # Validate extension
     ext = Path(file.filename).suffix.lower()
+    print(f"File extension===============>: {ext}")
     if ext not in ALLOWED_EXTENSIONS:
         raise HTTPException(status_code=400, detail=f"❌ Unsupported file type: {ext}")
 
@@ -38,6 +39,7 @@ async def upload_file(file: UploadFile = File(...)):
 
     # Save file
     file_path = UPLOAD_DIR / file.filename
+    print(f"File path===============>: {file_path}")
     with open(file_path, "wb") as f:
         f.write(contents)
 
@@ -45,6 +47,7 @@ async def upload_file(file: UploadFile = File(...)):
     try:
         preview = parse_file(file_path, limit=5)
         preview = clean_json(preview)  # Clean JSON data if needed
+        print(f"Preview data===============>: {preview}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"❌ Failed to parse file: {str(e)}")
     
