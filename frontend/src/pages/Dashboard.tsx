@@ -7,9 +7,9 @@ import {
   BiErrorCircle, BiTimeFive, BiMenu, BiX, BiMoon, BiSun
 } from "react-icons/bi";
 
-import ChartPanel from "./ChartPanel.tsx";
+import ChartPanel from "./ChartPanel";
 import "./Dashboard.css";
-import InsightCards from "../components/InsightCards.tsx";
+import InsightCards from "../components/InsightCards";
 
 const kpiData = [
   { label: "Campaigns", value: "25", icon: <BiRocket /> },

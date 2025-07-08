@@ -21,3 +21,20 @@ export const generateToken = (userId) => {
 export const startTraining = () => {
   return axios.post(`${API_BASE}/api/training/start-training/`);
 };
+
+// Knowledge Base API functions
+export const getKBEntries = () => {
+  return axios.get(`${API_BASE}/api/files/kb/entries`);
+};
+
+export const createKBEntry = (question, answer) => {
+  return axios.post(`${API_BASE}/api/files/kb/entries`, { question, answer });
+};
+
+export const updateKBEntry = (id, question, answer) => {
+  return axios.put(`${API_BASE}/api/files/kb/entries/${id}`, { question, answer });
+};
+
+export const deleteKBEntry = (id) => {
+  return axios.delete(`${API_BASE}/api/files/kb/entries/${id}`);
+};

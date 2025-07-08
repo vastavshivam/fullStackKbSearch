@@ -62,7 +62,7 @@ class ChatMessage(BaseModel):
     user_id: Optional[int]
     message: str
     sender: str  # 'user' or 'bot'
-    timestamp: datetime | None = None
+    timestamp: Optional[datetime] = None
     session_id: str
 
     class Config:
@@ -141,4 +141,25 @@ class AskRequest(BaseModel):
 
 class AskResponse(BaseModel):
     answer: str
+
+
+# ----------------------------- KB ENTRY SCHEMAS ----------------------------- #
+
+class KBEntryBase(BaseModel):
+    question: str
+    answer: str
+
+class KBEntryCreate(KBEntryBase):
+    pass
+
+class KBEntryResponse(KBEntryBase):
+    id: int
+    created_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+class KBEntriesListResponse(BaseModel):
+    entries: List[KBEntryResponse]
+    total: int
 

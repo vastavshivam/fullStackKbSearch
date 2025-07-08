@@ -4,8 +4,8 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy.ext.declarative import declarative_base
 from api.qa import router as qa_router
 
-
-from database import database  # Assuming you have a database module for initialization
+# Temporarily commenting out database import to test KB functionality
+# from database import database  # Assuming you have a database module for initialization
 
 from db import *
 from api import chat, auth, files, training, websocket
@@ -49,7 +49,8 @@ app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 # ✅ Startup/shutdown tasks
 @app.on_event("startup")
 async def startup():
-    await database.init_db()
+    # Temporarily commenting out database initialization
+    # await database.init_db()
     setup_email_notifications()
 
 @app.on_event("shutdown")
@@ -61,10 +62,10 @@ async def shutdown():
 def root():
     return {"message": "✅ Support Assistant API is live."}
 
-
-@app.on_event("startup")
-async def startup_event():
-    await database.init_db()
+# Commenting out duplicate startup event
+# @app.on_event("startup")
+# async def startup_event():
+#     await database.init_db()
 # from fastapi import FastAPI
 # from routes import admin, token
 # from fastapi.middleware.cors import CORSMiddleware

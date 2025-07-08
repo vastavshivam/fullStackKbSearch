@@ -2,18 +2,19 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 
-import Dashboard from './pages/Dashboard.tsx';
-import Chat from './pages/Chat.tsx';
-import KnowledgeBase from './pages/KnowledgeBase.tsx';
-import Login from './pages/Login.tsx';
-import Register from './pages/Register.tsx';
+import Dashboard from './pages/Dashboard';
+import Chat from './pages/Chat';
+import KnowledgeBase from './pages/KnowledgeBase';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Settings from './pages/Settings';
 import ChatWidget from './components/ChatWidget';
-import ChatbotWidget from './components/ChatbotWidget.tsx';
-import UserDashboard from './pages/UserDashboard.tsx';
-import Campaigns from './pages/Campaigns.tsx';
-import Journeys from './pages/Journeys.tsx';
-import JourneyDetail from './pages/JourneyDetail.tsx'; // ✅ New page
-import Layout from './components/Layout.tsx';
+import ChatbotWidget from './components/ChatbotWidget';
+import UserDashboard from './pages/UserDashboard';
+import Campaigns from './pages/Campaigns';
+import Journeys from './pages/Journeys';
+import JourneyDetail from './pages/JourneyDetail'; // ✅ New page
+import Layout from './components/Layout';
 
 function App() {
   return (
@@ -75,6 +76,14 @@ function App() {
             element={
               <Layout>
                 <JourneyDetail />
+              </Layout>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <Layout>
+                <Settings />
               </Layout>
             }
           />

@@ -1,8 +1,8 @@
 // src/pages/Campaigns.tsx
 import React, { useState } from 'react';
 import './campaigns.css';
-import ViewToggle from '../components/ViewToggle.tsx';
-import { exportToCSV, exportToPDF } from '../utils/exportUtils.ts';
+import ViewToggle from '../components/ViewToggle';
+import { exportToCSV, exportToPDF } from '../utils/exportUtils';
 import {
   BarChart3, MailOpen, Coins, BarChart, DollarSign,
   Users, Settings, ArrowUpRight
