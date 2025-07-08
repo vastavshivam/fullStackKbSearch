@@ -2,33 +2,68 @@ import React, { useState, useRef, useEffect } from 'react';
 import ChatHistory from '../pages/ChatHistory.tsx';
 import '../pages/Chat.css';
 
+type Message = {
+  sender: 'user' | 'bot';
+  text: string;
+};
+
 export default function Chat() {
-  const [messages, setMessages] = useState([{ sender: 'bot', text: "Welcome to Bird AI! 🐦" }]);
+  const [messages, setMessages] = useState<Message[]>([
+    { sender: 'bot', text: "Welcome to Bird AI! 🐦" }
+  ]);
   const [input, setInput] = useState('');
   const [history, setHistory] = useState<string[][]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const ws = useRef<WebSocket | null>(null);
+
+  // Open WebSocket connection
+  useEffect(() => {
+    ws.current = new WebSocket('ws://localhost:8000/ws/chat');
+
+    ws.current.onopen = () => {
+      console.log('✅ WebSocket connected');
+    };
+
+    ws.current.onmessage = (e: MessageEvent) => {
+      setMessages(prev => [...prev, { sender: 'bot', text: e.data }]);
+    };
+
+    ws.current.onerror = (e) => {
+      console.error("WebSocket error:", e);
+    };
+
+    ws.current.onclose = () => {
+      console.log('❌ WebSocket disconnected');
+    };
+
+    return () => {
+      ws.current?.close();
+    };
+  }, []);
+
+  // Auto-scroll to latest message
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
 
+    // Send to WebSocket server
+    if (ws.current?.readyState === WebSocket.OPEN) {
+      ws.current.send(input);
+    }
+
     const newMessages = [...messages, { sender: 'user', text: input }];
     setMessages(newMessages);
     setHistory(prev => [[input], ...prev]);
     setInput('');
-
-    setTimeout(() => {
-      setMessages(prev => [...prev, { sender: 'bot', text: "Let me get that for you..." }]);
-    }, 1000);
   };
 
   const handleNewChat = () => {
     setMessages([{ sender: 'bot', text: "New chat started! 👋" }]);
   };
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
 
   return (
     <div className="chat-layout">

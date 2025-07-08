@@ -8,26 +8,44 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [role, setRole] = useState('admin');
+  const [role, setRole] = useState<'admin' | 'user'>('admin');
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
     if (!email || !password) {
       setError('Please enter both email and password.');
       return;
     }
+
     setLoading(true);
-    // Simulate login API
-    setTimeout(() => {
+    try {
+      const response = await fetch('http://localhost:8000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
       setLoading(false);
-      if (role === 'admin') {
-        navigate('/dashboard');
+
+      if (response.ok && data.access_token) {
+        localStorage.setItem('token', data.access_token);
+
+        if (role === 'admin') {
+          navigate('/dashboard');
+        } else {
+          navigate('/user-dashboard');
+        }
       } else {
-        navigate('/user-dashboard');
+        setError(data.detail || 'Login failed. Please try again.');
       }
-    }, 1000);
+    } catch (err) {
+      setLoading(false);
+      setError('Network error. Please try again.');
+    }
   };
 
   const Logo = () => (
@@ -39,7 +57,9 @@ export default function Login() {
   const WelcomeMessage = () => (
     <>
       <h2 className="login-title">Welcome back to BirdAI</h2>
-      <p className="login-subtext">Sign in to manage your conversations, models, and dashboards.</p>
+      <p className="login-subtext">
+        Sign in to manage your conversations, models, and dashboards.
+      </p>
     </>
   );
 

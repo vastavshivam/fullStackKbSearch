@@ -47,10 +47,10 @@ app.include_router(whatsapp.router, prefix="/whatsapp")
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 # ✅ Startup/shutdown tasks
-# @app.on_event("startup")
-# async def startup():
-#     await database.init_db()
-#     setup_email_notifications()
+@app.on_event("startup")
+async def startup():
+    await database.init_db()
+    setup_email_notifications()
 
 @app.on_event("shutdown")
 async def shutdown():
@@ -62,9 +62,9 @@ def root():
     return {"message": "✅ Support Assistant API is live."}
 
 
-# @app.on_event("startup")
-# async def startup_event():
-#     await database.init_db()
+@app.on_event("startup")
+async def startup_event():
+    await database.init_db()
 # from fastapi import FastAPI
 # from routes import admin, token
 # from fastapi.middleware.cors import CORSMiddleware
@@ -85,6 +85,5 @@ def root():
 # if __name__ == "__main__": 
 #     import uvicorn
 #     uvicorn.run(app, host="0.0.0.0", port=8000) 
-
 
 
