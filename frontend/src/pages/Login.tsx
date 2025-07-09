@@ -15,8 +15,8 @@ export default function Login() {
     e.preventDefault();
     setError('');
 
-    if (!email || !password) {
-      setError('Please enter both email and password.');
+    if (!email || !password || !role) {
+      setError('Please enter email, password and role.');
       return;
     }
 
@@ -25,7 +25,7 @@ export default function Login() {
       const response = await fetch('http://localhost:8000/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, role }),
       });
 
       const data = await response.json();
