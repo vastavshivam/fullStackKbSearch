@@ -31,12 +31,16 @@ def verify_password(plain_password, hashed_password):
 def get_password_hash(password):
     return pwd_context.hash(password)
 
-async def authenticate_user(db: AsyncSession ,email: str, password: str):
-    print
+async def authenticate_user(db: AsyncSession, email: str, password: str, role: str):
     user = await get_user_by_email(db, email)
-    if not user or not verify_password(password, user.hashed_password):
+    if not user:
+        return None
+    if not verify_password(password, user.hashed_password):
+        return None
+    if user.role != role:
         return None
     return user
+
 
 def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode = data.copy()
@@ -50,6 +54,7 @@ async def register_user_helper(db: AsyncSession, user: schemas.UserCreate) -> sc
     """
     Helper function to register a new user. Hashes password and stores user in DB.
     """
+
     existing_user = await crud.get_user_by_email(db, email=user.email)
     if existing_user:
         raise HTTPException(
@@ -57,6 +62,14 @@ async def register_user_helper(db: AsyncSession, user: schemas.UserCreate) -> sc
             detail="User with this email already exists"
         )
 
+    # 🚫 Restrict registering as admin unless a condition is met
+    if user.role == "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin role cannot be self-assigned"
+        )
+
     hashed_password = pwd_context.hash(user.password)
     created_user = await create_user(db, user, hashed_password)
     return created_user
+

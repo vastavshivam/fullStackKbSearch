@@ -1,8 +1,9 @@
 # This file contains Pydantic schemas for the application.
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, List
 from datetime import datetime
+from enum import Enum  
 
 
 # ----------------------------- USER SCHEMAS ----------------------------- #
@@ -10,6 +11,17 @@ from datetime import datetime
 class UserBase(BaseModel):
     name: str
     email: EmailStr
+    password: str
+    role: str  # <-- add this
+
+class RoleEnum(str, Enum):
+    user = "user"
+    admin = "admin"
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+    role: RoleEnum
 
 
 # class UserCreate(UserBase):
@@ -123,6 +135,7 @@ class UserCreate(BaseModel):
     name: str
     email: EmailStr
     password: str
+    role: RoleEnum = Field(default=RoleEnum.user)
 
 class UserOut(BaseModel):
     id: int
