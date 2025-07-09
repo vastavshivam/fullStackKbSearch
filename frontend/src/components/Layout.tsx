@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Sidebar from './Sidebar.tsx';
+import Sidebar from './Sidebar';
 
 export default function Layout({ children }) {
   const [activeSidebar, setActiveSidebar] = useState('Dashboard');
