@@ -1,5 +1,5 @@
 // src/pages/Campaigns.tsx
-import React, { useState } from 'react';
+import React, { JSX, useState } from 'react';
 import './campaigns.css';
 import ViewToggle from '../components/ViewToggle';
 import { exportToCSV, exportToPDF } from '../components/exportUtils';

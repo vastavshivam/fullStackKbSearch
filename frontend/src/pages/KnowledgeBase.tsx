@@ -2,12 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { uploadFile, getKBEntries, createKBEntry, deleteKBEntry, updateKBEntry } from '../services/api';
 import '../pages/KnowledgeBase.css';
 
+<<<<<<< HEAD
 type KBEntry = { 
   id: number;
   question: string; 
   answer: string;
   created_at?: string;
 };
+=======
+type KBEntry = { question: string; answer: string };
+>>>>>>> a7f144ce309495948fcfdbb83e555d79871546d4
 
 export default function KnowledgeBase() {
   const [entries, setEntries] = useState<KBEntry[]>([]);
@@ -20,6 +24,7 @@ export default function KnowledgeBase() {
 
   // Load KB entries on component mount
   useEffect(() => {
+<<<<<<< HEAD
     loadKBEntries();
   }, []);
 
@@ -94,15 +99,60 @@ export default function KnowledgeBase() {
     setAnswer('');
   };
 
+=======
+    const fetchEntries = async () => {
+      try {
+        const res = await fetch('http://localhost:8000/api/ask');
+        const data = await res.json();
+        if (res.ok) {
+          setEntries(data); // assuming data is array of { question, answer }
+        } else {
+          console.error('Failed to load KB:', data.detail || res.statusText);
+        }
+      } catch (err: any) {
+        console.error('Error loading KB:', err.message);
+      }
+    };
+
+    fetchEntries();
+  }, []);
+
+  const handleAdd = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!question.trim() || !answer.trim()) return;
+
+    try {
+      const res = await fetch('http://localhost:8000/api/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question, answer }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setEntries(prev => [...prev, data]);
+        setQuestion('');
+        setAnswer('');
+      } else {
+        alert('❌ Failed to add entry: ' + (data.detail || res.statusText));
+      }
+    } catch (err: any) {
+      alert('❌ Network error: ' + err.message);
+    }
+  };
+
+>>>>>>> a7f144ce309495948fcfdbb83e555d79871546d4
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setUploadedFile(file);
       setUploadStatus('Uploading...');
+
       try {
         const formData = new FormData();
         formData.append('file', file);
 
+<<<<<<< HEAD
         const response = await uploadFile(formData);
         
         if (response.data) {
@@ -118,6 +168,21 @@ export default function KnowledgeBase() {
         setUploadStatus(`❌ Upload failed: ${errorMessage}`);
       } finally {
         setTimeout(() => setUploadStatus(null), 5000);
+=======
+        const response = await fetch('http://localhost:8000/api/files', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const err = await response.json();
+          setUploadStatus('Upload failed: ' + (err.detail || response.statusText));
+        } else {
+          setUploadStatus('✅ Upload successful!');
+        }
+      } catch (err: any) {
+        setUploadStatus('❌ Upload failed: ' + err.message);
+>>>>>>> a7f144ce309495948fcfdbb83e555d79871546d4
       }
     }
   };
@@ -126,12 +191,15 @@ export default function KnowledgeBase() {
     <div className="kb-layout">
       <h1 className="kb-title">📚 Knowledge Base</h1>
 
+<<<<<<< HEAD
       {uploadStatus && (
         <div className={`status-message ${uploadStatus.includes('❌') ? 'error' : 'success'}`}>
           {uploadStatus}
         </div>
       )}
 
+=======
+>>>>>>> a7f144ce309495948fcfdbb83e555d79871546d4
       <div className="kb-card upload-card">
         <h3>📤 Upload Dataset</h3>
         <p className="card-description">Upload CSV, JSON, TXT, PDF, or Excel files to automatically populate the knowledge base</p>

@@ -16,7 +16,7 @@ from utils.auth_utils import (
 router = APIRouter()
 
 @router.post("/login", response_model=schemas.Token)
-async def login(form_data: OAuth2PasswordRequestForm = Depends(),db: AsyncSession = Depends(get_db),):
+async def login(data: schemas.LoginRequest = Depends(),db: AsyncSession = Depends(get_db),):
     """
     User login endpoint using OAuth2PasswordRequestForm
     """
@@ -25,12 +25,13 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(),db: AsyncSessio
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid credentials",
+            detail="Invalid credentials or role mismatch",
             headers={"WWW-Authenticate": "Bearer"},
         )
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(data={"sub": user.email}, expires_delta=access_token_expires)
     return {"access_token": access_token, "token_type": "bearer"}
+    return("success!!")
 
 
 @router.post("/register", response_model=schemas.UserOut, status_code=201)

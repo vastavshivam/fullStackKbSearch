@@ -39,8 +39,8 @@ celery==5.3.6
 redis==5.0.1
 
 # === Email/Slack Notify ===
-slack_sdk==3.27.0
-smtplib3==3.0.0
+flask
+slack_sdk>=3.27.0
 email-validator==2.1.1
 
 # === Utilities ===

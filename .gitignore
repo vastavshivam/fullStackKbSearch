@@ -25,6 +25,7 @@ dist/
 build/
 .eggs/
 pip-wheel-metadata/
+venv310
 
 # --- Virtual Environments ---
 venv/
