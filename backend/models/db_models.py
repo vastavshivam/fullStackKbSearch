@@ -15,6 +15,7 @@ class User(Base):
     email = Column(String(100), unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
     is_active = Column(Boolean, default=True)
+    role = Column(String, default="user")  # <-- add this line
 
     # these two must correspond to the other side’s back_populates
     items = relationship("Item", back_populates="owner")

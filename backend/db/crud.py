@@ -99,12 +99,14 @@ async def create_user(db: AsyncSession, user, hashed_password: str):
         name=user.name,
         email=user.email,
         hashed_password=hashed_password,
+        role=user.role,  # <-- added role
         is_active=True
     )
     db.add(db_user)
     await db.commit()
     await db.refresh(db_user)
     return db_user
+
     
 
 
