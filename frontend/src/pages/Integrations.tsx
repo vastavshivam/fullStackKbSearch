@@ -16,7 +16,7 @@ import {
 } from "react-icons/bi";
 
 import "./Integrations.css";
-
+import axios from 'axios';
 
 const Integrations = () => {
   const [isConnected, setIsConnected] = useState(false);
@@ -238,92 +238,120 @@ const Integrations = () => {
     </div>
   );
 
-  const renderSetupTab = () => (
-    <div className="tab-content">
-      <div className="integration-card">
-        <div className="card-header">
-          <div className="card-title">
-            <div className="icon-wrapper primary">
-              <BiCog />
-            </div>
-            WhatsApp Business Setup
+// --- WhatsApp Setup Tab with Backend Integration ---
+const [waConfig, setWaConfig] = useState({
+  client_id: '',
+  phone_id: '',
+  token: '',
+  verify_token: ''
+});
+const [waConfigLoading, setWaConfigLoading] = useState(false);
+const [waConfigSuccess, setWaConfigSuccess] = useState(false);
+const [waConfigError, setWaConfigError] = useState('');
+
+const handleWaConfigChange = (e) => {
+  setWaConfig({ ...waConfig, [e.target.name]: e.target.value });
+};
+
+const handleWaConfigSubmit = async (e) => {
+  e.preventDefault();
+  setWaConfigLoading(true);
+  setWaConfigError('');
+  setWaConfigSuccess(false);
+  try {
+    const res = await axios.post('/api/whatsapp/configure-whatsapp', waConfig);
+    setWaConfigSuccess(true);
+    showToast('WhatsApp configuration saved!', 'success');
+    setIsConnected(true);
+  } catch (err) {
+    setWaConfigError('Failed to save WhatsApp config.');
+    showToast('Failed to save WhatsApp config.', 'error');
+  } finally {
+    setWaConfigLoading(false);
+  }
+};
+
+const renderSetupTab = () => (
+  <div className="tab-content">
+    <div className="integration-card">
+      <div className="card-header">
+        <div className="card-title">
+          <div className="icon-wrapper primary">
+            <BiCog />
           </div>
-          <p className="card-description">
-            Follow these steps to connect your WhatsApp Business account
-          </p>
+          WhatsApp Business Setup
         </div>
-        <div className="card-content">
-          <div className="setup-steps">
-            {[
-              {
-                step: 1,
-                title: "Create WhatsApp Business Account",
-                description: "Register your business with WhatsApp Business API platform",
-                completed: isConnected
-              },
-              {
-                step: 2,
-                title: "Configure API Credentials",
-                description: "Enter your API credentials and business information",
-                completed: false
-              },
-              {
-                step: 3,
-                title: "Test Connection",
-                description: "Verify that your integration is working correctly",
-                completed: false
-              }
-            ].map((item, index) => (
-              <div key={index} className="setup-step">
-                <div className={`step-number ${item.completed ? 'completed' : 'pending'}`}>
-                  {item.completed ? <BiCheckCircle /> : item.step}
-                </div>
-                <div className="step-content">
-                  <div className="step-header">
-                    <h3>{item.title}</h3>
-                    {item.completed && <span className="completed-badge">Completed</span>}
-                  </div>
-                  <p>{item.description}</p>
-                  {index === 1 && (
-                    <div className="credentials-form">
-                      <div className="form-row">
-                        <div className="form-group">
-                          <label>WhatsApp API Key</label>
-                          <input type="password" placeholder="Enter your API key" />
-                        </div>
-                        <div className="form-group">
-                          <label>App ID</label>
-                          <input type="text" placeholder="Enter your App ID" />
-                        </div>
-                      </div>
-                      <div className="form-row">
-                        <div className="form-group">
-                          <label>Business Phone Number</label>
-                          <input type="text" placeholder="+1 (555) 123-4567" />
-                        </div>
-                        <div className="form-group">
-                          <label>Business Name</label>
-                          <input type="text" placeholder="Your Business Name" />
-                        </div>
-                      </div>
-                      <div className="form-group">
-                        <label>Webhook URL</label>
-                        <input type="url" placeholder="https://your-domain.com/webhook" />
-                      </div>
-                    </div>
-                  )}
-                </div>
+        <p className="card-description">
+          Follow these steps to connect your WhatsApp Business account
+        </p>
+      </div>
+      <div className="card-content">
+        <div className="setup-steps">
+          {/* Step 1: Create Account */}
+          <div className="setup-step">
+            <div className={`step-number ${isConnected ? 'completed' : 'pending'}`}>{isConnected ? <BiCheckCircle /> : 1}</div>
+            <div className="step-content">
+              <div className="step-header">
+                <h3>Create WhatsApp Business Account</h3>
+                {isConnected && <span className="completed-badge">Completed</span>}
               </div>
-            ))}
+              <p>Register your business with WhatsApp Business API platform</p>
+            </div>
           </div>
-          <button className="btn btn-primary btn-large" disabled={!isConnected}>
-            <BiCheckCircle className="btn-icon" />
-            Complete Setup
-          </button>
+          {/* Step 2: Configure API Credentials */}
+          <div className="setup-step">
+            <div className="step-number">2</div>
+            <div className="step-content">
+              <div className="step-header">
+                <h3>Configure API Credentials</h3>
+              </div>
+              <p>Enter your API credentials and business information</p>
+              <form className="credentials-form" onSubmit={handleWaConfigSubmit} autoComplete="off">
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Client ID</label>
+                    <input name="client_id" type="text" placeholder="Enter your Client ID" value={waConfig.client_id} onChange={handleWaConfigChange} required />
+                  </div>
+                  <div className="form-group">
+                    <label>Phone ID</label>
+                    <input name="phone_id" type="text" placeholder="Enter your Phone ID" value={waConfig.phone_id} onChange={handleWaConfigChange} required />
+                  </div>
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>API Token</label>
+                    <input name="token" type="password" placeholder="Enter your API Token" value={waConfig.token} onChange={handleWaConfigChange} required />
+                  </div>
+                  <div className="form-group">
+                    <label>Verify Token</label>
+                    <input name="verify_token" type="text" placeholder="Enter your Verify Token" value={waConfig.verify_token} onChange={handleWaConfigChange} required />
+                  </div>
+                </div>
+                {waConfigError && <div className="form-error">{waConfigError}</div>}
+                {waConfigSuccess && <div className="form-success">Configuration saved!</div>}
+                <button className="btn btn-primary" type="submit" disabled={waConfigLoading}>
+                  {waConfigLoading ? 'Saving...' : 'Save Configuration'}
+                </button>
+              </form>
+            </div>
+          </div>
+          {/* Step 3: Test Connection */}
+          <div className="setup-step">
+            <div className="step-number">3</div>
+            <div className="step-content">
+              <div className="step-header">
+                <h3>Test Connection</h3>
+              </div>
+              <p>Verify that your integration is working correctly</p>
+              {isConnected && <span className="completed-badge">Connected</span>}
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  );
+  </div>
+);
+//end renderSetupTab
 
   const renderTemplatesTab = () => (
     <div className="tab-content">
