@@ -29,3 +29,10 @@ with open(output_file, "w") as f:
         f.write("\n")
 
 print("✅ JSONL exported from MongoDB")
+
+
+
+
+
+
+
