@@ -8,7 +8,7 @@ import json
 from langchain.memory import RedisChatMessageHistory, ConversationBufferMemory
 
 # MongoDB setup
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
+MONGO_URI = os.getenv("MONGO_URI", "mongodb+srv://AppGallop:<appgallop123>@cluster0.tpatz5r.mongodb.net/")
 mongo_client = MongoClient(MONGO_URI)
 
 mongo_db = mongo_client["chat_support"]
@@ -22,27 +22,11 @@ feedback_logs_col = mongo_db["feedback_logs"]
 redis_client = redis.Redis(host="localhost", port=6379, db=0)
 
 
-def save_chat_log_mongo(user_id, message, sender, session_id, sentiment=None, embedding=None, bot_reply=None):
+def save_chat_log_mongo( **record):
     """
     Save a chat message with optional sentiment, embedding, and bot reply.
     """
-    record = {
-        "user_id": user_id,
-        "session_id": session_id,
-        "sender": sender,  # 'user' or 'bot'
-        "message": message,
-        "timestamp": datetime.utcnow(),
-    }
-
-    if sentiment:
-        record["sentiment"] = sentiment
-
-    if embedding:
-        record["embedding"] = embedding
-
-    if bot_reply:
-        record["bot_reply"] = bot_reply
-
+    record["timestamp"] = datetime.utcnow()
     result = chat_logs_col.insert_one(record)
     return result.inserted_id
 

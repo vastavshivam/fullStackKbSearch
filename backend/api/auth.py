@@ -18,7 +18,7 @@ router = APIRouter()
 @router.post("/login", response_model=schemas.Token)
 async def login(data: schemas.LoginRequest = Depends(),db: AsyncSession = Depends(get_db),):
     """
-    User login endpoint using OAuth2PasswordRequestForm
+    User login endpoint using LoginRequest
     """
     user = await authenticate_user(db, form_data.username, form_data.password)
     print(f"User authenticated:================> {user}")
