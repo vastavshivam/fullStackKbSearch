@@ -1,8 +1,8 @@
 // src/pages/Campaigns.tsx
 import React, { JSX, useState } from 'react';
 import './campaigns.css';
-import ViewToggle from '../components/ViewToggle.tsx';
-import { exportToCSV, exportToPDF } from '../utils/exportUtils.ts';
+import ViewToggle from '../components/ViewToggle';
+import { exportToCSV, exportToPDF } from '../components/exportUtils';
 import {
   BarChart3, MailOpen, Coins, BarChart, DollarSign,
   Users, Settings, ArrowUpRight
@@ -12,7 +12,7 @@ interface Stat {
   label: string;
   value: string;
   sub: string;
-  icon: JSX.Element;
+  icon: React.ReactNode;
   bar?: number;
 }
 

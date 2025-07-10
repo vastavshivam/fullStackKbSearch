@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import ChatHistory from '../pages/ChatHistory.tsx';
+import ChatHistory from './ChatHistory';
 import '../pages/Chat.css';
 
 type Message = {

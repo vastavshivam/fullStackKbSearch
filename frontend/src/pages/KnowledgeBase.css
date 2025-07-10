@@ -141,3 +141,208 @@
   padding: 16px;
   color: #ccc;
 }
+
+/* Status Messages */
+.status-message {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-weight: 500;
+  text-align: center;
+  animation: slideIn 0.3s ease;
+}
+
+.status-message.success {
+  background-color: rgba(40, 167, 69, 0.2);
+  border: 1px solid rgba(40, 167, 69, 0.5);
+  color: #28a745;
+}
+
+.status-message.error {
+  background-color: rgba(220, 53, 69, 0.2);
+  border: 1px solid rgba(220, 53, 69, 0.5);
+  color: #dc3545;
+}
+
+/* Card Description */
+.card-description {
+  color: #cccccc;
+  font-size: 14px;
+  margin-bottom: 16px;
+  line-height: 1.4;
+}
+
+/* Form Buttons */
+.form-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.form-buttons button {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.form-buttons button[type="submit"] {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.form-buttons button[type="submit"]:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.form-buttons button[type="submit"]:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.cancel-btn {
+  background: rgba(220, 53, 69, 0.8);
+  color: white;
+}
+
+.cancel-btn:hover:not(:disabled) {
+  background: rgba(220, 53, 69, 1);
+  transform: translateY(-2px);
+}
+
+/* Entries List */
+.entries-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.entry-item {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  transition: all 0.2s ease;
+}
+
+.entry-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.entry-content {
+  flex: 1;
+  margin-right: 16px;
+}
+
+.entry-question {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #ffffff;
+}
+
+.entry-answer {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #e0e0e0;
+  margin-bottom: 8px;
+}
+
+.entry-date {
+  font-size: 12px;
+  color: #aaaaaa;
+  font-style: italic;
+}
+
+.entry-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.edit-btn, .delete-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.edit-btn {
+  background: rgba(255, 193, 7, 0.2);
+  border: 1px solid rgba(255, 193, 7, 0.5);
+}
+
+.edit-btn:hover:not(:disabled) {
+  background: rgba(255, 193, 7, 0.3);
+  transform: scale(1.1);
+}
+
+.delete-btn {
+  background: rgba(220, 53, 69, 0.2);
+  border: 1px solid rgba(220, 53, 69, 0.5);
+}
+
+.delete-btn:hover:not(:disabled) {
+  background: rgba(220, 53, 69, 0.3);
+  transform: scale(1.1);
+}
+
+.edit-btn:disabled, .delete-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Animations */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .kb-layout {
+    padding: 20px 15px;
+  }
+  
+  .kb-title {
+    font-size: 24px;
+  }
+  
+  .entry-item {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .entry-content {
+    margin-right: 0;
+  }
+  
+  .entry-actions {
+    align-self: flex-end;
+  }
+  
+  .form-buttons {
+    flex-direction: column;
+  }
+}
