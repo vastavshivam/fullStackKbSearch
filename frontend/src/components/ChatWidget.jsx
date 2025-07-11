@@ -24,17 +24,14 @@ export default function ChatWidget() {
     const userInput = input;
     setInput('');
     try {
-      const res = await fetch('http://localhost:8000/chat/send', {
+      const res = await fetch('/api/qa/static-chat', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwiZXhwIjoxNzUxNDQxNzM4fQ.A_CYS2tZH08yr0Yh7qQ8hnZm1SMG3dJb-noB1gOoslY',
-        },
-        body: JSON.stringify({ content: userInput })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: userInput })
       });
       if (!res.ok) throw new Error('Network response was not ok');
       const data = await res.json();
-      setMessages(msgs => [...msgs, { sender: 'bot', text: data.bot_response.content }]);
+      setMessages(msgs => [...msgs, { sender: 'bot', text: data.answer }]);
     } catch (err) {
       setMessages(msgs => [...msgs, { sender: 'bot', text: 'Sorry, I could not get a response from the server.' }]);
     }

@@ -46,7 +46,8 @@ async def upload_file(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail=f"❌ File too large (max {MAX_FILE_SIZE_MB}MB)")
 
     # Save file
-    file_path = UPLOAD_DIR / file.filename
+    filename = str(file.filename) if file.filename else "uploaded_file"
+    file_path = UPLOAD_DIR / filename
     print(f"File path===============>: {file_path}")
     with open(file_path, "wb") as f:
         f.write(contents)
@@ -59,14 +60,13 @@ async def upload_file(file: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"❌ Failed to parse file: {str(e)}")
     
-     # 🔁 Embed full content for retrieval
-    try:  
-
-        full_text = parse_file(file_path)  # No limit here
-        chunks = chunk_text(full_text)
-        save_embeddings(file_id=file.filename, chunks=chunks)
-    except Exception as e:
-        print(f"[Embedding Error]: {e}")  # or raise a warning log
+    # --- Embedding disabled for testing: skip all post-upload processing ---
+    # try:  
+    #     full_text = parse_file(file_path)  # No limit here
+    #     chunks = chunk_text(full_text)
+    #     save_embeddings(file_id=file.filename, chunks=chunks)
+    # except Exception as e:
+    #     print(f"[Embedding Error]: {e}")  # or raise a warning log
 
     # Optional: send email/slack alert to admin
     send_upload_notification("vastavshivam@gmai.com", "uploaded successfully.", body="File uploaded ...")
@@ -80,7 +80,9 @@ async def upload_file(file: UploadFile = File(...)):
 @router.get("/kb/entries", response_model=KBEntriesListResponse, summary="Get all KB entries")
 async def get_kb_entries():
     """Get all knowledge base entries"""
-    return KBEntriesListResponse(entries=kb_entries, total=len(kb_entries))
+    # Convert dicts to KBEntryResponse objects for type safety
+    entries_resp = [KBEntryResponse(**entry) for entry in kb_entries]
+    return KBEntriesListResponse(entries=entries_resp, total=len(entries_resp))
 
 @router.post("/kb/entries", response_model=KBEntryResponse, summary="Create new KB entry")
 async def create_kb_entry(entry: KBEntryCreate):

@@ -2,41 +2,18 @@ import React, { useState, useRef, useEffect } from 'react';
 import './ChatWidget.css';
 
 async function getLLMResponse(message: string): Promise<string> {
-  // Try flan-t5-large first
   try {
-    const response = await fetch(
-      "https://api-inference.huggingface.co/models/google/flan-t5-large",
-      {
-        method: "POST",
-        headers: {
-          "Authorization": "Bearer ${import.meta.env.VITE_HF_TOKEN}",
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ inputs: message })
-      }
-    );
+    const response = await fetch('/api/qa/static-chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question: message })
+    });
+    if (!response.ok) throw new Error('Network response was not ok');
     const data = await response.json();
-    if (data[0]?.generated_text) return data[0].generated_text;
-  } catch {}
-  // Try falcon-7b-instruct as fallback
-  try {
-    const response = await fetch(
-      "https://api-inference.huggingface.co/models/tiiuae/falcon-7b-instruct",
-      {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${import.meta.env.VITE_HF_TOKEN}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ inputs: message })
-      }
-    );
-    
-    const data = await response.json();
-    if (data[0]?.generated_text) return data[0].generated_text;
-  } catch {}
-  // Fallback: echo
-  return "[Echo] " + message;
+    return data.answer;
+  } catch {
+    return 'Sorry, I could not get a response from the server.';
+  }
 }
 
 const ChatbotWidget = () => {
