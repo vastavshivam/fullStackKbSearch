@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import ChatbotWidget from '../components/ChatbotWidget';
+import ChatbotWidget from '../components/ChatWidget';
 
 const UserDashboard = () => {
   const [analytics, setAnalytics] = useState<any>(null);

@@ -3,6 +3,11 @@ import ChatHistory from '../pages/ChatHistory';
 import '../pages/Chat.css';
 import axios from 'axios';
 
+/** ─────────── Custom type for what the server sends back ─────────── */
+interface ChatResponse {
+  answer: string;
+}
+
 export default function Chat() {
   const [messages, setMessages] = useState([{ sender: 'bot', text: "Welcome to Bird AI! 🐦" }]);
   const [input, setInput] = useState('');
@@ -13,19 +18,17 @@ export default function Chat() {
     e.preventDefault();
     if (!input.trim()) return;
 
-    const newMessages = [...messages, { sender: 'user', text: input }];
-    setMessages(newMessages);
+    setMessages(prev => [...prev, { sender: 'user', text: input }]);
     setHistory(prev => [[input], ...prev]);
     setInput('');
-
     setMessages(prev => [...prev, { sender: 'bot', text: "Let me get that for you..." }]);
 
     try {
-      const res = await axios.post('/api/qa/static-chat', { question: input });
+      // 👇 tell axios what shape we expect
+      const res = await axios.post<ChatResponse>('/api/qa/static-chat', { question: input });
       const answer = res.data.answer || "Sorry, I couldn't find an answer.";
       setMessages(prev => {
-        // Remove the loading message and add the real answer
-        const msgs = prev.slice(0, -1);
+        const msgs = prev.slice(0, -1); // drop loading
         return [...msgs, { sender: 'bot', text: answer }];
       });
     } catch (err) {
@@ -36,13 +39,9 @@ export default function Chat() {
     }
   };
 
-  const handleNewChat = () => {
-    setMessages([{ sender: 'bot', text: "New chat started! 👋" }]);
-  };
+  const handleNewChat = () => setMessages([{ sender: 'bot', text: "New chat started! 👋" }]);
 
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  useEffect(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), [messages]);
 
   return (
     <div className="chat-layout">

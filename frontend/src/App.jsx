@@ -9,7 +9,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Settings from './pages/Settings';
 import ChatWidget from './components/ChatWidget';
-import ChatbotWidget from './components/ChatbotWidget';
+import ChatbotWidget from './components/ChatWidget';
 import UserDashboard from './pages/UserDashboard';
 import Campaigns from './pages/Campaigns';
 import Journeys from './pages/Journeys';
@@ -99,7 +99,7 @@ function App() {
           <Route path="/" element={<Login />} />
         </Routes>
         <ChatWidget />
-        <ChatbotWidget />
+        <ChatWidget />
       </div>
     </Router>
   );
