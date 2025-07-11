@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import ChatbotWidget from '../components/ChatbotWidget.tsx';
+import ChatbotWidget from '../components/ChatbotWidget';
 
 const UserDashboard = () => {
   const [analytics, setAnalytics] = useState<any>(null);
@@ -59,4 +59,4 @@ const UserDashboard = () => {
   );
 };
 
-export default UserDashboard; 
+export default UserDashboard;
