@@ -1,5 +1,5 @@
 import { BiTrendingUp, BiTrendingDown, BiInfoCircle, BiDownload } from "react-icons/bi";
-import { exportToPDF } from "./exportUtils";
+import { exportToPDF } from "./exportUtils.ts";
 
 
 const insights = [

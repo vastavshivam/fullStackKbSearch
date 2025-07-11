@@ -32,6 +32,8 @@ venv/
 env/
 ENV/
 .venv/
+.myenv/
+backend/myenv
 
 # --- VSCode/IDE Files ---
 .vscode/

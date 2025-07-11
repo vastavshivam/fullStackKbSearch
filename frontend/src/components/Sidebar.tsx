@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  BiBarChartAlt2, BiUser, BiRocket, BiGroup, BiEnvelope,
+  BiBarChartAlt2, BiRocket, BiGroup, BiEnvelope,
   BiCog, BiCube, BiLayer, BiChevronRight, BiMenu, BiX
 } from 'react-icons/bi';
 import '../pages/Dashboard.css';

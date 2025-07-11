@@ -25,4 +25,4 @@ export const startTraining = () => {
 export const getKBEntries = () => Promise.resolve([]);
 export const updateKBEntry = () => Promise.resolve();
 export const createKBEntry = () => Promise.resolve();
-export const deleteKBEntry = () => Promise.resolve();
+export const deleteKBEntry = (id) => Promise.resolve();
