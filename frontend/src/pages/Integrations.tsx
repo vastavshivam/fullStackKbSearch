@@ -259,7 +259,7 @@ const handleWaConfigSubmit = async (e) => {
   setWaConfigError('');
   setWaConfigSuccess(false);
   try {
-    const res = await axios.post('/api/whatsapp/configure-whatsapp', waConfig);
+    const res = await axios.post('/api/routes/whatsapp/configure-whatsapp', waConfig);
     setWaConfigSuccess(true);
     showToast('WhatsApp configuration saved!', 'success');
     setIsConnected(true);
@@ -320,7 +320,7 @@ const renderSetupTab = () => (
                 <div className="form-row">
                   <div className="form-group">
                     <label>API Token</label>
-                    <input name="token" type="password" placeholder="Enter your API Token" value={waConfig.token} onChange={handleWaConfigChange} required />
+                    <input name="token" type="password" placeholder="Enter your API Token" value={waConfig.token} onChange={handleWaConfigChange} required autoComplete="current-password" />
                   </div>
                   <div className="form-group">
                     <label>Verify Token</label>
