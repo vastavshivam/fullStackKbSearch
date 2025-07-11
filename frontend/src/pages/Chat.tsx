@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ChatHistory from '../pages/ChatHistory';
 import '../pages/Chat.css';
+import axios from 'axios';
 
 export default function Chat() {
   const [messages, setMessages] = useState([{ sender: 'bot', text: "Welcome to Bird AI! 🐦" }]);
@@ -8,7 +9,7 @@ export default function Chat() {
   const [history, setHistory] = useState<string[][]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  const handleSend = (e: React.FormEvent) => {
+  const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
 
@@ -17,9 +18,22 @@ export default function Chat() {
     setHistory(prev => [[input], ...prev]);
     setInput('');
 
-    setTimeout(() => {
-      setMessages(prev => [...prev, { sender: 'bot', text: "Let me get that for you..." }]);
-    }, 1000);
+    setMessages(prev => [...prev, { sender: 'bot', text: "Let me get that for you..." }]);
+
+    try {
+      const res = await axios.post('/api/qa/static-chat', { question: input });
+      const answer = res.data.answer || "Sorry, I couldn't find an answer.";
+      setMessages(prev => {
+        // Remove the loading message and add the real answer
+        const msgs = prev.slice(0, -1);
+        return [...msgs, { sender: 'bot', text: answer }];
+      });
+    } catch (err) {
+      setMessages(prev => {
+        const msgs = prev.slice(0, -1);
+        return [...msgs, { sender: 'bot', text: "Sorry, there was an error getting the answer." }];
+      });
+    }
   };
 
   const handleNewChat = () => {

@@ -7,12 +7,36 @@ import torch
 
 from utils.embed_store import VECTOR_DIR
 import os
+import json
+from fastapi import Request
+from difflib import get_close_matches
 
 router = APIRouter()
 
 LLM_MODEL = "tiiuae/falcon-rw-1b"
 tokenizer = AutoTokenizer.from_pretrained(LLM_MODEL)
 model = AutoModelForCausalLM.from_pretrained(LLM_MODEL)
+
+STATIC_DATA_PATHS = [
+    os.path.join("training", "data", "fine_tune.jsonl"),
+    os.path.join("training", "data", "train.jsonl"),
+]
+
+def load_static_qa():
+    qa_pairs = []
+    for path in STATIC_DATA_PATHS:
+        if os.path.exists(path):
+            with open(path, "r", encoding="utf-8") as f:
+                for line in f:
+                    try:
+                        item = json.loads(line)
+                        qa_pairs.append({
+                            "prompt": item.get("prompt", ""),
+                            "response": item.get("response", "")
+                        })
+                    except Exception:
+                        continue
+    return qa_pairs
 
 @router.post("/ask", response_model=AskResponse)
 async def ask_question(data: AskRequest):
@@ -39,7 +63,7 @@ async def ask_question(data: AskRequest):
 
 
 @router.post("/v1/ask", response_model=AskResponse)
-async def ask_question(request: AskRequest):
+async def ask_question_v1(request: AskRequest):
     try:
         top_chunks = query_embeddings(request.file_id, request.question, top_k=5)
         context = "\n".join(top_chunks)
@@ -54,3 +78,16 @@ async def ask_question(request: AskRequest):
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"❌ Failed: {str(e)}")
+
+@router.post("/static-chat")
+async def static_chat(request: Request):
+    data = await request.json()
+    question = data.get("question", "")
+    qa_pairs = load_static_qa()
+    prompts = [q["prompt"] for q in qa_pairs]
+    match = get_close_matches(question, prompts, n=1, cutoff=0.5)
+    if match:
+        for q in qa_pairs:
+            if q["prompt"] == match[0]:
+                return {"answer": q["response"]}
+    return {"answer": "Sorry, I couldn't find an answer to that question."}
