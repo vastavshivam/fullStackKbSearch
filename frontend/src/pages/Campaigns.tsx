@@ -1,5 +1,5 @@
 // src/pages/Campaigns.tsx
-import React, { useState } from 'react';
+import React, { useState, type JSX } from 'react';
 import './campaigns.css';
 import ViewToggle from '../components/ViewToggle';
 import { exportToCSV, exportToPDF } from '../utils/exportUtils';
@@ -12,7 +12,7 @@ interface Stat {
   label: string;
   value: string;
   sub: string;
-  icon: JSX.Element;
+  icon: React.ReactNode; // or even `any` but like… 😬
   bar?: number;
 }
 

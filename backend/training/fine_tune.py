@@ -11,7 +11,12 @@ from threading import Thread
 import redis
 import uuid
 import jwt
-from langchain.memory import RedisChatMessageHistory
+# OLD (❌ deprecated):
+# from langchain.memory import RedisChatMessageHistory
+
+# NEW (✅ use this instead):
+from langchain_community.chat_message_histories import RedisChatMessageHistory
+
 from langchain.schema import messages_from_dict, messages_to_dict
 from langchain.prompts import ChatPromptTemplate
 
