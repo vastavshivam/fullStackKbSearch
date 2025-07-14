@@ -16,6 +16,7 @@ import Journeys from './pages/Journeys';
 import JourneyDetail from './pages/JourneyDetail'; // ✅ New page
 import Integrations from './pages/Integrations'; // ✅ New integrations page
 import Layout from './components/Layout';
+import TemplatePage from './pages/TemplatePage';
 
 function App() {
   return (
@@ -93,6 +94,14 @@ function App() {
             element={
               <Layout>
                 <Integrations />
+              </Layout>
+            }
+          />
+          <Route
+            path="/template"
+            element={
+              <Layout>
+                <TemplatePage />
               </Layout>
             }
           />

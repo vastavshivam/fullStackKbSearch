@@ -11,7 +11,7 @@ const sidebarLinks = [
   { label: 'Campaigns', icon: <BiRocket />, route: '/campaigns' },
   { label: 'Journeys', icon: <BiLayer />, route: '/Journeys' },
   { label: 'Audience', icon: <BiGroup />, route: '/audience' },
-  { label: 'Templates', icon: <BiEnvelope />, route: '/templates' },
+  { label: 'Template', icon: <BiEnvelope />, route: '/template' },
   { label: 'Content', icon: <BiCube />, route: '/content' },
   { label: 'Products', icon: <BiCube />, route: '/products' },
   { label: 'Settings', icon: <BiCog />, route: '/settings' },

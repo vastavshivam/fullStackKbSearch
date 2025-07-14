@@ -125,7 +125,7 @@
   border: none;
   outline: none;
   background: transparent;
-  color: white;
+  color: rgb(0, 0, 0);
 }
 
 .chat-widget-input input::placeholder {
