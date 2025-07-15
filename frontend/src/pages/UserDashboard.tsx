@@ -3,6 +3,8 @@ import ConfirmModal from '../components/ConfirmModal';
 import { uploadFile } from '../services/api';
 
 // Dashboard stats
+
+// Dashboard stats
 const stats = [
   { label: 'Total Messages', value: 0 },
   { label: 'Sessions', value: 0 },
@@ -17,7 +19,6 @@ const tabs = [
   'Installation',
 ];
 
-// --- Settings State ---
 const defaultUserProfile = {
   name: 'John Doe',
   email: 'john.doe@birdcorp.com',
@@ -56,346 +57,39 @@ const defaultAIConfig = {
   enabled: true
 };
 
-// --- Knowledge Base State ---
-type KBEntry = {
-  id: number;
-  question: string;
-  answer: string;
-  created_at?: string;
-};
-
-type AIConfig = {
-  geminiApiKey: string;
-  openAiApiKey: string;
-  autoApprovalLimit: number;
-  aiResponseSpeed: string;
-  autoQuoteGeneration: boolean;
-  smartPricing: boolean;
-  apiProvider: string;
-  widgetColor: string;
-  widgetName: string;
-  greeting: string;
-  profileMascot: string;
-  widgetPosition: string;
-  widgetFont: string;
-  enabled: boolean;
-};
-
-
 const UserDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState(3); // Default to Installation tab
+  // State for tab switching
+  const [activeTab, setActiveTab] = useState(0);
+  // State for copy button
   const [copied, setCopied] = useState(false);
 
-  // Settings states
-  const [userProfile, setUserProfile] = useState(defaultUserProfile);
-  const [notifications, setNotifications] = useState(defaultNotifications);
-  const [systemSettings, setSystemSettings] = useState(defaultSystemSettings);
-  const [aiConfigurations, setAiConfigurations] = useState(defaultAIConfig);
-  const [isEditing, setIsEditing] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [saveMessage, setSaveMessage] = useState('');
-
-  // Knowledge base states
-  const [entries, setEntries] = useState<KBEntry[]>([]);
-  const [question, setQuestion] = useState('');
-  const [answer, setAnswer] = useState('');
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [uploadStatus, setUploadStatus] = useState<string | null>(null);
-  const [kbLoading, setKbLoading] = useState(false);
-  const [editingEntry, setEditingEntry] = useState<KBEntry | null>(null);
-  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
-
-  // Simulate KB load
-  useEffect(() => {
-    if (activeTab === 1) {
-      setKbLoading(true);
-      setTimeout(() => {
-        setEntries([
-          { id: 1, question: 'How to reset my password?', answer: 'Go to settings > security > change password.', created_at: '2025-07-01' },
-          { id: 2, question: 'How to install the widget?', answer: 'See the Installation tab for step-by-step instructions.', created_at: '2025-07-02' }
-        ]);
-        setKbLoading(false);
-      }, 800);
-    }
-  }, [activeTab]);
-
-  // Settings logic
-  const handleSave = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setIsEditing(false);
-      setSaveMessage('Settings saved successfully!');
-      setTimeout(() => setSaveMessage(''), 3000);
-    }, 1000);
-  };
-  const handleCancel = () => setIsEditing(false);
-
-  // Knowledge base logic
-  const handleAdd = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!question.trim() || !answer.trim()) return;
-    setKbLoading(true);
-    setTimeout(() => {
-      if (editingEntry) {
-        setEntries(entries.map(entry => entry.id === editingEntry.id ? { ...entry, question, answer } : entry));
-        setEditingEntry(null);
-        setUploadStatus('Entry updated successfully!');
-      } else {
-        setEntries([...entries, { id: Date.now(), question, answer }]);
-        setUploadStatus('Entry added successfully!');
-      }
-      setQuestion('');
-      setAnswer('');
-      setKbLoading(false);
-      setTimeout(() => setUploadStatus(null), 3000);
-    }, 800);
-  };
-  const handleEdit = (entry: KBEntry) => {
-    setEditingEntry(entry);
-    setQuestion(entry.question);
-    setAnswer(entry.answer);
-  };
-  const handleDelete = (id: number) => {
-    setKbLoading(true);
-    setTimeout(() => {
-      setEntries(entries.filter(entry => entry.id !== id));
-      setUploadStatus('Entry deleted successfully!');
-      setKbLoading(false);
-      setConfirmDeleteId(null);
-      setTimeout(() => setUploadStatus(null), 3000);
-    }, 800);
-  };
-  const cancelEdit = () => {
-    setEditingEntry(null);
-    setQuestion('');
-    setAnswer('');
-  };
-
-  // Installation tab logic
+  // Installation instructions and script
   const installInstructions = [
-    'Enable the Widget: Toggle the "Enable Widget" switch in the Widget Settings tab to activate your chatbot.',
-    'Copy the Installation Script: Use the Copy Script button below to copy the full installation code to your clipboard.',
-    'Open Your Website’s HTML: In your website’s codebase, open the main HTML file (usually index.html or your main template file).',
-    'Paste the Script: Paste the copied script just before the closing </body> tag of your HTML file. This ensures the chatbot loads after your page content.',
-    'Save & Deploy: Save your changes and deploy your website. The chatbot widget will now appear on all pages where the script is included.',
-    'Optional - Test the Widget: Visit your website and verify the chatbot appears in the selected position. You can further customize the widget settings from your dashboard at any time.',
-    'Need Help? If you face any issues, contact support or refer to the documentation for troubleshooting tips.',
+    'Copy the installation script below.',
+    'Paste it just before the </body> tag of your website.',
+    'Save and deploy your website.',
+    'The AI widget will appear on your site automatically.'
   ];
-  const installScript = `<!-- AppDialog Chatbot Widget -->\n<script>\nwindow.AppDialogWidget = {\n  "enabled": true,\n  "name": "AI Assistant",\n  "greeting": "Hello! How can I help you today?",\n  "color": "#8ad2f0",\n  "position": "bottom-right",\n  "font": "Inter",\n  "mascot": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...",\n  "hasKnowledgeBase": true,\n};\n</script>\n<script src=\"https://cdn.jsdelivr.net/gh/maheshghilall/cdnlinks/mistral_finetune_data.js\"></script>\n<script src=\"https://cdn.jsdelivr.net/gh/maheshghilall/cdnlinks/widget.js\"></script>`;
+  const installScript = `<script src="https://cdn.example.com/ai-widget.js" data-api-key="YOUR_API_KEY"></script>`;
+
+  // Copy script handler
   const handleCopy = () => {
     navigator.clipboard.writeText(installScript);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setTimeout(() => setCopied(false), 1500);
   };
 
-  // File upload handler
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setUploadedFile(file);
-      setUploadStatus('Uploading...');
-      setKbLoading(true);
-      try {
-        const formData = new FormData();
-        formData.append('file', file);
-        const response = await uploadFile(formData);
-        if (response.data) {
-          setUploadStatus(`✅ ${response.data.message}`);
-        } else {
-          setUploadStatus('Upload failed: Unknown error');
-        }
-      } catch (error: any) {
-        console.error('Upload error:', error);
-        const errorMessage = error.response?.data?.detail || error.message || 'Unknown error';
-        setUploadStatus(`❌ Upload failed: ${errorMessage}`);
-      } finally {
-        setKbLoading(false);
-        setTimeout(() => setUploadStatus(null), 5000);
-      }
-    }
-  };
-
-  // Tab content renderers
+  // Dummy renderWidgetSettings and renderKnowledgeBase
   const renderWidgetSettings = () => (
-    <div style={{ background: '#fff', borderRadius: 16, boxShadow: '0 2px 8px #eee', padding: 32, marginBottom: 32, maxWidth: 1200, marginLeft: 'auto', marginRight: 'auto' }}>
-      <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 24, display: 'flex', alignItems: 'center', gap: 12 }}>
-        <span style={{ fontSize: 22, marginRight: 8 }}>⚙️</span> Widget Configuration
-      </h2>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 24, marginBottom: 24 }}>
-        <div style={{ fontWeight: 600, fontSize: 18 }}>Enable Widget</div>
-        <span style={{ color: '#888' }}>Turn your chatbot widget on or off</span>
-        <label style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
-          <input type="checkbox" checked={aiConfigurations.enabled ?? true} onChange={e => setAiConfigurations(prev => ({ ...prev, enabled: e.target.checked }))} style={{ width: 32, height: 32 }} />
-        </label>
-      </div>
-      <hr style={{ margin: '24px 0', border: 'none', borderTop: '1px solid #eee' }} />
-      <form style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-          <label style={{ fontWeight: 500 }}>Bot Name
-            <input type="text" value={aiConfigurations.widgetName} onChange={e => setAiConfigurations(prev => ({ ...prev, widgetName: e.target.value }))} style={{ width: '100%', marginTop: 6, padding: 10, borderRadius: 8, border: '1px solid #e0e0e0', fontSize: 16 }} />
-          </label>
-          <label style={{ fontWeight: 500 }}>Greeting Message
-            <textarea value={aiConfigurations.greeting ?? 'Hello! How can I help you today?'} onChange={e => setAiConfigurations(prev => ({ ...prev, greeting: e.target.value }))} style={{ width: '100%', marginTop: 6, padding: 10, borderRadius: 8, border: '1px solid #e0e0e0', fontSize: 16, resize: 'vertical', minHeight: 48 }} />
-          </label>
-          <label style={{ fontWeight: 500 }}>Theme Color
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 6 }}>
-              <input type="color" value={aiConfigurations.widgetColor} onChange={e => setAiConfigurations(prev => ({ ...prev, widgetColor: e.target.value }))} style={{ width: 40, height: 40, border: 'none', borderRadius: 8 }} />
-              <input type="text" value={aiConfigurations.widgetColor} onChange={e => setAiConfigurations(prev => ({ ...prev, widgetColor: e.target.value }))} style={{ width: 120, padding: 8, borderRadius: 8, border: '1px solid #e0e0e0', fontSize: 16 }} />
-            </div>
-          </label>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-          <label style={{ fontWeight: 500 }}>Position
-            <select value={aiConfigurations.widgetPosition} onChange={e => setAiConfigurations(prev => ({ ...prev, widgetPosition: e.target.value }))} style={{ width: '100%', marginTop: 6, padding: 10, borderRadius: 8, border: '1px solid #e0e0e0', fontSize: 16 }}>
-              <option value="bottomRight">Bottom Right</option>
-              <option value="bottomLeft">Bottom Left</option>
-              <option value="topRight">Top Right</option>
-              <option value="topLeft">Top Left</option>
-            </select>
-          </label>
-          <label style={{ fontWeight: 500 }}>Font Family
-            <select value={aiConfigurations.widgetFont} onChange={e => setAiConfigurations(prev => ({ ...prev, widgetFont: e.target.value }))} style={{ width: '100%', marginTop: 6, padding: 10, borderRadius: 8, border: '1px solid #e0e0e0', fontSize: 16 }}>
-              <option value="Inter">Inter</option>
-              <option value="Arial">Arial</option>
-              <option value="Roboto">Roboto</option>
-              <option value="Open Sans">Open Sans</option>
-            </select>
-          </label>
-          <label style={{ fontWeight: 500 }}>Mascot (Upload Image)
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 6 }}>
-              <input type="file" id="mascot-upload" style={{ display: 'none' }} onChange={e => {
-                if (e.target.files && e.target.files[0]) {
-                  setAiConfigurations(prev => ({ ...prev, profileMascot: URL.createObjectURL(e.target.files[0]) }));
-                }
-              }} />
-              <label htmlFor="mascot-upload" style={{ background: '#e3f2fd', color: '#1976d2', borderRadius: 6, padding: '8px 16px', cursor: 'pointer', fontWeight: 600 }}>Choose File</label>
-              <span style={{ color: '#888' }}>{aiConfigurations.profileMascot ? 'File chosen' : 'No file chosen'}</span>
-              {aiConfigurations.profileMascot && (
-                <img src={aiConfigurations.profileMascot} alt="mascot" style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', border: '1px solid #eee' }} />
-              )}
-            </div>
-          </label>
-        </div>
-      </form>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 32 }}>
-        <button onClick={handleSave} style={{ background: '#1976d2', color: '#fff', border: 'none', borderRadius: 8, padding: '12px 32px', fontWeight: 600, fontSize: 18, boxShadow: '0 2px 8px #e3f2fd', cursor: 'pointer' }} disabled={loading}>
-          {loading ? 'Saving...' : 'Save Settings'}
-        </button>
-      </div>
-      {saveMessage && <div style={{ marginTop: 16, color: '#1976d2', fontWeight: 600 }}>{saveMessage}</div>}
+    <div style={{ padding: 24 }}>
+      <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 16 }}>Widget Settings</h2>
+      <div style={{ color: '#888' }}>Widget settings content goes here.</div>
     </div>
   );
-
   const renderKnowledgeBase = () => (
-    <div style={{ background: '#fff', borderRadius: 12, boxShadow: '0 2px 8px #eee', padding: 32, marginBottom: 32 }}>
-      <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 16 }}>Knowledge Base Management</h2>
-      <div style={{ border: '2px dashed #ddd', borderRadius: 12, padding: 32, textAlign: 'center', marginBottom: 32 }}>
-        <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16 }}>Upload Any Data File</h3>
-        <p style={{ color: '#6b7280', marginBottom: 16 }}>
-          Upload any file format - PDF, Excel, Word, CSV, JSON, TXT, and more!<br />
-          Our AI will automatically extract and structure the data for your chatbot.
-        </p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 16 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <i className="bi bi-file-earmark-pdf" style={{ fontSize: 24, color: '#d32f2f' }}></i>
-            <span>PDF</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <i className="bi bi-file-earmark-excel" style={{ fontSize: 24, color: '#388e3c' }}></i>
-            <span>Excel</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <i className="bi bi-file-earmark-word" style={{ fontSize: 24, color: '#1976d2' }}></i>
-            <span>Word</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <i className="bi bi-filetype-csv" style={{ fontSize: 24, color: '#fbc02d' }}></i>
-            <span>CSV</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <i className="bi bi-file-earmark-code" style={{ fontSize: 24, color: '#6a1b9a' }}></i>
-            <span>JSON</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <i className="bi bi-file-earmark-text" style={{ fontSize: 24, color: '#616161' }}></i>
-            <span>TXT</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <i className="bi bi-file-earmark-image" style={{ fontSize: 24, color: '#0288d1' }}></i>
-            <span>Images</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <i className="bi bi-plus-circle" style={{ fontSize: 24, color: '#757575' }}></i>
-            <span>More</span>
-          </div>
-        </div>
-        <input
-          type="file"
-          id="kb-file-upload"
-          style={{ display: 'none' }}
-          onChange={handleFileUpload}
-          accept=".csv,.json,.xlsx,.txt,.pdf,.jpg,.jpeg,.png,.gif,.bmp"
-          disabled={kbLoading}
-        />
-        <label htmlFor="kb-file-upload">
-          <button
-            style={{ background: '#1976d2', color: '#fff', border: 'none', borderRadius: 8, padding: '12px 32px', fontWeight: 600, cursor: kbLoading ? 'not-allowed' : 'pointer' }}
-            disabled={kbLoading}
-          >
-            {kbLoading ? 'Uploading...' : 'Select File to Upload'}
-          </button>
-        </label>
-        {uploadedFile && <p style={{ marginTop: 8 }}>Selected: {uploadedFile.name}</p>}
-        <p style={{ color: '#6b7280', marginTop: 16 }}>
-          Max file size: 50MB • All formats supported • Data is processed securely
-        </p>
-      </div>
-      {uploadStatus && (
-        <div style={{ color: uploadStatus.includes('❌') ? '#f44336' : '#1976d2', marginBottom: 16 }}>{uploadStatus}</div>
-      )}
-      <div style={{ marginBottom: 24 }}>
-        <h3>{editingEntry ? 'Edit Q&A' : 'Manually Add Q&A'}</h3>
-        <form onSubmit={handleAdd} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <input type="text" value={question} onChange={e => setQuestion(e.target.value)} placeholder="Type your question..." required disabled={kbLoading} />
-          <textarea value={answer} onChange={e => setAnswer(e.target.value)} placeholder="Type the answer..." rows={3} required disabled={kbLoading} />
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button type="submit" disabled={kbLoading || !question.trim() || !answer.trim()}>{kbLoading ? 'Saving...' : editingEntry ? 'Update Entry' : 'Add Entry'}</button>
-            {editingEntry && <button type="button" onClick={cancelEdit} disabled={kbLoading}>Cancel</button>}
-          </div>
-        </form>
-      </div>
-      <div>
-        <h3>Existing Entries ({entries.length})</h3>
-        {kbLoading && entries.length === 0 ? (
-          <p>Loading entries...</p>
-        ) : entries.length === 0 ? (
-          <p>No entries yet. Add some Q&A pairs or upload a dataset!</p>
-        ) : (
-          <div>
-            {entries.map(entry => (
-              <div key={entry.id} style={{ border: '1px solid #eee', borderRadius: 8, padding: 12, marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <div><strong>Q:</strong> {entry.question}</div>
-                  <div><strong>A:</strong> {entry.answer}</div>
-                  {entry.created_at && <div style={{ color: '#888', fontSize: 12 }}>Added: {new Date(entry.created_at).toLocaleDateString()}</div>}
-                </div>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <button onClick={() => handleEdit(entry)} disabled={kbLoading}>Edit</button>
-                  <button onClick={() => setConfirmDeleteId(entry.id)} disabled={kbLoading}>Delete</button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-      {confirmDeleteId !== null && (
-        <ConfirmModal
-          message="Are you sure you want to delete this entry?"
-          onConfirm={() => handleDelete(confirmDeleteId)}
-          onCancel={() => setConfirmDeleteId(null)}
-        />
-      )}
+    <div style={{ padding: 24 }}>
+      <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 16 }}>Knowledge Base</h2>
+      <div style={{ color: '#888' }}>Knowledge base content goes here.</div>
     </div>
   );
 
@@ -498,6 +192,7 @@ const UserDashboard: React.FC = () => {
     </div>
   );
 
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 0:
@@ -512,6 +207,7 @@ const UserDashboard: React.FC = () => {
         return null;
     }
   };
+
 
   return (
     <div style={{ background: '#f7f8fa', minHeight: '100vh', padding: '24px' }}>
@@ -553,5 +249,4 @@ const UserDashboard: React.FC = () => {
     </div>
   );
 };
-
 export default UserDashboard;
