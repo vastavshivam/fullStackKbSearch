@@ -95,10 +95,10 @@ async def static_chat(request: Request):
         "thanks": "You're welcome!",
         "thank you": "You're welcome!",
         "how are you": "I'm just a bot, but I'm here to help!",
-        "who are you": "I'm Bird AI, your assistant!",
+        "who are you": "I'm FishAI, your assistant!",
         "what can you do": "I can answer your questions and help you with information from my knowledge base.",
         "help": "Sure! Ask me anything or tell me what you need help with.",
-        "what is your name": "I'm Bird AI, your virtual assistant.",
+        "what is your name": "I'm FishAI, your virtual assistant.",
         "what is ai": "AI stands for Artificial Intelligence, which enables machines to mimic human intelligence.",
         "tell me a joke": "Why don't scientists trust atoms? Because they make up everything!",
         "what is the weather today": "I'm not connected to a weather service, but you can check your local forecast!",
@@ -136,7 +136,9 @@ async def static_chat(request: Request):
         "what is a database": "A database is an organized collection of data that can be accessed, managed, and updated.",
         "what is sql": "SQL stands for Structured Query Language, used for managing and manipulating databases.",
         "what is nosql": "NoSQL is a type of database that provides a mechanism for storage and retrieval of data that is modeled in means other than tabular relations.",
-        "what is cloud storage": "Cloud storage is a service that allows you to save data by transferring it over the internet to an offsite storage system maintained by a third party."
+        "what is cloud storage": "Cloud storage is a service that allows you to save data by transferring it over the internet to an offsite storage system maintained by a third party.",
+        "who am i": "You are whoever you want to be!",
+        
     }
 
     # Fuzzy matching for greetings

@@ -35,7 +35,7 @@ export default function Register() {
 
   const WelcomeMessage = () => (
     <>
-      <h2 className="login-title">Create your BirdAI account</h2>
+      <h2 className="login-title">Create your FishAI account</h2>
       <p className="login-subtext">Register to access your dashboard and tools.</p>
     </>
   );
@@ -51,7 +51,7 @@ export default function Register() {
     <div className="login-cover">
       <div className="login-left-panel">
         <Logo />
-        <h1 className="brand-name">BirdAI</h1>
+        <h1 className="brand-name">FishAI</h1>
         <p className="brand-tagline">Powering smart conversations with AI.</p>
         <Benefits />
       </div>

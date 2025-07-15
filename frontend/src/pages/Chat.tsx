@@ -9,7 +9,7 @@ interface ChatResponse {
 }
 
 export default function Chat() {
-  const [messages, setMessages] = useState([{ sender: 'bot', text: "Welcome to Bird AI! 🐦" }]);
+  const [messages, setMessages] = useState([{ sender: 'bot', text: "Welcome to FishAI! �" }]);
   const [input, setInput] = useState('');
   const [history, setHistory] = useState<string[][]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -50,7 +50,7 @@ export default function Chat() {
       </div>
 
       <div className="chat-main">
-        <div className="chat-header">Bird AI</div>
+        <div className="chat-header">FishAI</div>
 
         <div className="chat-body">
           {messages.map((msg, i) => (

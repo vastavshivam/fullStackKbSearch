@@ -4,7 +4,7 @@ import './ChatWidget.css';
 
 
 const initialMessages = [
-  { sender: 'bot', text: 'Hi! I am BirdAI. How can I help you today?' }
+  { sender: 'bot', text: 'Hi! I am FishAI. How can I help you today?' }
 ];
 
 const ChatWidget: React.FC = () => {
@@ -50,7 +50,7 @@ const ChatWidget: React.FC = () => {
       {open && (
         <div className="chat-widget-modal">
           <div className="chat-widget-header">
-            BirdAI Chatbot
+            FishAI Chatbot
             <button style={{ background: 'none', border: 'none', color: '#fff', fontSize: 20, cursor: 'pointer' }} onClick={() => setOpen(false)}>&times;</button>
           </div>
           <div className="chat-widget-body" ref={bodyRef}>

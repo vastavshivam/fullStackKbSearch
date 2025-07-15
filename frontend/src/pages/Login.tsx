@@ -38,7 +38,7 @@ export default function Login() {
 
   const WelcomeMessage = () => (
     <>
-      <h2 className="login-title">Welcome back to BirdAI</h2>
+      <h2 className="login-title">Welcome back to FishAI</h2>
       <p className="login-subtext">Sign in to manage your conversations, models, and dashboards.</p>
     </>
   );
@@ -55,7 +55,7 @@ export default function Login() {
     <div className="login-cover">
       <div className="login-left-panel">
         <Logo />
-        <h1 className="brand-name">BirdAI</h1>
+        <h1 className="brand-name">FishAI</h1>
         <p className="brand-tagline">Powering smart conversations with AI.</p>
         <Benefits />
       </div>

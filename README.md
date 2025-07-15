@@ -1,6 +1,6 @@
 # 🤖 AI Support Assistant
 
-A full-stack AI-powered support assistant platform, inspired by Bird.com, that allows users to:
+A full-stack AI-powered support assistant platform, inspired by FishAI, that allows users to:
 
 - Upload support files (.csv, .json, .txt)
 - Automatically fine-tune and embed document data

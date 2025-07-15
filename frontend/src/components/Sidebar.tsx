@@ -54,13 +54,13 @@ export default function Sidebar({
             <>
               <img
                 src="/logo192.png"
-                alt="Bird Corp Logo"
+                alt="Fish Corp Logo"
                 className="sidebar-logo"
                 onError={(e) => {
                   (e.target as HTMLImageElement).style.display = 'none';
                 }}
               />
-              <span className="logo-text">Bird Corp.</span>
+              <span className="logo-text">Fish Corp.</span>
             </>
           ) : (
             <BiRocket size={28} />
