@@ -28,9 +28,11 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(),db: AsyncSessio
             detail="Invalid credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    # Assume user.scopes is a list of scopes, e.g. ["admin", "user"]
+    scopes = getattr(user, "scopes", ["user"])  # fallback to 'user' if not present
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(data={"sub": user.email}, expires_delta=access_token_expires)
-    return {"access_token": access_token, "token_type": "bearer"}
+    access_token = create_access_token(data={"sub": user.email, "scopes": scopes}, expires_delta=access_token_expires)
+    return {"access_token": access_token, "token_type": "bearer", "scopes": scopes}
 
 
 @router.post("/register", response_model=schemas.UserOut, status_code=201)

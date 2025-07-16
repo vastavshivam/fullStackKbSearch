@@ -4,8 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy.ext.declarative import declarative_base
 from api.qa import router as qa_router
 
-# Temporarily commenting out database import to test KB functionality
-# from database import database  # Assuming you have a database module for initialization
+from database import database  # Assuming you have a database module for initialization
 
 from db import *
 from api import chat, auth, files, training, websocket
@@ -42,6 +41,7 @@ app.include_router(qa_router, prefix="/api/qa", tags=["Q&A"])
 app.include_router(training.router, prefix="/api/training", tags=["Training"])
 app.include_router(websocket.router, tags=["WebSocket"])
 app.include_router(whatsapp.router, prefix="/whatsapp")
+app.include_router(chat.router, prefix="/api/conversations", tags=["Conversations"])
 
 # ✅ Static file serving (for uploaded images, previews, etc.)
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
@@ -49,8 +49,7 @@ app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 # ✅ Startup/shutdown tasks
 @app.on_event("startup")
 async def startup():
-    # Temporarily commenting out database initialization
-    # await database.init_db()
+    await database.init_db()
     setup_email_notifications()
 
 @app.on_event("shutdown")
@@ -85,7 +84,7 @@ def root():
 
 # if __name__ == "__main__": 
 #     import uvicorn
-#     uvicorn.run(app, host="0.0.0.0", port=8000) 
+#     uvicorn.run(app, host="0.0.0.0", port=8000)
 
 
 

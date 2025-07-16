@@ -38,3 +38,12 @@ export const updateKBEntry = (id, question, answer) => {
 export const deleteKBEntry = (id) => {
   return axios.delete(`${API_BASE}/api/files/kb/entries/${id}`);
 };
+
+// Conversations API functions
+export const saveConversation = (conversation) => {
+  return axios.post(`${API_BASE}/api/conversations`, conversation);
+};
+
+export const getUserConversations = (userId) => {
+  return axios.get(`${API_BASE}/api/conversations/${userId}`);
+};

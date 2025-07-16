@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ConfirmModal from '../components/ConfirmModal';
+import { useWidgetConfig, WidgetFont, WidgetPosition } from '../components/WidgetConfigContext';
 import { uploadFile } from '../services/api';
 
 // Dashboard stats
@@ -58,6 +59,7 @@ const defaultAIConfig = {
 };
 
 const UserDashboard: React.FC = () => {
+  const { config, setConfig } = useWidgetConfig();
   // State for tab switching
   const [activeTab, setActiveTab] = useState(0);
   // State for copy button
@@ -80,10 +82,106 @@ const UserDashboard: React.FC = () => {
   };
 
   // Dummy renderWidgetSettings and renderKnowledgeBase
+  // Modern modular widget settings UI
+  const [mascotFile, setMascotFile] = useState<File | null>(null);
+  const [mascotPreview, setMascotPreview] = useState<string | null>(config.profileMascot);
+  const handleMascotChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setMascotFile(file);
+      const reader = new FileReader();
+      reader.onload = ev => setMascotPreview(ev.target?.result as string);
+      reader.readAsDataURL(file);
+    }
+  };
+  const handleSaveConfig = () => {
+    setConfig(cfg => ({
+      ...cfg,
+      profileMascot: mascotPreview,
+    }));
+  };
   const renderWidgetSettings = () => (
-    <div style={{ padding: 24 }}>
-      <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 16 }}>Widget Settings</h2>
-      <div style={{ color: '#888' }}>Widget settings content goes here.</div>
+    <div style={{ padding: 32, borderRadius: 16, background: '#fff', boxShadow: '0 2px 8px #eee', maxWidth: 900, margin: '0 auto' }}>
+      <h2 style={{ fontSize: 28, fontWeight: 800, marginBottom: 28, letterSpacing: -1 }}>Widget Settings</h2>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 32, alignItems: 'center', marginBottom: 32 }}>
+        <div style={{ minWidth: 180 }}>
+          <div style={{ fontWeight: 700, marginBottom: 8 }}>Widget Status</div>
+          <button
+            onClick={() => setConfig(cfg => ({ ...cfg, enabled: !cfg.enabled }))}
+            style={{
+              background: config.enabled ? '#22c55e' : '#ef4444',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 8,
+              padding: '10px 22px',
+              fontWeight: 700,
+              fontSize: 16,
+              cursor: 'pointer',
+              marginBottom: 8,
+              transition: 'background 0.2s',
+              boxShadow: '0 2px 8px #eee',
+            }}
+          >
+            {config.enabled ? 'Deactivate' : 'Activate'}
+          </button>
+        </div>
+        <div style={{ minWidth: 180 }}>
+          <div style={{ fontWeight: 700, marginBottom: 8 }}>Widget Color</div>
+          <input
+            type="color"
+            value={config.widgetColor}
+            onChange={e => setConfig(cfg => ({ ...cfg, widgetColor: e.target.value }))}
+            style={{ width: 48, height: 48, border: 'none', borderRadius: 8, boxShadow: '0 2px 8px #eee', cursor: 'pointer' }}
+          />
+        </div>
+        <div style={{ minWidth: 220 }}>
+          <div style={{ fontWeight: 700, marginBottom: 8 }}>Widget Name</div>
+          <input
+            type="text"
+            value={config.widgetName}
+            onChange={e => setConfig(cfg => ({ ...cfg, widgetName: e.target.value }))}
+            style={{ width: 160, padding: '10px 14px', borderRadius: 8, border: '1px solid #ddd', fontSize: 16, fontWeight: 500 }}
+          />
+        </div>
+        <div style={{ minWidth: 180 }}>
+          <div style={{ fontWeight: 700, marginBottom: 8 }}>Widget Font</div>
+          <select
+            value={config.widgetFont}
+            onChange={e => setConfig(cfg => ({ ...cfg, widgetFont: e.target.value as WidgetFont }))}
+            style={{ width: 140, padding: '10px 14px', borderRadius: 8, border: '1px solid #ddd', fontSize: 16, fontWeight: 500 }}
+          >
+            {['Inter','Roboto','Montserrat','Lato','Poppins','Open Sans','Nunito','Oswald','Raleway','Merriweather'].map(font => (
+              <option key={font} value={font} style={{ fontFamily: font }}>{font}</option>
+            ))}
+          </select>
+        </div>
+        <div style={{ minWidth: 180 }}>
+          <div style={{ fontWeight: 700, marginBottom: 8 }}>Widget Position</div>
+          <select
+            value={config.widgetPosition}
+            onChange={e => setConfig(cfg => ({ ...cfg, widgetPosition: e.target.value as WidgetPosition }))}
+            style={{ width: 140, padding: '10px 14px', borderRadius: 8, border: '1px solid #ddd', fontSize: 16, fontWeight: 500 }}
+          >
+            <option value="bottomRight">Bottom Right</option>
+            <option value="bottomLeft">Bottom Left</option>
+            <option value="topRight">Top Right</option>
+            <option value="topLeft">Top Left</option>
+          </select>
+        </div>
+        <div style={{ minWidth: 220 }}>
+          <div style={{ fontWeight: 700, marginBottom: 8 }}>Profile Mascot (Upload Image)</div>
+          <input type="file" accept="image/*" onChange={handleMascotChange} />
+          {mascotPreview && (
+            <img src={mascotPreview} alt="Mascot Preview" style={{ width: 48, height: 48, borderRadius: '50%', marginTop: 8, boxShadow: '0 2px 8px #eee' }} />
+          )}
+        </div>
+      </div>
+      <button
+        onClick={handleSaveConfig}
+        style={{ background: '#1976d2', color: '#fff', border: 'none', borderRadius: 8, padding: '14px 38px', fontWeight: 700, fontSize: 18, cursor: 'pointer', marginTop: 8, boxShadow: '0 2px 8px #eee', letterSpacing: 0.5 }}
+      >
+        Save Widget Configuration
+      </button>
     </div>
   );
   const renderKnowledgeBase = () => (

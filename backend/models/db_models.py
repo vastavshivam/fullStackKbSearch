@@ -1,10 +1,17 @@
+from database.database import Base
 from typing import Text
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Text, DateTime,func
 from sqlalchemy.orm import relationship
-from database.database import Base
 from datetime import datetime
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
+
+
+class UserWidgetConfig(Base):
+    __tablename__ = "user_widget_config"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), unique=True)
+    config = Column(Text, nullable=False)  # Store as JSON string
 
 
 class User(Base):
@@ -89,14 +96,25 @@ class ClientConfig(Base):
     direction = Column(String, nullable=False)  # 'incoming' or 'outgoing'
     timestamp = Column(DateTime(timezone=True), server_default=func.now())
 
+
+# New Conversation model for storing full conversation, summary, and title
+class Conversation(Base):
+    __tablename__ = "conversations"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    conversation_history = Column(Text, nullable=False)  # Store as JSON string (list of messages)
+    summary = Column(Text, nullable=True)
+    title = Column(String(200), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
 class ChatHistory(Base):
     __tablename__ = "chat_history"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(Integer, primary_key=True, index=True)
     client_id = Column(String, nullable=False)
-    sender = Column(String, nullable=False)  # e.g., 'user' or 'bot'
+    sender = Column(String, nullable=False)  # 'user' or 'bot'
     user_number = Column(String, nullable=False)  # WhatsApp number
     message = Column(Text, nullable=False)
-    message_type = Column(String, default="text")  # Optional: 'text', 'image', etc.
     direction = Column(String, nullable=False)  # 'incoming' or 'outgoing'
-    timestamp = Column(DateTime(timezone=True), server_default=func.now())
+    timestamp = Column(DateTime, default=datetime.utcnow)

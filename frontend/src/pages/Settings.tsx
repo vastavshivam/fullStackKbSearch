@@ -745,6 +745,31 @@ export default function Settings() {
           <BiSave />
           {loading ? 'Saving...' : 'Save Widget Configuration'}
         </button>
+        <button
+          className="activate-button"
+          style={{ marginLeft: 16, background: '#4CAF50', color: '#fff', padding: '0.5rem 1.5rem', borderRadius: 6, border: 'none', fontWeight: 600, cursor: 'pointer' }}
+          onClick={async () => {
+            setLoading(true);
+            try {
+              // Replace with actual user ID logic
+              const userId = window.localStorage.getItem('userId') || '1';
+              const res = await fetch(`/api/widget-config/${userId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(aiConfigurations),
+              });
+              if (!res.ok) throw new Error('Failed to activate widget config');
+              setSaveMessage('Widget configuration activated!');
+            } catch (err) {
+              setSaveMessage('Failed to activate widget config');
+            } finally {
+              setLoading(false);
+            }
+          }}
+          disabled={loading}
+        >
+          Activate
+        </button>
       </div>
     </div>
   );

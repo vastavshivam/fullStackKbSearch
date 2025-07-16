@@ -1,12 +1,13 @@
 from sqlalchemy.orm import Session
-from models.db_models import ChatLog, Ticket, UserFeedback, HumanEscalation
-from models.schemas import ChatMessage, TicketCreate, FeedbackCreate, EscalationCreate
+from models.db_models import ChatLog, Ticket, UserFeedback, HumanEscalation, Conversation
+from models.schemas import ChatMessage, TicketCreate, FeedbackCreate, EscalationCreate, ConversationCreate
 from sqlalchemy.future import select
 from database.database import async_session
 from models.db_models import User
 from sqlalchemy.ext.asyncio import AsyncSession
 # 💬 Save Chat Message
 from datetime import datetime
+import json
 
 async  def save_chat_message(db: AsyncSession, msg: ChatMessage):
     timestamp = msg.timestamp
@@ -105,6 +106,26 @@ async def create_user(db: AsyncSession, user, hashed_password: str):
     await db.commit()
     await db.refresh(db_user)
     return db_user
-    
+
+# Save a new conversation
+async def save_conversation(db: AsyncSession, conversation: ConversationCreate):
+    new_conversation = Conversation(
+        user_id=conversation.user_id,
+        conversation_history=json.dumps(conversation.conversation_history),
+        summary=conversation.summary,
+        title=conversation.title
+    )
+    db.add(new_conversation)
+    await db.commit()
+    await db.refresh(new_conversation)
+    return new_conversation
+
+# Fetch all conversations for a user
+async def get_user_conversations(db: AsyncSession, user_id: int):
+    result = await db.execute(
+        select(Conversation).where(Conversation.user_id == user_id).order_by(Conversation.created_at.desc())
+    )
+    return result.scalars().all()
+
 
 
