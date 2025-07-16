@@ -6,6 +6,7 @@ import redis
 import uuid
 import jwt
 import pandas as pd
+import torch
 
 from datasets import Dataset, load_dataset
 from transformers import (
@@ -26,10 +27,14 @@ from langchain.memory import RedisChatMessageHistory
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
+MODEL_DIR = os.path.abspath("../vector_stores/falcon-rw-1b")  # Local model directory
+DATA_FILE = os.path.abspath("training/data/fine_tune.jsonl")               # Your JSONL file
+# OUTPUT_DIR = os.path.abspath("../fine_tuned/falcon-rw-1b") 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_NAME = os.getenv("MODEL_NAME", "tiiuae/falcon-rw-1b")
-DATA_PATH = "training/data/train.jsonl"
+DATA_PATH = os.path.abspath("data/train.jsonl")
 OUTPUT_DIR = "training/checkpoints/fine-tuned-output"
-REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379") #not tested 
 JWT_SECRET = os.getenv("JWT_SECRET", "your-secret-key")
 
 app = FastAPI()
@@ -100,41 +105,111 @@ def convert_to_jsonl(file_path, output_path):
     return output_path
 
 
-def fine_tune(model_name=MODEL_NAME, jsonl_path="training/data/fine_tune.jsonl"):
-    """
-    Standard Trainer-based fine-tuning
-    """
-    log.info(f"Starting fine-tuning with model: {model_name} and data: {jsonl_path}")
-    with open(jsonl_path, 'r') as f:
-        data = [json.loads(line) for line in f.readlines()]
-    log.info(f"Loaded {len(data)} training records")
+# def fine_tune(model_name=MODEL_NAME, jsonl_path="training/data/fine_tune.jsonl"):
+#     """
+#     Standard Trainer-based fine-tuning
+#     """
+#     log.info(f"Starting fine-tuning with model: {model_name} and data: {jsonl_path}")
+#     with open(jsonl_path, 'r') as f:
+#         data = [json.loads(line) for line in f.readlines()]
+#     log.info(f"Loaded {len(data)} training records")
 
+#     dataset = Dataset.from_list(data)
+#     tokenizer = AutoTokenizer.from_pretrained(model_name)
+#     model = AutoModelForCausalLM.from_pretrained(model_name)
+#     log.info("Model and tokenizer loaded")
+
+#     def tokenize(example):
+#         return tokenizer("<s>" + example["prompt"] + "\n" + example["response"] + "</s>", truncation=True)
+
+#     tokenized = dataset.map(tokenize)
+#     log.info("Tokenization complete")
+
+  
+
+#     args = TrainingArguments(
+#         output_dir="training/checkpoints",
+#         per_device_train_batch_size=2,
+#         num_train_epochs=2,
+#         logging_dir="./logs",
+#         logging_steps=10,
+#         save_total_limit=1,
+#         save_strategy="epoch",
+#         pad_token_id=tokenizer.eos_token_id
+#     )
+
+#     trainer = Trainer(model=model, args=args, train_dataset=tokenized)
+#     log.info("Trainer initialized. Starting training...")
+#     trainer.train()
+#     log.info("Training complete")
+DATA_PATH = "training/data/train.jsonl"
+def fine_tune(model_dir=MODEL_DIR, jsonl_path="data/train.jsonl"):
+    log.info(f"📂 Loading training data from: {MODEL_DIR}")
+    
+    # Load JSONL
+    with open(jsonl_path, "r", encoding="utf-8") as f:
+        data = [json.loads(line) for line in f if "prompt" in line and "response" in line]
+    log.info(f"✅ Loaded {len(data)} training records")
+
+    # Convert to Hugging Face dataset
     dataset = Dataset.from_list(data)
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForCausalLM.from_pretrained(model_name)
-    log.info("Model and tokenizer loaded")
 
+    # Load tokenizer and model from local directory
+    tokenizer = AutoTokenizer.from_pretrained(model_dir)
+    model = AutoModelForCausalLM.from_pretrained(model_dir)
+
+    # Update pad token if missing
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
+
+    model.config.pad_token_id = tokenizer.pad_token_id
+
+    # Tokenization function
     def tokenize(example):
-        return tokenizer("<s>" + example["prompt"] + "\n" + example["response"] + "</s>", truncation=True)
+        full_prompt = f"<s>{example['prompt']}\n{example['response']}</s>"
+        tokens = tokenizer(full_prompt, truncation=True, padding="max_length", max_length=512)
+        tokens["labels"] = tokens["input_ids"].copy()
+        return tokens
 
-    tokenized = dataset.map(tokenize)
-    log.info("Tokenization complete")
+    tokenized_dataset = dataset.map(tokenize)
 
-    args = TrainingArguments(
-        output_dir="training/checkpoints",
-        per_device_train_batch_size=2,
-        num_train_epochs=2,
-        logging_dir="./logs",
-        logging_steps=10,
-        save_total_limit=1,
-        save_strategy="epoch",
-        pad_token_id=tokenizer.eos_token_id
+    # Data collator for dynamic padding
+    data_collator = DataCollatorForLanguageModeling(
+        tokenizer=tokenizer,
+        mlm=False  # Causal LM = not masked
     )
 
-    trainer = Trainer(model=model, args=args, train_dataset=tokenized)
-    log.info("Trainer initialized. Starting training...")
+    # Training configuration
+    args = TrainingArguments(
+        output_dir=OUTPUT_DIR,
+        per_device_train_batch_size=2,
+        num_train_epochs=2,
+        logging_dir=os.path.join(BASE_DIR, "logs"),
+        logging_steps=10,
+        save_strategy="epoch",
+        save_total_limit=1,
+        fp16=torch.cuda.is_available(),  # Mixed precision if GPU
+    )
+
+    # Trainer
+    trainer = Trainer(
+        model=model,
+        args=args,
+        train_dataset=tokenized_dataset,
+        tokenizer=tokenizer,
+        data_collator=data_collator
+    )
+
+    # Start training
+    log.info("🚀 Starting training...")
     trainer.train()
-    log.info("Training complete")
+    
+    # Save model
+    log.info(f"💾 Saving fine-tuned model to: {OUTPUT_DIR}")
+    model.save_pretrained(OUTPUT_DIR)
+    tokenizer.save_pretrained(OUTPUT_DIR)
+    log.info("✅ Training complete!")
+
 
 
 def fine_tune_with_ppo(model_name=MODEL_NAME, jsonl_path="training/data/fine_tune_reward.jsonl"):
@@ -263,6 +338,6 @@ async def websocket_endpoint(websocket: WebSocket):
 
 if __name__ == "__main__":
     # Uncomment whichever you want to run:
-    # fine_tune()
+    fine_tune()
     # fine_tune_with_ppo()
-    pass
+    # pass
