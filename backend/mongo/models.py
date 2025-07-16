@@ -22,13 +22,35 @@ feedback_logs_col = mongo_db["feedback_logs"]
 redis_client = redis.Redis(host="localhost", port=6379, db=0)
 
 
-def save_chat_log_mongo( **record):
+def save_chat_log_mongo(**record):
     """
     Save a chat message with optional sentiment, embedding, and bot reply.
+    Also updates Redis session context and LangChain memory.
     """
+
+    # 1. Add timestamp
     record["timestamp"] = datetime.utcnow()
-    result = chat_logs_col.insert_one(record)
-    return result.inserted_id
+
+    # 2. Save to MongoDB
+    chat_logs_col.insert_one(record)
+
+    # 3. Update Redis context
+    session_id = record.get("session_id")
+    sender = record.get("sender")
+    message = record.get("message")
+
+    context = get_session_context(session_id)
+    role_prefix = "User" if sender == "user" else "Bot"
+    context.append(f"{role_prefix}: {message}")
+    save_session_context(session_id, context)
+
+    # 4. Update LangChain memory
+    memory = get_langchain_memory(session_id)
+
+    if sender == "user":
+        memory.save_context({"input": message}, {"output": record.get("bot_reply", "")})
+
+    return record  # Optionally return record or inserted ID
 
 
 def save_ticket_log_mongo(ticket_data):
