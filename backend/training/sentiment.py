@@ -8,7 +8,7 @@ import json
 print("[🔌] Connecting to MongoDB...")
 
 # MongoDB connection
-client = MongoClient("mongodb+srv://RootAdmin:Root@atlascluster.0ktshci.mongodb.net/?retryWrites=true&w=majority&appName=AtlasCluster")
+client = MongoClient("mongodb+srv://RootAdmin:root@atlascluster.0ktshci.mongodb.net/?retryWrites=true&w=majority&appName=AtlasCluster")
 db = client["Portfolio"]
 collection = db["Portfolio-Website"]
 
@@ -29,6 +29,7 @@ summarizer_tokenizer = AutoTokenizer.from_pretrained(summarizer_model_name)
 
 print("[✅] All models loaded.")
 
+# Helpers
 def format_chat_session(chat):
     return " [SEP] ".join([f"{msg['sender'].upper()}: {msg['message']}" for msg in chat])
 
@@ -45,7 +46,22 @@ def summarize_chat(text):
     summary_ids = summarizer_model.generate(inputs["input_ids"], max_length=150, min_length=30, length_penalty=2.0, num_beams=4, early_stopping=True)
     return summarizer_tokenizer.decode(summary_ids[0], skip_special_tokens=True)
 
-print("[🚀] Starting sentiment analysis and summarization...")
+def convert_to_three_level_sentiment(star):
+    try:
+        rating = int(star.strip().split()[0])  # e.g., "1 star" → 1
+        if rating <= 2:
+            return "negative"
+        elif rating == 3:
+            return "neutral"
+        else:
+            return "positive"
+    except Exception:
+        return "neutral"
+
+# Final output
+output_path = "fine_tune.jsonl"
+
+print("[🚀] Starting analysis and training example creation...")
 
 total, processed, skipped = 0, 0, 0
 
@@ -55,9 +71,9 @@ for session in collection.find():
     chat = session.get("chat", [])
 
     print(f"\n---\n🧾 Session ID: {session_id}")
-    
+
     if not chat:
-        print("⚠️  Skipped: Empty chat session.")
+        print("⚠️ Skipped: Empty chat session.")
         skipped += 1
         continue
 
@@ -65,8 +81,7 @@ for session in collection.find():
         chat_text = format_chat_session(chat)
         chunks = chunk_text_by_tokens(chat_text)
 
-        all_scores = []
-        all_labels = []
+        all_scores, all_labels = [], []
 
         for i, chunk in enumerate(chunks):
             result = sentiment_pipeline(chunk)[0]
@@ -78,7 +93,7 @@ for session in collection.find():
         avg_score = float(np.mean(all_scores))
         summary = summarize_chat(chat_text)
 
-        # Update MongoDB
+        # Save to MongoDB
         collection.update_one(
             {"_id": session_id},
             {"$set": {
@@ -88,17 +103,18 @@ for session in collection.find():
             }}
         )
 
-        # Pretty print output
-        summary_dict = {
-            "_id": str(session_id),
-            "chat": "[...]",
-            "overall_sentiment": final_label,
-            "sentiment_score": round(avg_score, 2),
-            "chat_summary": summary
+        # Build training data
+        sentiment_example = {
+            "prompt": summary,
+            "response": "Let me help you with that. Please try resetting your password.",  # You can improve this with Ollama if needed
+            "sentiment": convert_to_three_level_sentiment(final_label),
         }
 
-        print("\n📝 Final Session Summary:")
-        print(json.dumps(summary_dict, indent=2))
+        # Save to file
+        with open(output_path, "a", encoding="utf-8") as f:
+            f.write(json.dumps(sentiment_example) + "\n")
+
+        print(f"✅ Training example saved with sentiment: {sentiment_example['sentiment']}")
         processed += 1
 
     except PyMongoError as db_err:
@@ -108,7 +124,7 @@ for session in collection.find():
         print(f"❌ Error processing session {session_id}: {e}")
         skipped += 1
 
-print("\n---\n🎯 Analysis Summary:")
-print(f"Total sessions found: {total}")
-print(f"Processed successfully: {processed}")
-print(f"Skipped (empty or error): {skipped}")
+print("\n---\n🎯 Summary")
+print(f"Total sessions: {total}")
+print(f"Processed: {processed}")
+print(f"Skipped: {skipped}")
