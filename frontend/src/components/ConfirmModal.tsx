@@ -2,22 +2,29 @@
 import React from 'react';
 import './ConfirmModal.css'; // Optional styling
 
-type ConfirmModalProps = {
-  message: string;
+export interface ConfirmModalProps {
+  open: boolean;
+  onClose: () => void;
   onConfirm: () => void;
-  onCancel: () => void;
-};
+  title: string;
+  description: string;
+}
 
-export default function ConfirmModal({ message, onConfirm, onCancel }: ConfirmModalProps) {
+const ConfirmModal: React.FC<ConfirmModalProps> = ({ open, onClose, onConfirm, title, description }) => {
+  if (!open) return null;
+
   return (
-    <div className="confirm-modal-backdrop">
-      <div className="confirm-modal">
-        <p>{message}</p>
-        <div className="modal-buttons">
-          <button onClick={onConfirm} className="confirm-btn">✅ Yes</button>
-          <button onClick={onCancel} className="cancel-btn">❌ Cancel</button>
+    <div className="modal-overlay">
+      <div className="modal-box">
+        <h2>{title}</h2>
+        <p>{description}</p>
+        <div className="modal-actions">
+          <button onClick={onClose}>Cancel</button>
+          <button onClick={onConfirm}>Confirm</button>
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default ConfirmModal;

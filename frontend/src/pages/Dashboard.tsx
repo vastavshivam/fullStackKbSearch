@@ -52,102 +52,131 @@ export default function Dashboard() {
   }, [darkMode]);
 
   return (
-    <div className="dashboard-layout">
-      <main className="main-dashboard">
-        <header className="dashboard-header">
-          <h1>Dashboard</h1>
-          <div className="header-actions">
-            <button onClick={() => setDarkMode(!darkMode)} title="Toggle Dark Mode">
-              {darkMode ? <BiSun /> : <BiMoon />}
-            </button>
-            <div className="tabs">
-              <button
-                className={activeTab === "Overview" ? "active" : ""}
-                onClick={() => setActiveTab("Overview")}
-              >
-                Overview
-              </button>
-              <button
-                className={activeTab === "Analytics" ? "active" : ""}
-                onClick={() => setActiveTab("Analytics")}
-              >
-                Analytics
-              </button>
+    <div className="user-dashboard-container">
+      <div className="dashboard-header-wrapper">
+        <div className="dashboard-header">
+          <h1 className="dashboard-title">AppGallop Dashboard</h1>
+          <button className="help-button" title="Get Help">
+            <i className="bi bi-question-circle-fill"></i>
+            Help
+          </button>
+        </div>
+      </div>
+
+      <div className="dashboard-content-wrapper">
+        <p className="dashboard-subtitle">Monitor your campaigns and analytics with ease.</p>
+
+        {/* Stats Cards */}
+        <div className="stats-cards-grid">
+          {kpiData.map((kpi, idx) => (
+            <div key={idx} className="stat-card-large">
+              <div className="stat-card-label">
+                {kpi.icon}
+                {kpi.label}
+              </div>
+              <div className="stat-card-value">{kpi.value}</div>
             </div>
-          </div>
-        </header>
+          ))}
+        </div>
 
-        {activeTab === "Overview" && (
-          <>
-            <section className="kpi-cards">
-              {kpiData.map((kpi) => (
-                <KPI key={kpi.label} label={kpi.label} value={kpi.value} icon={kpi.icon} />
-              ))}
-            </section>
+        {/* Tabs with icons */}
+        <div className="tabs-container">
+          <button
+            onClick={() => setActiveTab("Overview")}
+            className={`tab-button ${activeTab === "Overview" ? 'active' : ''}`}
+            title="Overview"
+          >
+            <i className="bi bi-bar-chart"></i>
+            Overview
+          </button>
+          <button
+            onClick={() => setActiveTab("Analytics")}
+            className={`tab-button ${activeTab === "Analytics" ? 'active' : ''}`}
+            title="Analytics"
+          >
+            <i className="bi bi-graph-up"></i>
+            Analytics
+          </button>
+        </div>
 
-            <section className="insight-section">
-              <InsightCards />
-            </section>
+        {/* Main Content Card */}
+        <div className="main-content-card">
+          {activeTab === "Overview" && (
+            <>
+              <section className="insight-section">
+                <InsightCards />
+              </section>
 
-            <section className="summary-section">
-              <div className="insight-header">
-                <h2 className="insight-heading">Business Performance Summary</h2>
-              </div>
-              <div className="summary-grid insight-grid">
-                {summaryData.map((item) => (
-                  <div className="insight-card" key={item.title}>
-                    <div className="insight-details">
-                      <h4>{item.title}</h4>
-                      <p>{item.value}</p>
-                      {item.change && <p className="summary-change">({item.change})</p>}
+              <section className="summary-section">
+                <div className="insight-header">
+                  <h2 className="insight-heading">Business Performance Summary</h2>
+                </div>
+                <div className="summary-grid insight-grid">
+                  {summaryData.map((item) => (
+                    <div className="insight-card" key={item.title}>
+                      <div className="insight-details">
+                        <h4>{item.title}</h4>
+                        <p>{item.value}</p>
+                        {item.change && <p className="summary-change">({item.change})</p>}
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            <section className="campaign-table">
-              <h3>Top performing campaigns</h3>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Status</th>
-                    <th>Type</th>
-                    <th>Delivers</th>
-                    <th>Revenue</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {campaignRows.map((row) => (
-                    <tr key={row.name}>
-                      <td>{row.name}</td>
-                      <td>
-                        <span className={`status ${row.status.toLowerCase()}`}>
-                          {row.status === "Sent" && <BiCheckCircle />}
-                          {row.status === "Failed" && <BiErrorCircle />}
-                          {row.status === "Draft" && <BiTimeFive />}
-                          {row.status}
-                        </span>
-                      </td>
-                      <td>{row.type}</td>
-                      <td>{row.delivers}</td>
-                      <td>{row.revenue}</td>
-                    </tr>
                   ))}
-                </tbody>
-              </table>
-            </section>
-          </>
-        )}
+                </div>
+              </section>
 
-        {activeTab === "Analytics" && (
-          <section className="analytics-section">
-            <h2>Analytics</h2>
-            <ChartPanel />
-          </section>
-        )}
-      </main>
+              <section className="campaign-table">
+                <h3>Top performing campaigns</h3>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Status</th>
+                      <th>Type</th>
+                      <th>Delivers</th>
+                      <th>Revenue</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {campaignRows.map((row) => (
+                      <tr key={row.name}>
+                        <td>{row.name}</td>
+                        <td>
+                          <span className={`status ${row.status.toLowerCase()}`}>
+                            {row.status === "Sent" && <BiCheckCircle />}
+                            {row.status === "Failed" && <BiErrorCircle />}
+                            {row.status === "Draft" && <BiTimeFive />}
+                            {row.status}
+                          </span>
+                        </td>
+                        <td>{row.type}</td>
+                        <td>{row.delivers}</td>
+                        <td>{row.revenue}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </section>
+            </>
+          )}
+
+          {activeTab === "Analytics" && (
+            <section className="analytics-section">
+              <h2>Analytics</h2>
+              <ChartPanel />
+            </section>
+          )}
+        </div>
+      </div>
+
+      {/* Subtle background shapes for glassmorphism effect */}
+      <div className="background-shapes">
+        <svg width="100%" height="100%" viewBox="0 0 1400 900" fill="none" xmlns="http://www.w3.org/2000/svg" className="svg-background">
+          <circle cx="1100" cy="150" r="200" fill="#6366f1" opacity="0.06" />
+          <circle cx="300" cy="800" r="250" fill="#1976d2" opacity="0.05" />
+          <rect x="50" y="50" width="150" height="150" rx="30" fill="#6366f1" opacity="0.03" transform="rotate(25 50 50)" />
+          <rect x="1000" y="600" width="180" height="180" rx="40" fill="#1976d2" opacity="0.04" transform="rotate(-40 1000 600)" />
+        </svg>
+      </div>
     </div>
   );
 }

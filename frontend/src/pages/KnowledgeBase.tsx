@@ -228,9 +228,11 @@ export default function KnowledgeBase() {
 
       {confirmDeleteId !== null && (
         <ConfirmModal
-          message="Are you sure you want to delete this entry?"
+          title="Delete Entry"
+          description="Are you sure you want to delete this entry?"
           onConfirm={() => handleDelete(confirmDeleteId)}
-          onCancel={() => setConfirmDeleteId(null)}
+          onClose={() => setConfirmDeleteId(null)}
+          open={true}
         />
       )}
     </div>
