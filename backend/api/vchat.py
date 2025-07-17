@@ -8,7 +8,7 @@ from transformers import TextStreamer
 import torch
 
 # --- CONFIGURATION ---
-MODEL_PATH = os.path.abspath("training/training/checkpoints/fine-tuned-output")  # Path to your fine-tuned model
+MODEL_PATH = os.path.abspath("checkpoints/fine-tuned-output")  # Path to your fine-tuned model
 VECTOR_MODEL_NAME = "all-MiniLM-L6-v2"
 INDEX_PATH = "kb.index"
 DOCS_PATH = "kb_docs.pkl"
@@ -31,6 +31,7 @@ chatbot = pipeline("text-generation", model=model, tokenizer=tokenizer)
 embedder = SentenceTransformer(VECTOR_MODEL_NAME)
 
 # --- Vector DB Initialization ---
+print(f"🔄 Loading vector DB from: {INDEX_PATH}======={TRAINING_DATA_PATH}")
 def build_vector_index_from_jsonl(jsonl_path=TRAINING_DATA_PATH):
     logger.info("📖 Building vector index from JSONL...")
     with open(jsonl_path, "r", encoding="utf-8") as f:

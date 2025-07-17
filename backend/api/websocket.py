@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, FastAPI
 from models.mistral_model import get_mistral_response
 
@@ -9,16 +8,6 @@ clients = []
 
 
 @router.websocket("/ws/chat")
-=======
-from fastapi import WebSocket, WebSocketDisconnect
-from jose.exceptions import ExpiredSignatureError
-from utils.auth_utils import decode_jwt_token
-import httpx
-
-REFRESH_URL = "http://localhost:8000/auth/refresh"
-
-@router.websocket("/ws")
->>>>>>> 2c779269de8a934232bf7a35acb3fe2d982b1938
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
 
@@ -66,12 +55,8 @@ async def websocket_endpoint(websocket: WebSocket):
             await websocket.send_text(reply)
 
     except WebSocketDisconnect:
-<<<<<<< HEAD
-        clients.remove(websocket)
-=======
         print(f"🔌 WebSocket disconnected: {user_id}")
     except Exception as e:
         print("❌ WebSocket error:", e)
         await websocket.send_text("Something went wrong.")
         await websocket.close(code=1011)
->>>>>>> 2c779269de8a934232bf7a35acb3fe2d982b1938
