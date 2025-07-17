@@ -47,3 +47,18 @@ export const saveConversation = (conversation) => {
 export const getUserConversations = (userId) => {
   return axios.get(`${API_BASE}/api/conversations/${userId}`);
 };
+
+// WebSocket Chat API
+export const connectWebSocketChat = () => {
+  return new WebSocket(`${API_BASE}/ws/chat`);
+};
+
+// WhatsApp Configuration API
+export const configureWhatsApp = (config) => {
+  return axios.post(`${API_BASE}/whatsapp/configure-whatsapp`, config);
+};
+
+// WhatsApp Message Sending API
+export const sendWhatsAppMessage = (message) => {
+  return axios.post(`${API_BASE}/whatsapp/send-message`, message);
+};

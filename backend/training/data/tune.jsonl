@@ -1,0 +1,16 @@
+{"prompt": "<s>Customer: How to reset password?\nAgent:", "response": "Go to settings and click 'Reset Password'.</s>", "sentiment": "positive"}
+{"prompt": "<s>Customer: App is crashing\nAgent:", "response": "Please reinstall the app and clear cache.</s>", "sentiment": "neutral"}
+{"prompt": "<s>Customer: How to change language?\nAgent:", "response": "Go to settings and select 'Language'.</s>", "sentiment": "positive"}
+{"prompt": "<s>Customer: App is slow\nAgent:", "response": "Try clearing cache or reinstalling the app.</s>", "sentiment": "negative"}
+{"prompt": "<s>Customer: How to delete account?\nAgent:", "response": "Go to settings and click 'Delete Account'.</s>", "sentiment": "neutral"}
+{"prompt": "<s>Customer: App not responding\nAgent:", "response": "Please restart the app or your device.</s>", "sentiment": "negative"}
+{"prompt": "<s>Customer: How to update profile?\nAgent:", "response": "Go to profile settings and edit your information.</s>", "sentiment": "positive"}
+{"prompt": "<s>Customer: App features are great\nAgent:", "response": "Thank you! We're glad you like them.</s>", "sentiment": "positive"}
+{"prompt": "<s>Customer: How to report a bug?\nAgent:", "response": "Please use the 'Report Bug' feature in settings.</s>", "sentiment": "neutral"}
+{"prompt": "<s>Customer: App is not loading\nAgent:", "response": "Check your internet connection or try again later.</s>", "sentiment": "negative"}
+{"prompt": "<s>Customer: How to contact support?\nAgent:", "response": "You can contact support via email or through the app.</s>", "sentiment": "positive"}
+{"prompt": "<s>Customer: App is too complicated\nAgent:", "response": "We are working on making it more user-friendly.</s>", "sentiment": "negative"}
+{"prompt": "<s>Customer: How to enable notifications?\nAgent:", "response": "Go to settings and turn on notifications.</s>", "sentiment": "positive"}
+{"prompt": "<s>Customer: App is not secure\nAgent:", "response": "We take security seriously and are constantly improving it.</s>", "sentiment": "negative"}
+{"prompt": "<s>Customer: How to change theme?\nAgent:", "response": "You can change the theme in the app settings.</s>", "sentiment": "positive"}
+{"prompt": "<s>Customer: App is crashing on startup\nAgent:", "response": "Please try reinstalling the app or updating it.</s>", "sentiment": "negative"}   
