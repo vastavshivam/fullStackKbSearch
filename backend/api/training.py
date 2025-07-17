@@ -13,6 +13,11 @@ async def start_training(background_tasks: BackgroundTasks):
 async def training_status():
     return {"status": "Training log check not implemented"}
 
+# @router.post("/notify/")
+# async def test_notification():
+#     notify_training_complete()
+#     return {"status": "Notification sent"}
+
 @router.post("/notify/")
 async def test_notification():
     notify_training_complete(
@@ -20,4 +25,4 @@ async def test_notification():
         model_name="support-model-v1",
         details="Test notification after training"
     )
-    return {"status": "Notification sent"}
+    return {"status": "Notification sent"} 

@@ -40,13 +40,11 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 #             await session.close()
 
 async def get_db():
-    db = None
+    db = SessionLocal()
     try:
-        db = SessionLocal()
         yield db
     finally:
-        if db is not None:
-            await db.close()
+        db.close()
 
 async def init_db():
     """

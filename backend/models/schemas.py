@@ -1,57 +1,9 @@
-# -------------------------- WIDGET CONFIG SCHEMA -------------------------- #
-
-# -------------------------- CONVERSATION SCHEMAS -------------------------- #
-from typing import List, Optional
-from pydantic import BaseModel
-from datetime import datetime
-
-# --------------------------- CHAT MESSAGE SCHEMAS ----------------------- #
-
-class ChatMessage(BaseModel):
-    user_id: Optional[int]
-    message: str
-    sender: str  # 'user' or 'bot'
-    timestamp: Optional[datetime] = None
-    session_id: str
-
-    class Config:
-        # orm_mode = True
-        from_attributes = True
-
-
-class ConversationCreate(BaseModel):
-    user_id: int
-    conversation_history: List[ChatMessage]  # List of ChatMessage objects
-    summary: Optional[str] = None
-    title: Optional[str] = None
-
-class ConversationResponse(BaseModel):
-    id: str
-    user_id: int
-    conversation_history: List[ChatMessage]
-    summary: Optional[str] = None
-    title: Optional[str] = None
-    created_at: Optional[datetime] = None
-
-    class Config:
-        from_attributes = True
-from typing import Dict, Any
-
-class WidgetConfig(BaseModel):
-    widgetColor: str
-    widgetFont: str
-    widgetPosition: str
-    widgetName: str
-    profileMascot: str = ""
-    # Add more fields as needed
-
-    class Config:
-        from_attributes = True
 # This file contains Pydantic schemas for the application.
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, List
 from datetime import datetime
+from enum import Enum  
 
 
 # ----------------------------- USER SCHEMAS ----------------------------- #
@@ -59,6 +11,17 @@ from datetime import datetime
 class UserBase(BaseModel):
     name: str
     email: EmailStr
+    password: str
+    role: str  # <-- add this
+
+class RoleEnum(str, Enum):
+    user = "user"
+    admin = "admin"
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+    role: RoleEnum
 
 
 # class UserCreate(UserBase):
@@ -103,6 +66,20 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     email: Optional[str] = None
+
+
+# --------------------------- CHAT MESSAGE SCHEMAS ----------------------- #
+
+class ChatMessage(BaseModel):
+    user_id: Optional[int]
+    message: str
+    sender: str  # 'user' or 'bot'
+    timestamp: datetime | None = None
+    session_id: str
+
+    class Config:
+        # orm_mode = True
+        from_attributes = True
 
 
 # ---------------------------- TICKET SCHEMAS ---------------------------- #
@@ -158,6 +135,7 @@ class UserCreate(BaseModel):
     name: str
     email: EmailStr
     password: str
+    role: RoleEnum = Field(default=RoleEnum.user)
 
 class UserOut(BaseModel):
     id: int
@@ -176,25 +154,4 @@ class AskRequest(BaseModel):
 
 class AskResponse(BaseModel):
     answer: str
-
-
-# ----------------------------- KB ENTRY SCHEMAS ----------------------------- #
-
-class KBEntryBase(BaseModel):
-    question: str
-    answer: str
-
-class KBEntryCreate(KBEntryBase):
-    pass
-
-class KBEntryResponse(KBEntryBase):
-    id: int
-    created_at: Optional[datetime] = None
-
-    class Config:
-        from_attributes = True
-
-class KBEntriesListResponse(BaseModel):
-    entries: List[KBEntryResponse]
-    total: int
 
