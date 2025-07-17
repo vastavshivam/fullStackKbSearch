@@ -124,3 +124,6 @@ backend/scripts/local_models/
 
 # --- Coverage ---
 /coverage
+backend/checkpoints
+backend/kb.index
+backend/kb_docs.pkl

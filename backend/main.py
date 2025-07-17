@@ -8,7 +8,7 @@ from api.qa import router as qa_router
 from database import database  # Assuming you have a database module for initialization
 
 from db import *
-from api import chat, auth, files, training, websocket,vchat
+from api import auth, files, training, websocket, vchat
 from utils.email_notify import setup_email_notifications
 from routes import whatsapp_routes as whatsapp
 Base = declarative_base()

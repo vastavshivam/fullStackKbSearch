@@ -8,7 +8,7 @@ from transformers import TextStreamer
 import torch
 
 # --- CONFIGURATION ---
-MODEL_PATH = os.path.abspath("training/training/checkpoints/fine-tuned-output")  # Path to your fine-tuned model
+MODEL_PATH = os.path.abspath("checkpoints/fine-tuned-output")  # Path to your fine-tuned model
 VECTOR_MODEL_NAME = "all-MiniLM-L6-v2"
 INDEX_PATH = "kb.index"
 DOCS_PATH = "kb_docs.pkl"

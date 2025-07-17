@@ -4,6 +4,7 @@ import asyncio
 import logging
 import redis
 import uuid
+import gc
 import jwt
 import pandas as pd
 import torch
@@ -27,13 +28,13 @@ from langchain.memory import RedisChatMessageHistory
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
-MODEL_DIR = os.path.abspath("../vector_stores/falcon-rw-1b")  # Local model directory
-DATA_FILE = os.path.abspath("training/data/fine_tune.jsonl")               # Your JSONL file
-# OUTPUT_DIR = os.path.abspath("../fine_tuned/falcon-rw-1b") 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_DIR = os.path.abspath("../vector_stores/falcon-rw-1b")  # Local model directory
+DATA_FILE = os.path.abspath("/data/fine_tune.jsonl")               # Your JSONL file
+# OUTPUT_DIR = os.path.abspath("../fine_tuned/falcon-rw-1b")
 MODEL_NAME = os.getenv("MODEL_NAME", "tiiuae/falcon-rw-1b")
-DATA_PATH = os.path.abspath("data/train.jsonl")
-OUTPUT_DIR = "training/checkpoints/fine-tuned-output"
+DATA_PATH = os.path.abspath("data/tune.jsonl")
+OUTPUT_DIR = os.path.abspath(os.path.join(BASE_DIR ,"../checkpoints/fine-tuned-output"))
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379") #not tested 
 JWT_SECRET = os.getenv("JWT_SECRET", "your-secret-key")
 
@@ -142,8 +143,13 @@ def convert_to_jsonl(file_path, output_path):
 #     log.info("Trainer initialized. Starting training...")
 #     trainer.train()
 #     log.info("Training complete")
-DATA_PATH = "training/data/train.jsonl"
-def fine_tune(model_dir=MODEL_DIR, jsonl_path="data/train.jsonl"):
+# DATA_PATH = "training/data/train.jsonl"
+from sklearn.model_selection import train_test_split
+
+#############################################################
+
+def fine_tune(model_dir=MODEL_DIR, jsonl_path=DATA_PATH):
+    log.info("✅ Training complete!")
     log.info(f"📂 Loading training data from: {MODEL_DIR}")
     
     # Load JSONL
@@ -156,8 +162,9 @@ def fine_tune(model_dir=MODEL_DIR, jsonl_path="data/train.jsonl"):
 
     # Load tokenizer and model from local directory
     tokenizer = AutoTokenizer.from_pretrained(model_dir)
-    model = AutoModelForCausalLM.from_pretrained(model_dir)
-
+    model = AutoModelForCausalLM.from_pretrained(model_dir, device_map="cpu")
+    # device = torch.device("cpu")
+    # model.to(device)
     # Update pad token if missing
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
@@ -182,13 +189,16 @@ def fine_tune(model_dir=MODEL_DIR, jsonl_path="data/train.jsonl"):
     # Training configuration
     args = TrainingArguments(
         output_dir=OUTPUT_DIR,
-        per_device_train_batch_size=2,
+        per_device_train_batch_size=1,
         num_train_epochs=2,
-        logging_dir=os.path.join(BASE_DIR, "logs"),
+        gradient_accumulation_steps=4,
+        logging_strategy="steps",
         logging_steps=10,
+        logging_dir=os.path.join(BASE_DIR, "logs"),
         save_strategy="epoch",
         save_total_limit=1,
-        fp16=torch.cuda.is_available(),  # Mixed precision if GPU
+        fp16=False,  # MUST be False for CPU
+        no_cuda=True
     )
 
     # Trainer
@@ -211,6 +221,116 @@ def fine_tune(model_dir=MODEL_DIR, jsonl_path="data/train.jsonl"):
     log.info("✅ Training complete!")
 
 
+
+##############################################################
+# def fine_tune(model_dir=MODEL_DIR, jsonl_path=DATA_PATH):
+#     log.info(f"📂 Loading training data from: {model_dir} ===> {jsonl_path}")
+
+#     gc.collect()
+#     torch.cuda.empty_cache()
+#     torch.cuda.reset_peak_memory_stats()
+#     log.info(f"🔍 GPU memory used: {torch.cuda.memory_allocated() / 1024 ** 2:.2f} MB")
+
+#     # Load and validate JSONL
+#     with open(jsonl_path, "r", encoding="utf-8") as f:
+#         raw_lines = [json.loads(line) for line in f if line.strip()]
+#     data = [item for item in raw_lines if "prompt" in item and "response" in item]
+#     log.info(f"✅ Parsed {len(raw_lines)} lines, {len(data)} valid prompt-response pairs")
+
+#     if not data:
+#         raise ValueError("🚨 No valid training data found. Please check your JSONL file!")
+
+#     # Convert to dataset
+#     dataset = Dataset.from_list(data)
+
+#     # Load model/tokenizer
+#     tokenizer = AutoTokenizer.from_pretrained(model_dir)
+#     model = AutoModelForCausalLM.from_pretrained(model_dir)
+
+#     if tokenizer.pad_token is None:
+#         tokenizer.pad_token = tokenizer.eos_token
+#     model.config.pad_token_id = tokenizer.pad_token_id
+
+#     if torch.cuda.is_available():
+#         model.to("cuda")
+#         model.gradient_checkpointing_enable()
+#         try:
+#             model = torch.compile(model)
+#         except Exception as e:
+#             log.warning(f"torch.compile not supported: {e}")
+
+#         props = torch.cuda.get_device_properties("cuda")
+#         log.info("🖥️ CUDA Device Info (After model load):")
+#         log.info(f"Device Name        : {props.name}")
+#         log.info(f"Total GPU Memory   : {props.total_memory / 1024**2:.2f} MB")
+
+#     log.info("✅ Tokenizer and model loaded")
+
+#     model.to("cpu")
+
+#     # Tokenization
+#     def tokenize(example):
+#         full_prompt = f"<s>{example['prompt']}\n{example['response']}</s>"
+#         tokens = tokenizer(full_prompt, truncation=True, padding="max_length", max_length=128)
+#         tokens["labels"] = tokens["input_ids"].copy()
+#         return tokens
+
+#     tokenized_dataset = dataset.map(
+#         tokenize,
+#         load_from_cache_file=False,
+#         remove_columns=dataset.column_names
+#     )
+#     tokenized_dataset.set_format(type="torch")
+
+#     log.info(f"🧪 Tokenized dataset size: {len(tokenized_dataset)}")
+
+#     # ⚠️ Add this check!
+#     if len(tokenized_dataset) == 0:
+#         raise ValueError("🚨 Tokenized dataset is empty after mapping. Check tokenizer or input formatting.")
+
+#     # Split into train/eval
+#     split = tokenized_dataset.train_test_split(test_size=0.1, seed=42)
+#     train_dataset = split["train"]
+#     eval_dataset = split["test"]
+
+#     log.info(f"Train dataset size: {len(train_dataset)}")
+#     log.info(f"Eval dataset size: {len(eval_dataset)}")
+
+#     log.info(f"📊 Train size: {len(train_dataset)}, Eval size: {len(eval_dataset)}")
+
+#     data_collator = DataCollatorForLanguageModeling(
+#         tokenizer=tokenizer,
+#         mlm=False
+#     )
+
+#     args = TrainingArguments(
+#         output_dir=OUTPUT_DIR,
+#         per_device_train_batch_size=1,
+#         gradient_accumulation_steps=4,
+#         num_train_epochs=2,
+#         logging_dir=os.path.join(BASE_DIR, "logs"),
+#         logging_steps=10,
+#         save_strategy="no",
+#         evaluation_strategy="no",  # ✅ Disable eval if causing trouble
+#         save_total_limit=1,
+#         fp16=torch.cuda.is_available(),
+#     )
+
+#     trainer = Trainer(
+#         model=model,
+#         args=args,
+#         train_dataset=train_dataset,
+#         tokenizer=tokenizer,
+#         data_collator=data_collator,
+#         # eval_dataset=eval_dataset,  # 👉 only add this back after it's working
+#     )
+
+#     log.info("🚀 Starting training...")
+#     trainer.train()
+#     log.info("✅ Training complete")
+
+#     model.save_pretrained(OUTPUT_DIR)
+#     tokenizer.save_pretrained(OUTPUT_DIR)
 
 def fine_tune_with_ppo(model_name=MODEL_NAME, jsonl_path="training/data/fine_tune_reward.jsonl"):
     """
