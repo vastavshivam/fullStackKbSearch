@@ -1,17 +1,14 @@
 .campaigns-wrapper {
   padding: 32px;
-  background-color: var(--bg-card);
-  color: var(--text-primary);
+  background-color: #fff;
+  color: #222;
   font-family: 'Segoe UI', sans-serif;
-  box-shadow: var(--shadow);
-  border-radius: 16px;
 }
 
 .campaigns-title {
   font-size: 28px;
   font-weight: 600;
   margin-bottom: 16px;
-  color: var(--text-primary);
 }
 
 .campaigns-header {
@@ -28,23 +25,22 @@
 }
 
 .export-btn {
-  background-color: var(--accent);
+  background-color: #e4e4e4;
   border: none;
   padding: 8px 14px;
   border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
-  color: #fff;
   transition: all 0.2s ease;
 }
 
 .export-btn:hover {
-  opacity: 0.9;
+  background-color: #d4d4d4;
 }
 
 .last-updated {
   font-size: 13px;
-  color: var(--text-secondary);
+  color: #888;
   margin-top: 4px;
   margin-bottom: 24px;
 }

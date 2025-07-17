@@ -3,31 +3,29 @@
 .login-cover {
   display: flex;
   height: 100vh;
-  background-color: var(--bg-main);
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
   font-family: 'Segoe UI', sans-serif;
-  color: var(--text-primary);
+  color: white;
 }
 
 .login-left-panel {
   flex: 1;
-  background-color: var(--bg-card);
+  background: rgba(0, 0, 0, 0.3);
   padding: 60px 40px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: 20px;
-  box-shadow: var(--shadow);
 }
 
 .brand-name {
   font-size: 36px;
   font-weight: 700;
-  color: var(--text-primary);
 }
 
 .brand-tagline {
   font-size: 16px;
-  color: var(--text-secondary);
+  color: #d0d0d0;
 }
 
 .login-benefits {
@@ -41,7 +39,6 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: var(--text-secondary);
 }
 
 .login-right-panel {
@@ -49,8 +46,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: var(--bg-card);
-  box-shadow: var(--shadow);
 }
 
 .login-card {

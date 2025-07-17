@@ -14,9 +14,6 @@ body, html {
   height: 100vh;
   width: 100%;
   overflow: hidden;
-  background-color: var(--bg-main);
-  font-family: 'Segoe UI', sans-serif;
-  color: var(--text-primary);
 }
 
 .login-left-panel,
@@ -35,20 +32,18 @@ body, html {
 }
 
 .login-right-panel {
-  flex: 1;
   align-items: center;
-  background-color: var(--bg-card);
-  box-shadow: var(--shadow);
+  background: linear-gradient(135deg, #2c5364, #0f2027);
 }
 
 .login-card {
   width: 100%;
   max-width: none;
-  background-color: var(--bg-card);
-  backdrop-filter: var(--glass-blur);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
   border-radius: 20px;
   padding: 40px;
-  box-shadow: var(--shadow);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
   animation: fadeIn 0.5s ease;
 }
 
@@ -56,8 +51,6 @@ body, html {
   display: flex;
   justify-content: center;
   margin-bottom: 20px;
-  font-size: 24px;
-  color: var(--accent);
 }
 
 .brand-name {
