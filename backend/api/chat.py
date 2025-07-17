@@ -128,7 +128,10 @@ def get_history(session_id: str):
     return get_conversation_context(session_id)
 
 # Load fine-tuned Mistral model
-MODEL_PATH = os.path.abspath("training/training/checkpoints/fine-tuned-output")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.abspath(os.path.join(BASE_DIR, "../vector_stores/falcon-rw-1b")) 
+# MODEL_PATH = os.path.abspath("training/training/checkpoints/fine-tuned-output")
+print(f"model path in chat.py file =======>{MODEL_PATH}")
 tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)
 model = AutoModelForCausalLM.from_pretrained(MODEL_PATH)
 chatbot = pipeline("text-generation", model=model, tokenizer=tokenizer)

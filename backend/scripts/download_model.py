@@ -9,6 +9,7 @@ REQUIRED_MEMORY_MB = 4000
 # 🛠 Dynamically resolve path to save model parallel to training/
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))              # training/
 SAVE_PATH = os.path.abspath(os.path.join(CURRENT_DIR, "../vector_stores/falcon-rw-1b"))
+print(f"vctore pathe is ========>{SAVE_PATH} ================= current path {CURRENT_DIR}")
 
 def check_gpu_memory():
     if not torch.cuda.is_available():
