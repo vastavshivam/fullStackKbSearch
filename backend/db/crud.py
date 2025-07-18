@@ -84,10 +84,28 @@ def get_escalation_queue(db: Session):
 
 
 async def get_user_by_email(db: AsyncSession, email: str):
+    """
+    Retrieve a user from the database by their email address using an async session.
+    Args:
+        db (AsyncSession): The async database session.
+        email (str): The user's email address.
+    Returns:
+        User or None: The user object if found, else None.
+    """
     result = await db.execute(select(User).where(User.email == email))
-    return result.scalar_one_or_none()
+    user = result.scalar_one_or_none()
+    return user
 
 async def create_user(db: AsyncSession, user, hashed_password: str):
+    """
+    Create a new user in the database using an async session.
+    Args:
+        db (AsyncSession): The async database session.
+        user: The user data object with attributes name, email, and role.
+        hashed_password (str): The hashed password for the user.
+    Returns:
+        User: The newly created user object.
+    """
     db_user = User(
         name=user.name,
         email=user.email,

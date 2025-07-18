@@ -16,11 +16,18 @@ from utils.auth_utils import (
 router = APIRouter()
 
 @router.post("/login", response_model=schemas.Token)
-async def login(data: schemas.LoginRequest = Depends(),db: AsyncSession = Depends(get_db),):
+async def login(form_data: schemas.LoginRequest = Depends(), db: AsyncSession = Depends(get_db)):
     """
-    User login endpoint using LoginRequest
+    Authenticate a user and return an access token if credentials are valid.
+    Args:
+        form_data (schemas.LoginRequest): The login request data containing email and password.
+        db (AsyncSession): The async database session.
+    Returns:
+        dict: Access token and token type if authentication is successful.
+    Raises:
+        HTTPException: If authentication fails.
     """
-    user = await authenticate_user(db, form_data.username, form_data.password)
+    user = await authenticate_user(db, form_data.email, form_data.password, form_data.role)
     print(f"User authenticated:================> {user}")
     if not user:
         raise HTTPException(
@@ -36,4 +43,20 @@ async def login(data: schemas.LoginRequest = Depends(),db: AsyncSession = Depend
 
 @router.post("/register", response_model=schemas.UserOut, status_code=201)
 async def register_user(user: schemas.UserCreate, db: AsyncSession = Depends(get_db)):
-    return await register_user_helper(db, user) 
+    """
+    Register a new user in the system.
+    Args:
+        user (schemas.UserCreate): The user creation data.
+        db (AsyncSession): The async database session.
+    Returns:
+        schemas.UserOut: The created user object.
+    """
+    try:
+        return await register_user_helper(db, user)
+    except Exception as exc:
+        # Log the exception for debugging
+        print(f"Error in register_user: {exc}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred during registration."
+        )
