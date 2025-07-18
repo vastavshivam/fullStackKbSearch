@@ -1,29 +1,65 @@
 import React, { useState } from 'react';
 import './Register.css';
 import { FaEnvelope, FaLock, FaUser } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
 // You can use Boxicons or Bootstrap Icons by adding their CDN in public/index.html
 // Example for Boxicons: <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
 // Example for Bootstrap Icons: <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
 
 export default function Register() {
+  const navigate = useNavigate();
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState('');
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if (!email || !password || !confirm) {
+
+    if (!name || !email || !password || !confirm) {
       setError('Please fill all fields.');
       return;
     }
+
     if (password !== confirm) {
       setError('Passwords do not match.');
       return;
     }
-    window.location.href = '/login';
+
+    try {
+      const res = await fetch('http://localhost:8000/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert('✅ Registered! Now login.');
+        navigate('/login');
+      } else {
+        // Handle different error response formats
+        let errorMessage = 'Registration failed.';
+        if (data.detail) {
+          if (typeof data.detail === 'string') {
+            errorMessage = data.detail;
+          } else if (Array.isArray(data.detail) && data.detail.length > 0) {
+            errorMessage = data.detail[0].msg || data.detail[0];
+          } else if (typeof data.detail === 'object') {
+            errorMessage = data.detail.msg || JSON.stringify(data.detail);
+          }
+        } else if (data.message) {
+          errorMessage = data.message;
+        }
+        setError(errorMessage);
+      }
+    } catch (err) {
+      setError('Network error. Please try again.');
+    }
   };
 
   const Logo = () => (
@@ -60,13 +96,21 @@ export default function Register() {
         <div className="login-card">
           <Logo />
           <WelcomeMessage />
-          {error && <div className="login-error">{error}</div>}
+          {error && <div className="login-error">{typeof error === 'string' ? error : 'An error occurred'}</div>}
           <form onSubmit={handleRegister} className="login-form">
             <div className="login-form-group">
-              <label>Email</label>
+              <label>Name</label>
               <div className="input-icon-wrapper">
                 {/* Boxicons user icon */}
                 <i className="bx bx-user icon" style={{ fontSize: 18 }}></i>
+                <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Enter your name..." />
+              </div>
+            </div>
+            <div className="login-form-group">
+              <label>Email</label>
+              <div className="input-icon-wrapper">
+                {/* Boxicons envelope icon */}
+                <i className="bx bx-envelope icon" style={{ fontSize: 18 }}></i>
                 <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Enter email..." />
               </div>
             </div>

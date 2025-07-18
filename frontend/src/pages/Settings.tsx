@@ -643,10 +643,11 @@ export default function Settings() {
           </label>
         </div>
 
-        {/* API Provider */}
-        <div className="setting-item">
+        {/* API Provider - Full Width */}
+        <div className="setting-item api-provider-item">
           <div className="setting-info">
             <span>API Provider</span>
+            <p>Select your preferred AI service provider</p>
           </div>
           <select
             value={aiConfigurations.apiProvider}
@@ -657,8 +658,23 @@ export default function Settings() {
             <option value="mistral">Mistral AI</option>
           </select>
         </div>
+      </div>
 
-        <h3 style={{ marginTop: '1.5rem', marginBottom: '1rem', fontSize: '1.25rem', borderBottom: '1px solid #eee', paddingBottom: '0.5rem' }}>Widget Customization</h3>
+      {/* Widget Customization Section */}
+      <div className="widget-section">
+        <h3 style={{ 
+          fontSize: '1.25rem', 
+          marginBottom: '1.5rem', 
+          color: '#333', 
+          borderBottom: '2px solid #007bff', 
+          paddingBottom: '0.5rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem'
+        }}>
+          <BiAtom style={{ color: '#007bff' }} />
+          Widget Customization
+        </h3>
 
         <div className="widget-customization-grid">
           <div className="setting-item">

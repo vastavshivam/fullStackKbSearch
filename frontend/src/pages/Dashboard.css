@@ -212,6 +212,7 @@ body, html {
 }
 
 .dashboard-header {
+<<<<<<< HEAD
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -227,6 +228,37 @@ body, html {
     letter-spacing: 1px;
     text-shadow: 0 4px 10px rgba(99, 102, 241, 0.15);
     margin: 0; /* Reset margin */
+=======
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 30px;
+  gap: 2rem;
+}
+
+.header-left {
+  flex: 1;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
+.dashboard-header h1 {
+  font-size: 28px;
+  color: var(--text-primary);
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.dashboard-subtitle {
+  font-size: 16px;
+  color: var(--text-secondary);
+  margin: 0;
+>>>>>>> eb4d94d (fron end changes)
 }
 
 .header-actions {
@@ -235,6 +267,7 @@ body, html {
     gap: 15px; /* Spacing between actions */
 }
 
+<<<<<<< HEAD
 .tabs button {
     background: none;
     border: var(--border-light);
@@ -258,6 +291,83 @@ body, html {
     font-weight: 700;
     box-shadow: var(--shadow-accent);
     border-color: transparent;
+=======
+.tabs-container {
+  display: flex;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 12px;
+  padding: 4px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.tab-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: none;
+  font-size: 13px;
+  padding: 8px 14px;
+  cursor: pointer;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.tab-button:hover {
+  background-color: rgba(29, 161, 242, 0.1);
+  color: var(--accent);
+}
+
+.tab-button.active {
+  background-color: var(--accent);
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(29, 161, 242, 0.3);
+}
+
+.tab-button i {
+  font-size: 14px;
+}
+
+.help-button,
+.logout-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(29, 161, 242, 0.3);
+}
+
+.help-button:hover,
+.logout-button:hover {
+  background-color: #1976d2;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(29, 161, 242, 0.4);
+}
+
+.logout-button {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.logout-button:hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+>>>>>>> eb4d94d (fron end changes)
 }
 
 /* --- KPI Cards --- */
@@ -310,6 +420,7 @@ body, html {
 
 /* --- Summary Section --- */
 .summary-section {
+<<<<<<< HEAD
     padding: 30px; /* More padding */
     border-radius: 20px; /* Consistent rounding */
     background: var(--bg-card);
@@ -331,9 +442,60 @@ body, html {
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* Responsive grid */
     gap: 20px; /* Increased gap */
     margin-top: 12px;
+=======
+  margin-bottom: 40px;
+  padding: 32px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, var(--bg-card) 0%, rgba(255, 255, 255, 0.95) 100%);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.summary-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+
+.summary-section h2 {
+  font-size: 22px;
+  color: var(--text-primary);
+  margin-bottom: 28px;
+  font-weight: 600;
+  text-align: center;
+  position: relative;
+}
+
+.summary-section h2::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), #4db5ff);
+  border-radius: 2px;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin-top: 16px;
+  align-items: stretch;
+>>>>>>> eb4d94d (fron end changes)
 }
 
 .summary-item {
+<<<<<<< HEAD
     background-color: rgba(255, 255, 255, 0.7); /* Lighter background for nested cards */
     padding: 20px; /* More padding */
     border-radius: 15px; /* Consistent rounding */
@@ -366,6 +528,72 @@ body, html {
     font-size: 12px;
     font-weight: 500;
     color: #6c757d; /* Neutral grey for changes */
+=======
+  background: linear-gradient(135deg, var(--bg-card) 0%, rgba(255, 255, 255, 0.9) 100%);
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.summary-item:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+  border-color: var(--accent);
+}
+
+.summary-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--accent), #4db5ff);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.summary-item:hover::before {
+  opacity: 1;
+}
+
+.summary-title {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.summary-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, var(--text-primary), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.summary-change {
+  color: #28a745;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+>>>>>>> eb4d94d (fron end changes)
 }
 
 /* --- Campaign Table --- */
@@ -456,6 +684,7 @@ body, html {
 
 /* --- Analytics Section (General card style) --- */
 .analytics-section {
+<<<<<<< HEAD
     background-color: var(--bg-card);
     border-radius: 20px; /* Consistent rounding */
     padding: 30px; /* Consistent padding */
@@ -469,6 +698,17 @@ body, html {
     color: var(--text-primary);
     margin-bottom: 20px;
     font-weight: 700;
+=======
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.analytics-section h2 {
+  display: none; /* Hide since we have header in ChartPanel */
+>>>>>>> eb4d94d (fron end changes)
 }
 
 .glass {
@@ -603,12 +843,156 @@ body, html {
 }
 
 .insights-table th {
+<<<<<<< HEAD
     background-color: #e0e7ff; /* Consistent with campaign table header */
     color: var(--text-primary);
     font-weight: 600;
 }
 
 /* --- Sidebar Dropdown Styles --- */
+=======
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* Content Header with tabs */
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 0 1rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.content-header .dashboard-subtitle {
+  font-size: 18px;
+  color: var(--text-secondary);
+  margin: 0;
+  font-weight: 500;
+}
+
+.content-header .tabs-container {
+  display: flex;
+  gap: 0.25rem;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  padding: 3px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.content-header .tab-button {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: transparent;
+  border: none;
+  font-size: 12px;
+  padding: 6px 12px;
+  cursor: pointer;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+  font-weight: 500;
+  white-space: nowrap;
+  min-width: auto;
+}
+
+.content-header .tab-button:hover {
+  background-color: rgba(29, 161, 242, 0.08);
+  color: var(--accent);
+}
+
+.content-header .tab-button.active {
+  background-color: var(--accent);
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(29, 161, 242, 0.3);
+}
+
+.content-header .tab-button i {
+  font-size: 12px;
+}
+
+/* Responsive adjustments for header */
+@media (max-width: 768px) {
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .header-right {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  
+  .tabs-container {
+    order: -1;
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .tab-button {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-header h1 {
+    font-size: 24px;
+  }
+  
+  .dashboard-subtitle {
+    font-size: 14px;
+  }
+  
+  .tabs-container {
+    padding: 3px;
+  }
+  
+  .tab-button {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+}
+
+/* Responsive adjustments for content header */
+@media (max-width: 768px) {
+  .content-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .content-header .tabs-container {
+    align-self: flex-end;
+  }
+}
+
+@media (max-width: 480px) {
+  .content-header {
+    align-items: stretch;
+  }
+  
+  .content-header .tabs-container {
+    align-self: stretch;
+    justify-content: center;
+  }
+  
+  .content-header .tab-button {
+    flex: 1;
+    justify-content: center;
+    font-size: 11px;
+    padding: 5px 8px;
+  }
+}
+
+/* Sidebar Dropdown Styles */
+>>>>>>> eb4d94d (fron end changes)
 .integrations-menu {
     display: flex;
     flex-direction: column;

@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   BiBarChartAlt2, BiUser, BiRocket, BiGroup, BiEnvelope,
   BiCog, BiCube, BiLayer, BiChevronRight, BiCheckCircle,
-  BiErrorCircle, BiTimeFive, BiMenu, BiX, BiMoon, BiSun
+  BiErrorCircle, BiTimeFive, BiMenu, BiX, BiMoon, BiSun, BiLogOut
 } from "react-icons/bi";
 
 import ChartPanel from "./ChartPanel";
@@ -51,20 +51,58 @@ export default function Dashboard() {
     localStorage.setItem("darkMode", String(darkMode));
   }, [darkMode]);
 
+  const handleLogout = () => {
+    // Clear any authentication tokens or user data
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("userRole");
+    localStorage.removeItem("userData");
+    
+    // Navigate to login page
+    navigate("/");
+  };
+
   return (
     <div className="user-dashboard-container">
       <div className="dashboard-header-wrapper">
         <div className="dashboard-header">
-          <h1 className="dashboard-title">AppGallop Dashboard</h1>
-          <button className="help-button" title="Get Help">
-            <i className="bi bi-question-circle-fill"></i>
-            Help
-          </button>
+          <div className="header-left">
+            <h1 className="dashboard-title">AppGallop Dashboard</h1>            
+          </div>
+          <div className="header-right">
+            {/* Tabs with icons - moved to header */}
+            
+            <button className="logout-button" title="Logout" onClick={handleLogout}>
+              <BiLogOut />
+              Logout
+            </button>
+          </div>
         </div>
       </div>
 
       <div className="dashboard-content-wrapper">
-        <p className="dashboard-subtitle">Monitor your campaigns and analytics with ease.</p>
+
+        <div className="content-header" style={{ marginBottom: "32px" }}>
+          <h2 className="dashboard-subtitle">Monitor your campaigns and analytics with ease.</h2>
+          
+          <div className="tabs-container">
+            <button
+              onClick={() => setActiveTab("Overview")}
+              className={`tab-button ${activeTab === "Overview" ? 'active' : ''}`}
+              title="Overview"
+            >
+              <i className="bi bi-bar-chart"></i>
+              Overview
+            </button>
+            <button
+              onClick={() => setActiveTab("Analytics")}
+              className={`tab-button ${activeTab === "Analytics" ? 'active' : ''}`}
+              title="Analytics"
+            >
+              <i className="bi bi-graph-up"></i>
+              Analytics
+            </button>
+          </div>
+        </div>
 
         {/* Stats Cards */}
         <div className="stats-cards-grid">
@@ -77,26 +115,6 @@ export default function Dashboard() {
               <div className="stat-card-value">{kpi.value}</div>
             </div>
           ))}
-        </div>
-
-        {/* Tabs with icons */}
-        <div className="tabs-container">
-          <button
-            onClick={() => setActiveTab("Overview")}
-            className={`tab-button ${activeTab === "Overview" ? 'active' : ''}`}
-            title="Overview"
-          >
-            <i className="bi bi-bar-chart"></i>
-            Overview
-          </button>
-          <button
-            onClick={() => setActiveTab("Analytics")}
-            className={`tab-button ${activeTab === "Analytics" ? 'active' : ''}`}
-            title="Analytics"
-          >
-            <i className="bi bi-graph-up"></i>
-            Analytics
-          </button>
         </div>
 
         {/* Main Content Card */}
