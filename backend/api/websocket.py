@@ -55,12 +55,4 @@ async def websocket_endpoint(websocket: WebSocket):
             await websocket.send_text(reply)
 
     except WebSocketDisconnect:
-<<<<<<< HEAD
         clients.remove(websocket)
-=======
-        print(f"🔌 WebSocket disconnected: {user_id}")
-    except Exception as e:
-        print("❌ WebSocket error:", e)
-        await websocket.send_text("Something went wrong.")
-        await websocket.close(code=1011)
->>>>>>> e21e413c0b9e4a4c3bbcd54b197aeb034025f721
