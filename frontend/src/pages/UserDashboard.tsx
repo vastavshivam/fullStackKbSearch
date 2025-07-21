@@ -1,5 +1,6 @@
 // UserDashboard.tsx
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useWidgetConfig, WidgetFont, WidgetPosition } from '../components/WidgetConfigContext';
 import { uploadFile } from '../services/api';
 import './UserDashboard.css'; // Import the CSS file
@@ -20,6 +21,7 @@ const tabs = [
 ];
 
 const UserDashboard: React.FC = () => {
+  const navigate = useNavigate();
   const [file, setFile] = useState<File | null>(null);
   const { config, setConfig } = useWidgetConfig();
   const [activeTab, setActiveTab] = useState(0);
@@ -94,6 +96,16 @@ const UserDashboard: React.FC = () => {
       profileMascot: mascotPreview || cfg.profileMascot,
     }));
     alert('Widget configuration saved!');
+  };
+
+  const handleLogout = () => {
+    // Clear any authentication tokens or user data
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("userRole");
+    localStorage.removeItem("userData");
+    
+    // Navigate to login page
+    navigate("/");
   };
 
   const renderWidgetSettings = () => (
@@ -350,9 +362,9 @@ const UserDashboard: React.FC = () => {
       <div className="dashboard-header-wrapper">
         <div className="dashboard-header">
           <h1 className="dashboard-title">AppGallop Dashboard</h1>
-          <button className="help-button" title="Get Help">
-            <i className="bi bi-question-circle-fill"></i>
-            Help
+          <button className="logout-button" title="Logout" onClick={handleLogout}>
+            <i className="bi bi-box-arrow-right"></i>
+            Logout
           </button>
         </div>
       </div>

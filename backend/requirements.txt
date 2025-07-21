@@ -39,11 +39,11 @@ celery==5.3.6
 redis==5.0.1
 
 # === Email/Slack Notify ===
-slack_sdk==3.27.0
+flask
+slack_sdk>=3.27.0
 email-validator==2.1.1
 
 # === Utilities ===
 python-dotenv==1.0.1
 aiofiles==23.2.1
 python-jose
-numpy==1.26.4

@@ -62,7 +62,8 @@ body {
     margin: 0;
 }
 
-.help-button {
+.help-button,
+.logout-button {
     background: linear-gradient(90deg, #6366f1 0%, #1976d2 100%);
     color: #fff;
     border: none;
@@ -78,17 +79,28 @@ body {
     gap: 10px;
 }
 
-.help-button:hover {
+.help-button:hover,
+.logout-button:hover {
     box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
 }
 
-.help-button i {
+.logout-button {
+    background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+}
+
+.logout-button:hover {
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.6);
+}
+
+.help-button i,
+.logout-button i {
     font-size: 24px;
 }
 
 /* --- Page Content Wrapper --- */
 .dashboard-content-wrapper {
-    max-width: 1280px; /* Content will be centered with a max-width */
+    max-width: none; /* Content will be centered with a max-width */
     margin: 0 auto;
     padding: 40px;
     border-radius: 32px;
@@ -873,7 +885,8 @@ body {
         text-align: center;
         width: 100%;
     }
-    .help-button {
+    .help-button,
+    .logout-button {
         font-size: 16px !important;
         padding: 10px 20px !important;
         width: 100%;

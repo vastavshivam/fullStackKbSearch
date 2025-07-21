@@ -16,23 +16,22 @@ from utils.auth_utils import (
 router = APIRouter()
 
 @router.post("/login", response_model=schemas.Token)
-async def login(form_data: OAuth2PasswordRequestForm = Depends(),db: AsyncSession = Depends(get_db),):
+async def login(data: schemas.LoginRequest = Depends(),db: AsyncSession = Depends(get_db),):
     """
-    User login endpoint using OAuth2PasswordRequestForm
+    User login endpoint using LoginRequest
     """
     user = await authenticate_user(db, form_data.username, form_data.password)
     print(f"User authenticated:================> {user}")
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid credentials",
+            detail="Invalid credentials or role mismatch",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    # Assume user.scopes is a list of scopes, e.g. ["admin", "user"]
-    scopes = getattr(user, "scopes", ["user"])  # fallback to 'user' if not present
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(data={"sub": user.email, "scopes": scopes}, expires_delta=access_token_expires)
-    return {"access_token": access_token, "token_type": "bearer", "scopes": scopes}
+    access_token = create_access_token(data={"sub": user.email}, expires_delta=access_token_expires)
+    return {"access_token": access_token, "token_type": "bearer"}
+    return("success!!")
 
 
 @router.post("/register", response_model=schemas.UserOut, status_code=201)

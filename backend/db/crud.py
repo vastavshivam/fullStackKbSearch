@@ -1,43 +1,39 @@
 from sqlalchemy.orm import Session
-from models.db_models import ChatLog, Ticket, UserFeedback, HumanEscalation, Conversation
-from models.schemas import ChatMessage, TicketCreate, FeedbackCreate, EscalationCreate, ConversationCreate
+from models.db_models import ChatLog, Ticket, UserFeedback, HumanEscalation
+from models.schemas import ChatMessage, TicketCreate, FeedbackCreate, EscalationCreate
 from sqlalchemy.future import select
 from database.database import async_session
 from models.db_models import User
+from mongo.models import save_chat_log_mongo, save_ticket_log_mongo, save_feedback_mongo, chat_logs_col
 from sqlalchemy.ext.asyncio import AsyncSession
 # 💬 Save Chat Message
 from datetime import datetime
-import json
 
-async  def save_chat_message(db: AsyncSession, msg: ChatMessage):
-    timestamp = msg.timestamp
-    if timestamp.tzinfo is not None:
-        timestamp = timestamp.replace(tzinfo=None)
-    # print (f" db data {db}") 
-    chat = ChatLog(session_id=msg.session_id,
-        user_input=msg.message,
-        bot_response=msg.sender,
-        timestamp=timestamp)
-    db.add(chat)
-    await db.commit()         # ✅ await required for async session
-    await db.refresh(chat)    # ✅ await required
-    return chat
+def save_chat_message(user_id, session_id, message, sender, sentiment=None, embedding=None, bot_reply=None):
+    chat_data = {
+        "user_id": user_id,
+        "session_id": session_id,
+        "message": message,
+        "sender": sender,
+        "sentiment": sentiment,
+        "embedding": embedding,
+        "bot_reply": bot_reply
+    }
+    save_chat_log_mongo(**chat_data)
 
 # 📩 Get All Chat Logs for a User
 def get_user_chats(db: Session, user_id: int):
     return db.query(ChatLog).filter(ChatLog.user_id == user_id).order_by(ChatLog.timestamp).all()
 
 # 💬 Get Conversation History (multi-turn)
-def get_conversation_context(db: Session, user_id: int, limit: int = 10):
-    return db.query(ChatLog).filter(ChatLog.user_id == user_id).order_by(ChatLog.timestamp.desc()).limit(limit).all()[::-1]
+def get_conversation_context(session_id: str, limit: int = 10):
+    return list(chat_logs_col.find(
+        {"session_id": session_id}
+    ).sort("timestamp", -1).limit(limit))[::-1]
 
 # 🎟️ Create Support Ticket
-def create_ticket(db: Session, ticket: TicketCreate):
-    new_ticket = Ticket(**ticket.dict())
-    db.add(new_ticket)
-    db.commit()
-    db.refresh(new_ticket)
-    return new_ticket
+def create_ticket(ticket_data):
+    return save_ticket_log_mongo(ticket_data)
 
 # 🎟️ Get Ticket by ID
 def get_ticket(db: Session, ticket_id: int):
@@ -61,14 +57,10 @@ def delete_ticket(db: Session, ticket_id: int):
     return ticket
 
 # 👍👎 Save Feedback
-def save_feedback(db: Session, feedback: FeedbackCreate):
-    fb = UserFeedback(**feedback.dict())
-    db.add(fb)
-    db.commit()
-    db.refresh(fb)
-    return fb
+def save_feedback(message_id: str, feedback: str):
+    return save_feedback_mongo(message_id, feedback)
 
-# 📊 Get Feedback by Chat ID
+#  Get Feedback by Chat ID
 def get_feedback_for_chat(db: Session, chat_id: int):
     return db.query(UserFeedback).filter(UserFeedback.chat_id == chat_id).all()
 
@@ -100,6 +92,7 @@ async def create_user(db: AsyncSession, user, hashed_password: str):
         name=user.name,
         email=user.email,
         hashed_password=hashed_password,
+        role=user.role,  # <-- added role
         is_active=True
     )
     db.add(db_user)
@@ -107,25 +100,6 @@ async def create_user(db: AsyncSession, user, hashed_password: str):
     await db.refresh(db_user)
     return db_user
 
-# Save a new conversation
-async def save_conversation(db: AsyncSession, conversation: ConversationCreate):
-    new_conversation = Conversation(
-        user_id=conversation.user_id,
-        conversation_history=json.dumps(conversation.conversation_history),
-        summary=conversation.summary,
-        title=conversation.title
-    )
-    db.add(new_conversation)
-    await db.commit()
-    await db.refresh(new_conversation)
-    return new_conversation
-
-# Fetch all conversations for a user
-async def get_user_conversations(db: AsyncSession, user_id: int):
-    result = await db.execute(
-        select(Conversation).where(Conversation.user_id == user_id).order_by(Conversation.created_at.desc())
-    )
-    return result.scalars().all()
-
+    
 
 

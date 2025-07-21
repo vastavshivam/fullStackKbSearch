@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import ChatHistory from '../pages/ChatHistory';
 import '../pages/Chat.css';
 import axios from 'axios';
+import { connectWebSocketChat, configureWhatsApp, sendWhatsAppMessage } from '../services/api'; // Corrected import path
 
 /** ─────────── Custom type for what the server sends back ─────────── */
 interface ChatResponse {
@@ -40,6 +41,33 @@ export default function Chat() {
   };
 
   const handleNewChat = () => setMessages([{ sender: 'bot', text: "New chat started! 👋" }]);
+
+  useEffect(() => {
+    const ws = connectWebSocketChat();
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      setMessages((prev) => [...prev, { sender: 'bot', text: data.message }]);
+    };
+    return () => ws.close();
+  }, []);
+
+  const handleWhatsAppConfig = async (config) => {
+    try {
+      await configureWhatsApp(config);
+      alert('WhatsApp configured successfully!');
+    } catch (error) {
+      console.error('Error configuring WhatsApp:', error);
+    }
+  };
+
+  const handleSendWhatsAppMessage = async (message) => {
+    try {
+      await sendWhatsAppMessage(message);
+      alert('Message sent successfully!');
+    } catch (error) {
+      console.error('Error sending WhatsApp message:', error);
+    }
+  };
 
   useEffect(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), [messages]);
 
