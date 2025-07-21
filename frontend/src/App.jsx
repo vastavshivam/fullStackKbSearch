@@ -18,7 +18,7 @@ import JourneyDetail from './pages/JourneyDetail'; // ✅ New page
 import Integrations from './pages/Integrations'; // ✅ New integrations page
 import Layout from './components/Layout';
 import TemplatePage from './pages/TemplatePage';
-import PrivateRoute from './components/PrivateRoute';
+// import PrivateRoute from './components/PrivateRoute';
 
 function App() {
   // Helper to render ChatWidget only if enabled
@@ -34,106 +34,17 @@ function App() {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route  
-              path="/dashboard"
-              element={
-                <PrivateRoute>
-                  <Layout>
-                    <Dashboard />
-                  </Layout>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/chat"
-              element={
-                <PrivateRoute>
-                  <Layout>
-                    <Chat />
-                  </Layout>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/knowledge-base"
-              element={
-                <PrivateRoute>
-                  <Layout>
-                    <KnowledgeBase />
-                  </Layout>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/user-dashboard"
-              element={
-                <PrivateRoute>
-                  <Layout>
-                    <UserDashboard />
-                  </Layout>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/campaigns"
-              element={
-                <PrivateRoute>
-                  <Layout>
-                    <Campaigns />
-                  </Layout>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/journeys"
-              element={
-                <PrivateRoute>
-                  <Layout>
-                    <Journeys />
-                  </Layout>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/journeys/:id"
-              element={
-                <PrivateRoute>
-                  <Layout>
-                    <JourneyDetail />
-                  </Layout>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/settings"
-              element={
-                <PrivateRoute>
-                  <Layout>
-                    <Settings />
-                  </Layout>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/integrations"
-              element={
-                <PrivateRoute>
-                  <Layout>
-                    <Integrations />
-                  </Layout>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/template"
-              element={
-                <PrivateRoute>
-                  <Layout>
-                    <TemplatePage />
-                  </Layout>
-                </PrivateRoute>
-              }
-            />
+            {/* Commented out PrivateRoute for now */}
+            <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
+            <Route path="/chat" element={<Layout><Chat /></Layout>} />
+            <Route path="/knowledge-base" element={<Layout><KnowledgeBase /></Layout>} />
+            <Route path="/user-dashboard" element={<Layout><UserDashboard /></Layout>} />
+            <Route path="/campaigns" element={<Layout><Campaigns /></Layout>} />
+            <Route path="/journeys" element={<Layout><Journeys /></Layout>} />
+            <Route path="/journeys/:id" element={<Layout><JourneyDetail /></Layout>} />
+            <Route path="/settings" element={<Layout><Settings /></Layout>} />
+            <Route path="/integrations" element={<Layout><Integrations /></Layout>} />
+            <Route path="/template" element={<Layout><TemplatePage /></Layout>} />
             <Route path="/" element={<Login />} />
           </Routes>
           <ChatWidgetConditional />

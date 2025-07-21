@@ -1,16 +1,5 @@
 .campaigns-wrapper {
   padding: 32px;
-<<<<<<< HEAD
-  background-color: #fff;
-  color: #222;
-  font-family: 'Segoe UI', sans-serif;
-}
-
-.campaigns-title {
-  font-size: 28px;
-  font-weight: 600;
-  margin-bottom: 16px;
-=======
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   color: #1a202c;
   font-family: 'Segoe UI', sans-serif;
@@ -27,7 +16,6 @@
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
->>>>>>> eb4d94d (fron end changes)
 }
 
 .campaigns-header {
@@ -45,30 +33,12 @@
 }
 
 .export-btn {
-<<<<<<< HEAD
-  background-color: #e4e4e4;
-=======
   background: linear-gradient(135deg, #4f46e5, #7c3aed);
->>>>>>> eb4d94d (fron end changes)
   border: none;
   padding: 10px 16px;
   border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
-<<<<<<< HEAD
-  transition: all 0.2s ease;
-}
-
-.export-btn:hover {
-  background-color: #d4d4d4;
-}
-
-.last-updated {
-  font-size: 13px;
-  color: #888;
-  margin-top: 4px;
-  margin-bottom: 24px;
-=======
   font-weight: 500;
   color: #fff;
   transition: all 0.3s ease;
@@ -88,7 +58,6 @@
   background: rgba(255, 255, 255, 0.7);
   border-radius: 8px;
   border-left: 4px solid #4f46e5;
->>>>>>> eb4d94d (fron end changes)
 }
 
 .campaigns-stats {

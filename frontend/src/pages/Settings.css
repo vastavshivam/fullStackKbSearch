@@ -184,15 +184,6 @@
     background-color: #218838;
 }
 
-<<<<<<< HEAD
-/* Toggles */
-.toggle-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 0;
-    border-bottom: 1px solid #eee;
-=======
 /* Toggles for AI Config */
 .ai-config-settings .toggle-item {
   display: flex;
@@ -224,7 +215,6 @@
 .ai-config-settings .toggle-item .toggle-switch {
   align-self: flex-start;
   margin-top: auto;
->>>>>>> eb4d94d (fron end changes)
 }
 
 .toggle-info {
@@ -293,14 +283,7 @@
 
 .setting-item,
 .security-item {
-<<<<<<< HEAD
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 0;
-    border-bottom: 1px solid #eee;
-=======
-  display: flex;
+display: flex;
   flex-direction: column;
   gap: 0.5rem;
   padding: 1.5rem;
@@ -316,56 +299,34 @@
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
   border-color: #007bff;
->>>>>>> eb4d94d (fron end changes)
 }
 
 .setting-info,
 .security-info {
-<<<<<<< HEAD
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-=======
-  display: flex;
+display: flex;
   flex-direction: column;
   gap: 0.5rem;
   margin-bottom: 1rem;
->>>>>>> eb4d94d (fron end changes)
 }
 
 .setting-info span,
 .security-info span {
-<<<<<<< HEAD
-    font-weight: 500;
-=======
-  font-weight: 600;
+font-weight: 600;
   font-size: 1rem;
   color: #1a202c;
->>>>>>> eb4d94d (fron end changes)
 }
 
 .setting-info p,
 .security-info p {
-<<<<<<< HEAD
-    font-size: 0.85rem;
-    color: #666;
-    margin: 0;
-=======
-  font-size: 0.875rem;
+font-size: 0.875rem;
   color: #64748b;
   margin: 0;
   line-height: 1.5;
->>>>>>> eb4d94d (fron end changes)
 }
 
 .setting-item select,
 .setting-item input {
-<<<<<<< HEAD
-    padding: 0.4rem;
-    border-radius: 0.4rem;
-    border: 1px solid #ccc;
-=======
-  padding: 0.75rem;
+padding: 0.75rem;
   border-radius: 8px;
   border: 1px solid #d1d5db;
   font-size: 0.875rem;
@@ -378,7 +339,6 @@
   outline: none;
   border-color: #007bff;
   box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
->>>>>>> eb4d94d (fron end changes)
 }
 
 .action-button {
@@ -405,71 +365,15 @@
 /* --- New AI Configurations Styles --- */
 
 .ai-config-settings {
-<<<<<<< HEAD
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    /* Consistent with other sections */
-=======
-  display: grid;
+display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 1.5rem;
   margin-top: 1rem;
->>>>>>> eb4d94d (fron end changes)
 }
 
 /* Individual setting item within AI config */
 .ai-config-settings .setting-item {
-<<<<<<< HEAD
-    padding: 1rem 0;
-    /* Consistent with existing .setting-item */
-    border-bottom: 1px solid #eee;
-    /* Consistent with existing .setting-item */
-}
-
-.ai-config-settings .setting-item:last-of-type {
-    border-bottom: none;
-    /* Remove border for the last item */
-}
-
-/* Specific styling for API key inputs and test buttons */
-.api-key-item {
-    /* Changed to align-items: center for vertical alignment */
-    /* Removed flex-wrap here, as we want a single row mostly */
-    align-items: center;
-    /* Ensure there's space between the info and the input group */
-    gap: 1rem;
-    /* Added gap to create separation */
-}
-
-.api-key-input-group {
-    display: flex;
-    gap: 0.5rem;
-    align-items: stretch;
-}
-
-.api-key-input-group input {
-    flex: 1;
-    padding: 0.75rem;
-    border: 1px solid #ddd;
-    border-radius: 0.5rem;
-    font-family: monospace;
-    font-size: 0.9rem;
-}
-
-.test-button {
-    background-color: #28a745;
-    color: white;
-    border: none;
-    padding: 0.75rem 1.25rem;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    font-weight: 500;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-    min-width: 80px;
-=======
-  padding: 1.5rem;
+padding: 1.5rem;
   border: 1px solid #e0e6ed;
   border-radius: 12px;
   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
@@ -544,7 +448,6 @@
   white-space: nowrap;
   min-width: 80px;
   align-self: stretch;
->>>>>>> eb4d94d (fron end changes)
 }
 
 .test-button:hover:not(:disabled) {
@@ -569,19 +472,6 @@
 }
 
 /* Widget Customization Section Header */
-<<<<<<< HEAD
-.ai-config-settings h3 {
-    font-size: 1.25rem;
-    /* Slightly smaller than main section headers */
-    margin-top: 1.5rem;
-    /* Space above this sub-header */
-    margin-bottom: 1rem;
-    /* Space below this sub-header */
-    color: #333;
-    border-bottom: 1px solid #eee;
-    /* Add a subtle separator */
-    padding-bottom: 0.5rem;
-=======
 .widget-section {
   margin-top: 2rem;
   padding: 2rem;
@@ -600,23 +490,14 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
->>>>>>> eb4d94d (fron end changes)
 }
 
 /* Widget Customization Grid */
 .widget-customization-grid {
-<<<<<<< HEAD
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
-    margin-top: 1rem;
-    /* Gap between grid items */
-=======
-  display: grid;
+display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 1.5rem;
   margin-top: 1.5rem;
->>>>>>> eb4d94d (fron end changes)
 }
 
 @media (min-width: 768px) {
@@ -632,17 +513,7 @@
 }
 
 .widget-customization-grid .setting-item {
-<<<<<<< HEAD
-    border-bottom: none;
-    /* Remove bottom border for items within the grid */
-    padding-bottom: 0;
-    flex-direction: column;
-    /* Stack label and input for better readability in grid */
-    align-items: flex-start;
-    gap: 0.5rem;
-    /* Gap between label and input */
-=======
-  border: 1px solid #e0e6ed;
+border: 1px solid #e0e6ed;
   border-radius: 12px;
   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
@@ -657,7 +528,6 @@
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
   border-color: #007bff;
->>>>>>> eb4d94d (fron end changes)
 }
 
 .widget-customization-grid input[type="color"] {

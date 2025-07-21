@@ -16,11 +16,12 @@ from utils.auth_utils import (
 router = APIRouter()
 
 @router.post("/login", response_model=schemas.Token)
-async def login(data: schemas.LoginRequest = Depends(),db: AsyncSession = Depends(get_db),):
+async def login(data: schemas.LoginRequest = Depends(), db: AsyncSession = Depends(get_db)):
     """
     User login endpoint using LoginRequest
     """
-    user = await authenticate_user(db, form_data.username, form_data.password)
+    print(f"Incoming login request: {data}")
+    user = await authenticate_user(db, data.email, data.password, data.role)
     print(f"User authenticated:================> {user}")
     if not user:
         raise HTTPException(
@@ -28,6 +29,7 @@ async def login(data: schemas.LoginRequest = Depends(),db: AsyncSession = Depend
             detail="Invalid credentials or role mismatch",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(data={"sub": user.email}, expires_delta=access_token_expires)
     return {"access_token": access_token, "token_type": "bearer"}
@@ -36,4 +38,4 @@ async def login(data: schemas.LoginRequest = Depends(),db: AsyncSession = Depend
 
 @router.post("/register", response_model=schemas.UserOut, status_code=201)
 async def register_user(user: schemas.UserCreate, db: AsyncSession = Depends(get_db)):
-    return await register_user_helper(db, user) 
+    return await register_user_helper(db, user)
