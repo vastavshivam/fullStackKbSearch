@@ -5,7 +5,8 @@ import redis
 import json
 
 # LangChain imports
-from langchain.memory import RedisChatMessageHistory, ConversationBufferMemory
+from langchain_community.chat_message_histories import RedisChatMessageHistory
+from langchain.memory import ConversationBufferMemory
 
 # MongoDB setup
 MONGO_URI = os.getenv("MONGO_URI", "mongodb+srv://AppGallop:<appgallop123>@cluster0.tpatz5r.mongodb.net/")

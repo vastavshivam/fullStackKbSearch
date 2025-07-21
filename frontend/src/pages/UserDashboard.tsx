@@ -20,6 +20,15 @@ const tabs = [
   { label: 'Installation', icon: 'bi-cloud-arrow-down-fill' },
 ];
 
+interface WidgetConfig {
+  enabled: boolean;
+  widgetColor: string;
+  widgetPosition: WidgetPosition;
+  widgetFont: WidgetFont;
+  profileMascot: string | null;
+  widgetName: string;
+}
+
 const UserDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [file, setFile] = useState<File | null>(null);
@@ -59,7 +68,7 @@ const UserDashboard: React.FC = () => {
     'The AI widget will appear on your site automatically.'
   ];
 
-  const installScript = `<script>
+  let installScript = `<script>
   window.AppGallopWidget = {
   "enabled": true,
   "name": "AI Assistant",
@@ -106,6 +115,32 @@ const UserDashboard: React.FC = () => {
     
     // Navigate to login page
     navigate("/");
+  };
+
+  const handleWidgetPositionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newPosition = e.target.value as WidgetPosition;
+    setConfig(cfg => {
+      const updatedConfig = { ...cfg, widgetPosition: newPosition };
+      updateInstallScript(updatedConfig);
+      return updatedConfig;
+    });
+  };
+
+  const updateInstallScript = (config: WidgetConfig) => {
+    installScript = `<script>
+    window.AppGallopWidget = {
+    "enabled": true,
+    "name": "AI Assistant",
+    "greeting": "Hello! How can I help you today?",
+    "color": "${config.widgetColor}",
+    "position": "${config.widgetPosition.replace('bottom', 'bottom-').replace('top', 'top-').toLowerCase()}",
+    "font": "${config.widgetFont}",
+    "mascot": "${config.profileMascot}",
+    "hasKnowledgeBase": false,
+    "apiUrl": "http://127.0.0.1:5001"
+  };
+  </script>
+  <script src="http://127.0.0.1:5001/widget.js"></script>`;
   };
 
   const renderWidgetSettings = () => (
@@ -160,7 +195,7 @@ const UserDashboard: React.FC = () => {
           <label className="setting-label">Widget Position</label>
           <select
             value={config.widgetPosition}
-            onChange={e => setConfig(cfg => ({ ...cfg, widgetPosition: e.target.value as WidgetPosition }))}
+            onChange={handleWidgetPositionChange}
             className="select-input"
           >
             <option value="bottomRight">Bottom Right</option>

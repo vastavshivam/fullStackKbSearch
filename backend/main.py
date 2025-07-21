@@ -77,25 +77,14 @@ async def global_exception_handler(request, exc):
 @app.on_event("startup")
 async def startup_event():
     await database.init_db()
-# from fastapi import FastAPI
-# from routes import admin, token
-# from fastapi.middleware.cors import CORSMiddleware
 
-# app = FastAPI()
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=["*"],
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-# )
-
-# app.include_router(admin.admin_router, prefix="/api/admin")
-# app.include_router(token.router)
-
-# if __name__ == "__main__": 
-#     import uvicorn
-#     uvicorn.run(app, host="0.0.0.0", port=8000)
+try:
+    from api.auth import router as auth_router
+except Exception as e:
+    logger.error(f"Error during application startup: {e}")
+    raise
 
 

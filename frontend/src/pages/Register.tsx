@@ -33,7 +33,7 @@ export default function Register() {
       const res = await fetch('http://localhost:8000/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await res.json();
@@ -48,17 +48,13 @@ export default function Register() {
           if (typeof data.detail === 'string') {
             errorMessage = data.detail;
           } else if (Array.isArray(data.detail) && data.detail.length > 0) {
-            errorMessage = data.detail[0].msg || data.detail[0];
-          } else if (typeof data.detail === 'object') {
-            errorMessage = data.detail.msg || JSON.stringify(data.detail);
+            errorMessage = data.detail.join(', ');
           }
-        } else if (data.message) {
-          errorMessage = data.message;
         }
-        setError(errorMessage);
+        alert(`❌ ${errorMessage}`);
       }
     } catch (err) {
-      setError('Network error. Please try again.');
+      alert('❌ An error occurred during registration.');
     }
   };
 

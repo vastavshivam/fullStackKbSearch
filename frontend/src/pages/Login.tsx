@@ -25,39 +25,28 @@ export default function Login() {
       const response = await fetch('http://localhost:8000/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, role }),
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
       setLoading(false);
 
-      if (response.ok && data.access_token) {
-        localStorage.setItem('token', data.access_token);
+      if (response.ok) {
+        localStorage.setItem('authToken', data.access_token);
+        localStorage.setItem('userRole', data.role);
+        localStorage.setItem('userData', JSON.stringify(data.user));
 
-        if (role === 'admin') {
-          navigate('/dashboard');
-        } else {
-          navigate('/user-dashboard');
-        }
+        navigate('/dashboard');
       } else {
-        // Handle different error response formats
-        let errorMessage = 'Login failed. Please try again.';
+        let errorMessage = 'Login failed.';
         if (data.detail) {
-          if (typeof data.detail === 'string') {
-            errorMessage = data.detail;
-          } else if (Array.isArray(data.detail) && data.detail.length > 0) {
-            errorMessage = data.detail[0].msg || data.detail[0];
-          } else if (typeof data.detail === 'object') {
-            errorMessage = data.detail.msg || JSON.stringify(data.detail);
-          }
-        } else if (data.message) {
-          errorMessage = data.message;
+          errorMessage = typeof data.detail === 'string' ? data.detail : data.detail.join(', ');
         }
-        setError(errorMessage);
+        alert(`❌ ${errorMessage}`);
       }
     } catch (err) {
+      alert('❌ An error occurred during login.');
       setLoading(false);
-      setError('Network error. Please try again.');
     }
   };
 
@@ -120,7 +109,36 @@ export default function Login() {
         <div className="login-card">
           <WelcomeMessage />
           {error && <div className="login-error">{typeof error === 'string' ? error : 'An error occurred'}</div>}
-          <form onSubmit={handleLogin} className="login-form">
+          <form onSubmit={async (e) => {
+            e.preventDefault();
+            setLoading(true);
+            try {
+              const res = await fetch('http://localhost:8000/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+              });
+
+              const data = await res.json();
+
+              if (res.ok) {
+                localStorage.setItem('authToken', data.access_token);
+                localStorage.setItem('userRole', data.role);
+                localStorage.setItem('userData', JSON.stringify(data.user));
+                navigate('/dashboard');
+              } else {
+                let errorMessage = 'Login failed.';
+                if (data.detail) {
+                  errorMessage = typeof data.detail === 'string' ? data.detail : data.detail.join(', ');
+                }
+                alert(`❌ ${errorMessage}`);
+              }
+            } catch (err) {
+              alert('❌ An error occurred during login.');
+            } finally {
+              setLoading(false);
+            }
+          }} className="login-form">
             <div className="login-form-group">
               <label>Email Address</label>
               <div className="input-icon-wrapper">
