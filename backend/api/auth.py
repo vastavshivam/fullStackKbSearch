@@ -26,48 +26,63 @@ async def login(data: schemas.LoginRequest):
     """
     User login endpoint using Supabase
     """
-    response = await supabase.auth.sign_in_with_password(
-        email=data.email,
-        password=data.password
-    )
-
-    if response.error:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid credentials",
-            headers={"WWW-Authenticate": "Bearer"},
+    try:
+        response = supabase.auth.sign_in_with_password(
+            {"email": data.email, "password": data.password}
         )
 
-    return {"access_token": response.data.access_token, "token_type": "bearer"}
+        if not response.user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid credentials",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        return {"access_token": response.session.access_token, "token_type": "bearer"}
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Login failed: {str(e)}",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
 @router.post("/register", response_model=schemas.UserOut, status_code=201)
 async def register_user(user: schemas.UserCreate):
     """
     User registration endpoint using Supabase
     """
-    response = await supabase.auth.sign_up(
-        email=user.email,
-        password=user.password
-    )
+    try:
+        # Sign up user in Supabase Auth
+        response = supabase.auth.sign_up(
+            {"email": user.email, "password": user.password}
+        )
 
-    if response.error:
+        if not response.user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Registration failed"
+            )
+
+        # Save additional user info to database if needed
+        try:
+            data = {
+                "id": response.user.id,
+                "name": user.name,
+                "email": user.email,
+                "password": user.password,  # Note: In production, consider if you need to store this
+                "created_at": datetime.utcnow().isoformat()
+            }
+            db_response = supabase.table("users").insert(data).execute()
+        except Exception as db_error:
+            # User is created in auth but failed to save in database
+            print(f"Database save failed: {db_error}")
+            # Still return success since auth user is created
+            pass
+
+        return {"email": response.user.email, "id": response.user.id}
+    
+    except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=response.error.message
+            detail=f"Registration failed: {str(e)}"
         )
-
-    # Save user credentials in Supabase database
-    data = {
-        "email": user.email,
-        "password": user.password,
-        "created_at": datetime.utcnow().isoformat()
-    }
-    db_response = supabase.table("users").insert(data).execute()
-
-    if db_response.error:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to save user credentials."
-        )
-
-    return {"email": response.data.user.email, "id": response.data.user.id}

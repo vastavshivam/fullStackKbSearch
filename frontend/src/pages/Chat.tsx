@@ -4,15 +4,25 @@ import '../pages/Chat.css';
 import axios from 'axios';
 import { connectWebSocketChat, configureWhatsApp, sendWhatsAppMessage } from '../services/api'; // Corrected import path
 
+// Simple summary function for demo (replace with backend call for advanced)
+function generateSummary(messages) {
+  // Use first user question and last bot answer for summary
+  const userMsg = messages.find(m => m.sender === 'user');
+  const botMsg = messages.slice().reverse().find(m => m.sender === 'bot');
+  if (!userMsg || !botMsg) return 'New Chat';
+  return `${userMsg.text.slice(0, 40)} → ${botMsg.text.slice(0, 40)}`;
+}
+
 /** ─────────── Custom type for what the server sends back ─────────── */
 interface ChatResponse {
   answer: string;
 }
 
 export default function Chat() {
-  const [messages, setMessages] = useState([{ sender: 'bot', text: "Welcome to FishAI! �" }]);
+  const [messages, setMessages] = useState([{ sender: 'bot', text: "Welcome to AppG! ✨" }]);
   const [input, setInput] = useState('');
-  const [history, setHistory] = useState<string[][]>([]);
+  // History now stores {messages, summary}
+  const [history, setHistory] = useState<{messages: any[], summary: string}[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const handleSend = async (e: React.FormEvent) => {
@@ -20,22 +30,25 @@ export default function Chat() {
     if (!input.trim()) return;
 
     setMessages(prev => [...prev, { sender: 'user', text: input }]);
-    setHistory(prev => [[input], ...prev]);
     setInput('');
     setMessages(prev => [...prev, { sender: 'bot', text: "Let me get that for you..." }]);
 
     try {
-      // 👇 tell axios what shape we expect
       const res = await axios.post<ChatResponse>('/api/qa/static-chat', { question: input });
       const answer = res.data.answer || "Sorry, I couldn't find an answer.";
       setMessages(prev => {
         const msgs = prev.slice(0, -1); // drop loading
-        return [...msgs, { sender: 'bot', text: answer }];
+        // Update history with summary
+        const newMsgs = [...msgs, { sender: 'bot', text: answer }];
+        setHistory(h => [{ messages: newMsgs, summary: generateSummary(newMsgs) }, ...h]);
+        return newMsgs;
       });
     } catch (err) {
       setMessages(prev => {
         const msgs = prev.slice(0, -1);
-        return [...msgs, { sender: 'bot', text: "Sorry, there was an error getting the answer." }];
+        const newMsgs = [...msgs, { sender: 'bot', text: "Sorry, there was an error getting the answer." }];
+        setHistory(h => [{ messages: newMsgs, summary: generateSummary(newMsgs) }, ...h]);
+        return newMsgs;
       });
     }
   };
@@ -78,7 +91,7 @@ export default function Chat() {
       </div>
 
       <div className="chat-main">
-        <div className="chat-header">FishAI</div>
+        <div className="chat-header">AppG Assistant</div>
 
         <div className="chat-body">
           {messages.map((msg, i) => (

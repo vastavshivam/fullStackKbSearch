@@ -4,7 +4,7 @@ import { useWidgetConfig } from './WidgetConfigContext';
 
 
 const initialMessages = [
-  { sender: 'bot', text: 'Hi! I am FishAI. How can I help you today?' }
+  { sender: 'bot', text: 'Hi! I am AppG Assistant. How can I help you today?' }
 ];
 
 const ChatWidget: React.FC = () => {
@@ -55,7 +55,7 @@ const ChatWidget: React.FC = () => {
       });
       if (!res.ok) throw new Error('Network response was not ok');
       const data = await res.json();
-      setMessages(data.conversation_history || []);
+      setMessages(msgs => [...msgs, { sender: 'bot', text: data.answer || 'Sorry, I could not get a response from the server.' }]);
     } catch (err) {
       setMessages(msgs => [...msgs, { sender: 'bot', text: 'Sorry, I could not get a response from the server.' }]);
     }

@@ -6,8 +6,7 @@ import pickle
 from sentence_transformers import SentenceTransformer
 from typing import List, Tuple
 import numpy as np
-import nltk
-from nltk.tokenize import sent_tokenize
+import re
 
 # Load embedding model
 EMBED_MODEL = SentenceTransformer("all-MiniLM-L6-v2")
@@ -17,25 +16,80 @@ VECTOR_DIR = "vector_stores"
 os.makedirs(VECTOR_DIR, exist_ok=True)
 
 # ------------------------------
-# Text Chunking using NLTK
+# Text Chunking using simple sentence splitting
 # ------------------------------
 def chunk_text(text: str, chunk_size=500) -> List[str]:
     """
-    Split text into chunks using NLTK sentence tokenizer.
+    Split text into chunks optimized for Q&A content and general text.
     Each chunk tries not to exceed the given chunk size.
     """
-    sentences = sent_tokenize(text)
+    # First, try to split by Q&A patterns if this looks like Q&A content
+    if "Q:" in text and "A:" in text:
+        # Split by Q&A pairs (separated by double newlines in our format)
+        qa_pairs = text.split("\n\n")
+        chunks = []
+        for pair in qa_pairs:
+            pair = pair.strip()
+            if not pair:
+                continue
+                
+            # If the pair is still too long, split it further
+            if len(pair) > chunk_size:
+                sentences = re.split(r'(?<=[.!?])\s+', pair)
+                current_chunk = ""
+                for sentence in sentences:
+                    sentence = sentence.strip()
+                    if not sentence:
+                        continue
+                    if len(current_chunk + sentence) + 1 <= chunk_size:
+                        current_chunk += sentence + " "
+                    else:
+                        if current_chunk.strip():
+                            chunks.append(current_chunk.strip())
+                        current_chunk = sentence + " "
+                if current_chunk.strip():
+                    chunks.append(current_chunk.strip())
+            else:
+                chunks.append(pair)
+        return [chunk for chunk in chunks if chunk.strip()]
+    
+    # For non-Q&A content, use the original sentence-based splitting
+    sentences = re.split(r'(?<=[.!?])\s+', text.strip())
+    
     chunks = []
     current = ""
+    
     for sentence in sentences:
-        if len(current) + len(sentence) <= chunk_size:
+        sentence = sentence.strip()
+        if not sentence:
+            continue
+            
+        if len(current) + len(sentence) + 1 <= chunk_size:
             current += sentence + " "
         else:
-            chunks.append(current.strip())
+            if current.strip():
+                chunks.append(current.strip())
             current = sentence + " "
-    if current:
+    
+    # Add the last chunk if it exists
+    if current.strip():
         chunks.append(current.strip())
-    return chunks
+    
+    # If no sentences were found, split by character limit
+    if not chunks and text.strip():
+        words = text.split()
+        current = ""
+        for word in words:
+            if len(current) + len(word) + 1 <= chunk_size:
+                current += word + " "
+            else:
+                if current.strip():
+                    chunks.append(current.strip())
+                current = word + " "
+        if current.strip():
+            chunks.append(current.strip())
+    
+    return chunks if chunks else [text.strip()] if text.strip() else []
 
 # ------------------------------
 # Save Embeddings

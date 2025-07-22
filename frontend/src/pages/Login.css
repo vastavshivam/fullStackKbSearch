@@ -463,6 +463,48 @@
   }
 }
 
+/* Features Preview - Cleaner Design */
+.features-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 40px;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  color: #1e40af;
+}
+
+.feature-icon {
+  font-size: 18px;
+  color: #2563eb;
+  background: rgba(37, 99, 235, 0.1);
+  padding: 8px;
+  border-radius: 8px;
+  backdrop-filter: blur(5px);
+}
+
+.feature-item span {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+/* Login Header - Cleaner */
+.login-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.login-subtitle {
+  color: #6b7280;
+  font-size: 14px;
+  margin-top: 8px;
+}
+
 @media (max-width: 480px) {
   .login-card {
     padding: 24px 20px;
@@ -474,5 +516,9 @@
   
   .input-icon-wrapper input {
     padding: 14px 14px 14px 44px;
+  }
+  
+  .features-preview {
+    margin-top: 24px;
   }
 }

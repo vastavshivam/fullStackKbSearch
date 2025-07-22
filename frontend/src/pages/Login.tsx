@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './Login.css';
-import { FaEnvelope, FaLock, FaBolt, FaChartLine, FaFish, FaShieldAlt, FaRocket } from 'react-icons/fa';
+import { FaEnvelope, FaLock, FaRocket, FaShieldAlt } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
@@ -8,65 +8,26 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [role, setRole] = useState('admin');
+  const [role, setRole] = useState('user');
   const navigate = useNavigate();
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-
-    if (!email || !password || !role) {
-      setError('Please enter email, password and role.');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const response = await fetch('http://localhost:8000/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-      setLoading(false);
-
-      if (response.ok) {
-        localStorage.setItem('authToken', data.access_token);
-        localStorage.setItem('userRole', data.role);
-        localStorage.setItem('userData', JSON.stringify(data.user));
-
-        navigate('/dashboard');
-      } else {
-        let errorMessage = 'Login failed.';
-        if (data.detail) {
-          errorMessage = typeof data.detail === 'string' ? data.detail : data.detail.join(', ');
-        }
-        alert(`❌ ${errorMessage}`);
-      }
-    } catch (err) {
-      alert('❌ An error occurred during login.');
-      setLoading(false);
-    }
-  };
 
   const Logo = () => (
     <div className="login-logo">
-      <FaFish size={40} className="logo-icon" />
+      <FaRocket size={40} className="logo-icon" />
     </div>
   );
 
   const WelcomeMessage = () => (
     <>
-      <h2 className="login-title">Welcome to FISH CORP</h2>
-      <p className="login-subtext">Access your intelligent platform and manage your business operations with ease.</p>
+      <h2 className="login-title">Welcome to AppG</h2>
+      <p className="login-subtext">Your gateway to intelligent automation.</p>
     </>
   );
 
   const Benefits = () => (
     <div className="login-benefits">
       <div className="benefit-item">
-        <FaFish className="benefit-icon" />
+        <FaRocket className="benefit-icon" />
         <div>
           <h4>Smart Solutions</h4>
           <p>Intelligent business tools powered by advanced technology</p>
@@ -94,29 +55,37 @@ export default function Login() {
       <div className="login-left-panel">
         <div className="brand-section">
           <Logo />
-          <h1 className="brand-name">FISH CORP</h1>
-          <p className="brand-tagline">Intelligent business solutions at your fingertips</p>
+          <h1 className="brand-name">AppG</h1>
+          <p className="brand-tagline">Your intelligent business platform</p>
         </div>
-        <Benefits />
-        <div className="decorative-elements">
-          <div className="floating-shape shape-1"></div>
-          <div className="floating-shape shape-2"></div>
-          <div className="floating-shape shape-3"></div>
+        <div className="features-preview">
+          <div className="feature-item">
+            <FaRocket className="feature-icon" />
+            <span>Lightning Fast</span>
+          </div>
+          <div className="feature-item">
+            <FaShieldAlt className="feature-icon" />
+            <span>Secure & Private</span>
+          </div>
         </div>
       </div>
 
       <div className="login-right-panel">
         <div className="login-card">
-          <WelcomeMessage />
+          <div className="login-header">
+            <h2 className="login-title">Welcome Back</h2>
+            <p className="login-subtitle">Sign in to your account</p>
+          </div>
+          
           {error && <div className="login-error">{typeof error === 'string' ? error : 'An error occurred'}</div>}
           <form onSubmit={async (e) => {
             e.preventDefault();
             setLoading(true);
             try {
-              const res = await fetch('http://localhost:8000/api/auth/login', {
+              const res = await fetch('/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password }),
+                body: JSON.stringify({ email, password, role }),
               });
 
               const data = await res.json();

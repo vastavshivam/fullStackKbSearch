@@ -171,39 +171,68 @@ async def static_chat(request: dict):
             vector_dir = Path(VECTOR_DIR)
             if vector_dir.exists():
                 vector_files = list(vector_dir.glob("*.index"))
-                best_match = None
-                highest_relevance = -1
-                # Track which file the best match came from (optional)
-                best_file = None
-                for vector_file in vector_files:
-                    file_id = vector_file.stem
+                
+                if vector_files:
+                    # Use the first available knowledge base
+                    vector_file = vector_files[0]
+                    file_id = vector_file.stem  # Remove .index extension
+                    
+                    # Search for relevant context
                     relevant_chunks = query_embeddings(file_id, question, top_k=3)
+                    
                     if relevant_chunks and len(relevant_chunks) > 0:
+                        print(f"[DEBUG] Found {len(relevant_chunks)} relevant chunks")
+                        # Parse the chunks to find matching Q&A pairs
+                        best_match = None
+                        highest_relevance = -1
+                        
                         for i, chunk in enumerate(relevant_chunks):
+                            print(f"[DEBUG] Processing chunk {i}: {chunk[:200]}...")
+                            
+                            # Handle the actual format: "prompt: ... response: ... sentiment: ..."
                             if "prompt:" in chunk.lower() and "response:" in chunk.lower():
+                                # Find all prompt-response pairs in the chunk
                                 parts = chunk.split("prompt:")
-                                for part in parts[1:]:
+                                for part in parts[1:]:  # Skip first empty part
                                     if "response:" in part:
                                         try:
                                             prompt_part = part.split("response:")[0].strip()
                                             response_part = part.split("response:")[1].split("sentiment:")[0].strip()
+                                            
+                                            print(f"[DEBUG] Extracted prompt: {prompt_part[:50]}...")
+                                            print(f"[DEBUG] Extracted response: {response_part[:50]}...")
+                                            
+                                            # Simple matching
                                             question_lower = question.lower()
                                             prompt_lower = prompt_part.lower()
+                                            
                                             question_words = set(question_lower.split())
                                             prompt_words = set(prompt_lower.split())
                                             match_count = len(question_words.intersection(prompt_words))
+                                            
+                                            print(f"[DEBUG] Match count: {match_count}")
+                                            
                                             if match_count > highest_relevance:
                                                 highest_relevance = match_count
                                                 best_match = response_part
-                                                best_file = file_id
+                                                print(f"[DEBUG] New best match with score {match_count}")
                                         except Exception as parse_error:
+                                            print(f"[DEBUG] Parse error: {parse_error}")
                                             continue
-                if best_match and highest_relevance > 0:
-                    clean_response = best_match.strip()
-                    if clean_response.startswith('"') and clean_response.endswith('"'):
-                        clean_response = clean_response[1:-1]
-                    print(f"[DEBUG] Returning KB response from {best_file}: {clean_response}")
-                    return {"answer": clean_response}
+                        
+                        print(f"[DEBUG] Final best match: {best_match if best_match else 'None'}")
+                        print(f"[DEBUG] Highest relevance: {highest_relevance}")
+                        
+                        # If we found a good match, return it
+                        if best_match and highest_relevance > 0:
+                            # Clean up the response
+                            clean_response = best_match.strip()
+                            # Remove quotes if present
+                            if clean_response.startswith('"') and clean_response.endswith('"'):
+                                clean_response = clean_response[1:-1]
+                            
+                            print(f"[DEBUG] Returning KB response: {clean_response}")
+                            return {"answer": clean_response}
         
         except Exception as e:
             print(f"Knowledge base search failed: {e}")

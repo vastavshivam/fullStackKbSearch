@@ -1,0 +1,102 @@
+[
+  {
+    "prompt": "How do I reset my password?",
+    "response": "To reset your password, go to the login page and click on 'Forgot Password'. Enter your email address and you'll receive a reset link within a few minutes.",
+    "sentiment": "neutral"
+  },
+  {
+    "prompt": "What file formats are supported?",
+    "response": "We support PDF, TXT, JSON, CSV, and XLSX file formats. Each file is automatically processed and converted to searchable text for the knowledge base.",
+    "sentiment": "neutral"
+  },
+  {
+    "prompt": "How do I upload documents?",
+    "response": "To upload documents, navigate to the Knowledge Base section, click the 'Upload' button, select your files, and click 'Submit'. The system will process and index your documents automatically.",
+    "sentiment": "neutral"
+  },
+  {
+    "prompt": "What are the app's main features?",
+    "response": "Our app offers document upload, AI-powered search, real-time chat, knowledge base management, and analytics dashboard. You can also export data and manage user permissions.",
+    "sentiment": "positive"
+  },
+  {
+    "prompt": "How do I delete my account?",
+    "response": "To delete your account, go to Settings > Account > Delete Account. Please note that this action is permanent and all your data will be removed. Contact support if you need assistance.",
+    "sentiment": "negative"
+  },
+  {
+    "prompt": "Why is the app running slowly?",
+    "response": "Slow performance could be due to large file uploads, network connectivity issues, or server load. Try clearing your browser cache, checking your internet connection, or contacting support if the issue persists.",
+    "sentiment": "neutral"
+  },
+  {
+    "prompt": "How do I export my data?",
+    "response": "Go to the dashboard, select the data you want to export, and click the 'Export' button. You can choose between CSV, Excel, or PDF formats.",
+    "sentiment": "neutral"
+  },
+  {
+    "prompt": "Can I integrate with Slack?",
+    "response": "Yes, you can integrate with Slack from the Integrations page. Follow the instructions to connect your workspace and enable notifications.",
+    "sentiment": "positive"
+  },
+  {
+    "prompt": "How do I manage user permissions?",
+    "response": "Go to Settings > Users. You can assign roles and permissions to each user from the user management panel.",
+    "sentiment": "neutral"
+  },
+  {
+    "prompt": "Is my data secure?",
+    "response": "We use enterprise-grade security protocols, including encryption at rest and in transit, regular audits, and strict access controls.",
+    "sentiment": "positive"
+  },
+  {
+    "prompt": "How do I contact support?",
+    "response": "You can contact support via the Help section in the app or email support@example.com. Our team is available 24/7.",
+    "sentiment": "positive"
+  },
+  {
+    "prompt": "How do I change my email address?",
+    "response": "Go to Settings > Account and update your email address. You will receive a confirmation email to verify the change.",
+    "sentiment": "neutral"
+  },
+  {
+    "prompt": "Can I use the app on mobile?",
+    "response": "Yes, our app is fully responsive and works on all modern mobile devices.",
+    "sentiment": "positive"
+  },
+  {
+    "prompt": "How do I enable notifications?",
+    "response": "Go to Settings > Notifications and toggle the options you want to enable. You can receive alerts via email, SMS, or Slack.",
+    "sentiment": "neutral"
+  },
+  {
+    "prompt": "What is the maximum file size for uploads?",
+    "response": "The maximum file size for uploads is 20MB per file.",
+    "sentiment": "neutral"
+  },
+  {
+    "prompt": "How do I view analytics?",
+    "response": "Go to the Analytics dashboard to view usage statistics, trends, and reports.",
+    "sentiment": "positive"
+  },
+  {
+    "prompt": "Can I restore deleted documents?",
+    "response": "Deleted documents cannot be restored. Please contact support if you need further assistance.",
+    "sentiment": "negative"
+  },
+  {
+    "prompt": "How do I invite team members?",
+    "response": "Go to Settings > Team and click 'Invite'. Enter the email addresses of your team members and send invitations.",
+    "sentiment": "positive"
+  },
+  {
+    "prompt": "How do I set up two-factor authentication?",
+    "response": "Go to Settings > Security and enable two-factor authentication. Follow the instructions to link your mobile device.",
+    "sentiment": "positive"
+  },
+  {
+    "prompt": "Can I customize the dashboard?",
+    "response": "Yes, you can customize the dashboard layout and widgets from the Settings > Dashboard section.",
+    "sentiment": "positive"
+  }
+]

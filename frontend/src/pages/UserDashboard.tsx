@@ -35,14 +35,13 @@ const UserDashboard: React.FC = () => {
   const { config, setConfig } = useWidgetConfig();
   const [activeTab, setActiveTab] = useState(0);
   const [copied, setCopied] = useState(false);
-  const [mascotFile, setMascotFile] = useState<File | null>(null);
   const [mascotPreview, setMascotPreview] = useState<string | null>(config.profileMascot);
 
   useEffect(() => {
     if (config.profileMascot && config.profileMascot !== mascotPreview) {
       setMascotPreview(config.profileMascot);
     }
-  }, [config.profileMascot]);
+  }, [config.profileMascot, mascotPreview]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -92,7 +91,6 @@ const UserDashboard: React.FC = () => {
   const handleMascotChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setMascotFile(file);
       const reader = new FileReader();
       reader.onload = ev => setMascotPreview(ev.target?.result as string);
       reader.readAsDataURL(file);

@@ -138,10 +138,8 @@ class UserCreate(BaseModel):
     role: RoleEnum = Field(default=RoleEnum.user)
 
 class UserOut(BaseModel):
-    id: int
-    name: str
-    email: EmailStr
-    is_active: bool
+    id: str  # Supabase uses UUID strings
+    email: str
 
     class Config:
         # orm_mode = True
