@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface ChatHistoryProps {
-  history: string[][];
+  history: {messages: any[], summary: string}[];
   onNewChat: () => void;
 }
 
@@ -15,7 +15,7 @@ export default function ChatHistory({ history, onNewChat }: ChatHistoryProps) {
       ) : (
         <ul>
           {history.map((item, index) => (
-            <li key={index}>{item[0]}</li>
+            <li key={index}>{item.summary}</li>
           ))}
         </ul>
       )}

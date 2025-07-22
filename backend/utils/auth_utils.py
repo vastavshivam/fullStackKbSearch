@@ -32,6 +32,13 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 async def authenticate_user(db: AsyncSession, email: str, password: str, role: str):
+    """
+    Temporarily hardcoded authentication for development.
+    """
+    if email == "krish.ishaan@gmail.com" and password == "root":
+        return schemas.UserOut(id=1, name="Krish Ishaan", email=email, is_active=True)
+
+    # Original logic
     user = await get_user_by_email(db, email)
     if not user:
         return None
@@ -69,7 +76,9 @@ async def register_user_helper(db: AsyncSession, user: schemas.UserCreate) -> sc
             detail="Admin role cannot be self-assigned"
         )
 
-    hashed_password = pwd_context.hash(user.password)
-    created_user = await create_user(db, user, hashed_password)
-    return created_user
+    hashed_password = get_password_hash(user.password)
+    user.password = hashed_password
+
+    new_user = await crud.create_user(db, user)
+    return new_user
 

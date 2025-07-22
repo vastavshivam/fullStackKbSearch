@@ -1,7 +1,7 @@
 # This file contains Pydantic schemas for the application.
 
 from pydantic import BaseModel, EmailStr, Field
-from typing import Optional, List
+from typing import Optional, List, Union
 from datetime import datetime
 from enum import Enum  
 
@@ -74,7 +74,7 @@ class ChatMessage(BaseModel):
     user_id: Optional[int]
     message: str
     sender: str  # 'user' or 'bot'
-    timestamp: datetime | None = None
+    timestamp: Union[datetime, None] = None
     session_id: str
 
     class Config:
@@ -138,10 +138,8 @@ class UserCreate(BaseModel):
     role: RoleEnum = Field(default=RoleEnum.user)
 
 class UserOut(BaseModel):
-    id: int
-    name: str
-    email: EmailStr
-    is_active: bool
+    id: str  # Supabase uses UUID strings
+    email: str
 
     class Config:
         # orm_mode = True

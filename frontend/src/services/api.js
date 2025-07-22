@@ -62,3 +62,12 @@ export const configureWhatsApp = (config) => {
 export const sendWhatsAppMessage = (message) => {
   return axios.post(`${API_BASE}/whatsapp/send-message`, message);
 };
+
+// Authentication API functions
+export const login = (email, password, role) => {
+  return axios.post(`${API_BASE}/api/auth/login`, {
+    email,
+    password,
+    role,
+  });
+};

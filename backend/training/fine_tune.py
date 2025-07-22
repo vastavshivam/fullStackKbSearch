@@ -20,7 +20,7 @@ from transformers import (
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
 from fastapi.responses import JSONResponse
 from threading import Thread
-from langchain.memory import RedisChatMessageHistory
+from langchain_community.chat_message_histories import RedisChatMessageHistory
 
 # Logging setup
 logging.basicConfig(level=logging.INFO)

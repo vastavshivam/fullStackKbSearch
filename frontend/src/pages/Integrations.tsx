@@ -31,7 +31,7 @@ const Integrations = () => {
   ]);
   const [newTemplate, setNewTemplate] = useState({ name: "", content: "" });
   const [isLoading, setIsLoading] = useState(false);
-  const [saveMessage, setSaveMessage] = useState("");
+  const [saveMessage] = useState("");
 
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
     // Simple toast notification implementation
@@ -52,11 +52,6 @@ const Integrations = () => {
       setIsLoading(false);
       showToast("Connected Successfully! Your WhatsApp Business account is now connected.");
     }, 2000);
-  };
-
-  const handleDisconnect = () => {
-    setIsConnected(false);
-    showToast("Disconnected. WhatsApp Business account has been disconnected.", 'error');
   };
 
   const addTemplate = () => {
@@ -259,7 +254,7 @@ const handleWaConfigSubmit = async (e) => {
   setWaConfigError('');
   setWaConfigSuccess(false);
   try {
-    const res = await axios.post('/api/routes/whatsapp/configure-whatsapp', waConfig);
+    await axios.post('/api/routes/whatsapp/configure-whatsapp', waConfig);
     setWaConfigSuccess(true);
     showToast('WhatsApp configuration saved!', 'success');
     setIsConnected(true);

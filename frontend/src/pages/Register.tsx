@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './Register.css';
-import { FaEnvelope, FaLock, FaUser } from 'react-icons/fa';
+import { FaEnvelope, FaLock } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
 // You can use Boxicons or Bootstrap Icons by adding their CDN in public/index.html
@@ -13,13 +13,14 @@ export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
+  const [role, setRole] = useState('user');
   const [error, setError] = useState('');
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    if (!name || !email || !password || !confirm) {
+    if (!name || !email || !password || !confirm || !role) {
       setError('Please fill all fields.');
       return;
     }
@@ -30,10 +31,15 @@ export default function Register() {
     }
 
     try {
-      const res = await fetch('http://localhost:8000/api/auth/register', {
+      const res = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ 
+          name, 
+          email, 
+          password,
+          role
+        }),
       });
 
       const data = await res.json();
@@ -48,17 +54,13 @@ export default function Register() {
           if (typeof data.detail === 'string') {
             errorMessage = data.detail;
           } else if (Array.isArray(data.detail) && data.detail.length > 0) {
-            errorMessage = data.detail[0].msg || data.detail[0];
-          } else if (typeof data.detail === 'object') {
-            errorMessage = data.detail.msg || JSON.stringify(data.detail);
+            errorMessage = data.detail.join(', ');
           }
-        } else if (data.message) {
-          errorMessage = data.message;
         }
-        setError(errorMessage);
+        alert(`❌ ${errorMessage}`);
       }
     } catch (err) {
-      setError('Network error. Please try again.');
+      alert('❌ An error occurred during registration.');
     }
   };
 
@@ -71,7 +73,7 @@ export default function Register() {
 
   const WelcomeMessage = () => (
     <>
-      <h2 className="login-title">Create your FishAI account</h2>
+      <h2 className="login-title">Create your AppG account</h2>
       <p className="login-subtext">Register to access your dashboard and tools.</p>
     </>
   );
@@ -85,17 +87,33 @@ export default function Register() {
 
   return (
     <div className="login-cover">
+      {/* Left Panel - Branding */}
       <div className="login-left-panel">
-        <Logo />
-        <h1 className="brand-name">FishAI</h1>
-        <p className="brand-tagline">Powering smart conversations with AI.</p>
-        <Benefits />
+        <div className="brand-section">
+          <Logo />
+          <h1 className="brand-name">AppG</h1>
+          <p className="brand-tagline">Join the intelligent business platform</p>
+        </div>
+        <div className="features-preview">
+          <div className="feature-item">
+            <FaEnvelope className="feature-icon" />
+            <span>Secure Registration</span>
+          </div>
+          <div className="feature-item">
+            <FaLock className="feature-icon" />
+            <span>Protected Data</span>
+          </div>
+        </div>
       </div>
 
+      {/* Right Panel - Registration Form */}
       <div className="login-right-panel">
         <div className="login-card">
-          <Logo />
-          <WelcomeMessage />
+          <div className="login-header">
+            <h2 className="login-title">Create Account</h2>
+            <p className="login-subtitle">Get started with AppG today</p>
+          </div>
+          
           {error && <div className="login-error">{typeof error === 'string' ? error : 'An error occurred'}</div>}
           <form onSubmit={handleRegister} className="login-form">
             <div className="login-form-group">
@@ -130,6 +148,33 @@ export default function Register() {
                 <input type="password" value={confirm} onChange={e => setConfirm(e.target.value)} placeholder="Confirm password..." />
               </div>
             </div>
+
+            <div className="role-selection">
+              <span className="role-label">Register as:</span>
+              <div className="role-options">
+                <label className={`role-option ${role === 'user' ? 'active' : ''}`}>
+                  <input
+                    type="radio"
+                    name="role"
+                    value="user"
+                    checked={role === 'user'}
+                    onChange={() => setRole('user')}
+                  />
+                  <span className="role-text">User</span>
+                </label>
+                <label className={`role-option ${role === 'admin' ? 'active' : ''}`}>
+                  <input
+                    type="radio"
+                    name="role"
+                    value="admin"
+                    checked={role === 'admin'}
+                    onChange={() => setRole('admin')}
+                  />
+                  <span className="role-text">Admin</span>
+                </label>
+              </div>
+            </div>
+
             <button className="login-btn" type="submit">Register</button>
           </form>
           <div className="login-footer">

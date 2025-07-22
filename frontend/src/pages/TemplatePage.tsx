@@ -39,10 +39,6 @@ export default function TemplatePage() {
     return matchesSearch && matchesFilter;
   });
 
-  const handleTemplateClick = (template) => {
-    alert(`You selected the template: ${template.title}`);
-  };
-
   const handleCreateOrEditTemplate = () => {
     if (newTemplate.title && newTemplate.description && (newTemplate.type === 'whatsapp' || newTemplate.type === 'email')) {
       if (editTemplateIndex !== null) {

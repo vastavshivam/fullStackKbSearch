@@ -7,39 +7,6 @@
   background: linear-gradient(135deg, #e8f4fd 0%, #b8dcf2 100%);
   font-family: 'Segoe UI', 'Trebuchet MS', sans-serif;
   overflow: hidden;
-<<<<<<< HEAD
-}
-
-.login-left-panel,
-.login-right-panel {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 60px 40px;
-  box-sizing: border-box;
-}
-
-.login-left-panel {
-  background: linear-gradient(145deg, #0f2027, #203a43);
-  color: #fff;
-}
-
-.login-right-panel {
-  align-items: center;
-  background: linear-gradient(135deg, #2c5364, #0f2027);
-}
-
-.login-card {
-  width: 100%;
-  max-width: none;
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(20px);
-  border-radius: 20px;
-  padding: 40px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-  animation: fadeIn 0.5s ease;
-=======
   position: relative;
 }
 
@@ -58,15 +25,10 @@
 .brand-section {
   z-index: 2;
   position: relative;
->>>>>>> eb4d94d (fron end changes)
 }
 
 .login-logo {
   display: flex;
-<<<<<<< HEAD
-  justify-content: center;
-  margin-bottom: 20px;
-=======
   justify-content: flex-start;
   margin-bottom: 30px;
 }
@@ -78,7 +40,6 @@
   backdrop-filter: blur(10px);
   color: #2563eb;
   border: 1px solid rgba(37, 99, 235, 0.2);
->>>>>>> eb4d94d (fron end changes)
 }
 
 .brand-name {
@@ -502,6 +463,48 @@
   }
 }
 
+/* Features Preview - Cleaner Design */
+.features-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 40px;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  color: #1e40af;
+}
+
+.feature-icon {
+  font-size: 18px;
+  color: #2563eb;
+  background: rgba(37, 99, 235, 0.1);
+  padding: 8px;
+  border-radius: 8px;
+  backdrop-filter: blur(5px);
+}
+
+.feature-item span {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+/* Login Header - Cleaner */
+.login-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.login-subtitle {
+  color: #6b7280;
+  font-size: 14px;
+  margin-top: 8px;
+}
+
 @media (max-width: 480px) {
   .login-card {
     padding: 24px 20px;
@@ -513,5 +516,9 @@
   
   .input-icon-wrapper input {
     padding: 14px 14px 14px 44px;
+  }
+  
+  .features-preview {
+    margin-top: 24px;
   }
 }
