@@ -20,7 +20,7 @@ const Footer: React.FC = () => (
     <div style={{ marginBottom: 12 }}>
       <span style={{ fontSize: 22, fontWeight: 700 }}>
         <i className="bi bi-stars" style={{ marginRight: 8 }}></i>
-        Powered by AppG
+        Powered by AppGallop
       </span>
     </div>
     <div style={{ fontSize: 16, opacity: 0.85 }}>

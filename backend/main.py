@@ -12,7 +12,7 @@ from database import database  # Assuming you have a database module for initial
 from db import *
 from api import chat, auth, files, training, websocket
 from utils.email_notify import setup_email_notifications
-from routes import whatsapp_routes as whatsapp
+from routes import whatsapp_routes as whatsapp, chat as chat_routes
 Base = declarative_base()
 
 app = FastAPI(
@@ -24,15 +24,15 @@ app = FastAPI(
 # ✅ CORS configuration 
 origins = [
     "http://localhost:3000",  # React frontend
-    "http://localhost:3001",  # React frontend (alternative port)
     "http://127.0.0.1:3000",
-    "http://127.0.0.1:3001",
     "http://localhost",
-    "*"  # Allow all origins for development (remove in production)
 ]
+from fastapi.middleware.cors import CORSMiddleware
+
+# Allow CORS from frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["http://127.0.0.1:3001", "http://localhost:3001", "*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -41,6 +41,7 @@ app.add_middleware(
 # ✅ API routers 
 
 app.include_router(chat.router, prefix="/api/chat", tags=["Chat"])
+app.include_router(chat_routes.router, prefix="/api", tags=["Chat Sessions"])
 app.include_router(files.router, prefix="/api/files", tags=["Files"])
 app.include_router(qa_router, prefix="/api/qa", tags=["Q&A"])
 app.include_router(training.router, prefix="/api/training", tags=["Training"])
@@ -54,8 +55,16 @@ app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 # ✅ Startup/shutdown tasks
 @app.on_event("startup")
 async def startup():
-    await database.init_db()
-    setup_email_notifications()
+    try:
+        await database.init_db()
+    except Exception as e:
+        print(f"Warning: Database initialization failed: {e}")
+        print("Continuing with MongoDB-only authentication...")
+    try:
+        setup_email_notifications()
+    except Exception as e:
+        print(f"Warning: Email setup failed: {e}")
+        print("Continuing without email notifications...")
 
 @app.on_event("shutdown")
 async def shutdown():
@@ -72,14 +81,12 @@ logging.basicConfig(level=logging.ERROR)
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
     logging.error(f"Unhandled exception: {exc}")
+    import traceback
+    traceback.print_exc()
     return JSONResponse(
         status_code=500,
-        content={"message": "An internal server error occurred."},
+        content={"message": "An internal server error occurred.", "error": str(exc)},
     )
-
-@app.on_event("startup")
-async def startup_event():
-    await database.init_db()
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

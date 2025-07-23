@@ -31,7 +31,7 @@ const Integrations = () => {
   ]);
   const [newTemplate, setNewTemplate] = useState({ name: "", content: "" });
   const [isLoading, setIsLoading] = useState(false);
-  const [saveMessage] = useState("");
+  const [saveMessage, setSaveMessage] = useState("");
 
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
     // Simple toast notification implementation
@@ -52,6 +52,11 @@ const Integrations = () => {
       setIsLoading(false);
       showToast("Connected Successfully! Your WhatsApp Business account is now connected.");
     }, 2000);
+  };
+
+  const handleDisconnect = () => {
+    setIsConnected(false);
+    showToast("Disconnected. WhatsApp Business account has been disconnected.", 'error');
   };
 
   const addTemplate = () => {
@@ -243,9 +248,42 @@ const [waConfig, setWaConfig] = useState({
 const [waConfigLoading, setWaConfigLoading] = useState(false);
 const [waConfigSuccess, setWaConfigSuccess] = useState(false);
 const [waConfigError, setWaConfigError] = useState('');
+const [clientIdGenerated, setClientIdGenerated] = useState(false);
 
 const handleWaConfigChange = (e) => {
   setWaConfig({ ...waConfig, [e.target.name]: e.target.value });
+};
+
+// Generate 32-character random token
+const generateRandomToken = () => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < 32; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+};
+
+const generateClientId = () => {
+  const newClientId = generateRandomToken();
+  setWaConfig({ ...waConfig, client_id: newClientId });
+  setClientIdGenerated(true);
+  showToast('Client ID generated successfully!', 'success');
+};
+
+const generateVerifyToken = () => {
+  const newVerifyToken = generateRandomToken();
+  setWaConfig({ ...waConfig, verify_token: newVerifyToken });
+  showToast('Verify Token generated successfully!', 'success');
+};
+
+const copyToClipboard = async (text: string, fieldName: string) => {
+  try {
+    await navigator.clipboard.writeText(text);
+    showToast(`${fieldName} copied to clipboard!`, 'success');
+  } catch (err) {
+    showToast('Failed to copy to clipboard', 'error');
+  }
 };
 
 const handleWaConfigSubmit = async (e) => {
@@ -254,7 +292,7 @@ const handleWaConfigSubmit = async (e) => {
   setWaConfigError('');
   setWaConfigSuccess(false);
   try {
-    await axios.post('/api/routes/whatsapp/configure-whatsapp', waConfig);
+    const res = await axios.post('/api/routes/whatsapp/configure-whatsapp', waConfig);
     setWaConfigSuccess(true);
     showToast('WhatsApp configuration saved!', 'success');
     setIsConnected(true);
@@ -305,7 +343,18 @@ const renderSetupTab = () => (
                 <div className="form-row">
                   <div className="form-group">
                     <label>Client ID</label>
-                    <input name="client_id" type="text" placeholder="Enter your Client ID" value={waConfig.client_id} onChange={handleWaConfigChange} required />
+                    <div className="input-with-button">
+                      <input name="client_id" type="text" placeholder="Enter your Client ID" value={waConfig.client_id} onChange={handleWaConfigChange} required />
+                      <button type="button" className="btn btn-generate" onClick={generateClientId} title="Generate Random Client ID">
+                        <BiRefresh />
+                        Generate
+                      </button>
+                      {waConfig.client_id && clientIdGenerated && (
+                        <button type="button" className="btn btn-copy" onClick={() => copyToClipboard(waConfig.client_id, 'Client ID')} title="Copy Client ID">
+                          <BiCopy />
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <div className="form-group">
                     <label>Phone ID</label>
@@ -319,7 +368,18 @@ const renderSetupTab = () => (
                   </div>
                   <div className="form-group">
                     <label>Verify Token</label>
-                    <input name="verify_token" type="text" placeholder="Enter your Verify Token" value={waConfig.verify_token} onChange={handleWaConfigChange} required />
+                    <div className="input-with-button">
+                      <input name="verify_token" type="text" placeholder="Enter your Verify Token" value={waConfig.verify_token} onChange={handleWaConfigChange} required />
+                      <button type="button" className="btn btn-generate" onClick={generateVerifyToken} title="Generate Random Verify Token">
+                        <BiRefresh />
+                        Generate
+                      </button>
+                      {waConfig.verify_token && (
+                        <button type="button" className="btn btn-copy" onClick={() => copyToClipboard(waConfig.verify_token, 'Verify Token')} title="Copy Verify Token">
+                          <BiCopy />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
                 {waConfigError && <div className="form-error">{waConfigError}</div>}

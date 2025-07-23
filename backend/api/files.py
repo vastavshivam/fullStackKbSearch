@@ -5,15 +5,14 @@
 # ==========================================
 # File: backend/api/files.py    
 # ==========================================
-from fastapi import APIRouter, UploadFile, File, HTTPException, BackgroundTasks
+from fastapi import APIRouter, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse
 from pathlib import Path
-from utils.embed_store import chunk_text, save_embeddings, VECTOR_DIR
+from utils.embed_store import chunk_text, save_embeddings
 import shutil
 import os
-import json
 from training.fine_tune import fine_tune
-from utils.file_parser import parse_file, clean_json, extract_text_content
+from utils.file_parser import parse_file, clean_json
 from utils.email_notify import send_upload_notification
 
 router = APIRouter()
@@ -25,7 +24,7 @@ ALLOWED_EXTENSIONS = {".csv", ".json", ".xlsx" , ".txt", ".pdf", ".jpg", ".jpeg"
 MAX_FILE_SIZE_MB = 10
 
 @router.post("/upload", summary="Upload training/WhatsApp file")
-async def upload_file(background_tasks: BackgroundTasks, file: UploadFile = File(...)):
+async def upload_file(file: UploadFile = File(...)):
     # Validate extension
     ext = Path(file.filename).suffix.lower()
     print(f"File extension===============>: {ext}")
@@ -54,14 +53,10 @@ async def upload_file(background_tasks: BackgroundTasks, file: UploadFile = File
     
      # 🔁 Embed full content for retrieval
     try:  
-        # Extract full text content from the file
-        full_text = extract_text_content(file_path)
-        if full_text:
-            chunks = chunk_text(full_text)
-            save_embeddings(file_id=file.filename, chunks=chunks)
-            print(f"✅ Created embeddings for {file.filename} with {len(chunks)} chunks")
-        else:
-            print(f"⚠️ No text content extracted from {file.filename}")
+
+        full_text = parse_file(file_path)  # No limit here
+        chunks = chunk_text(full_text)
+        save_embeddings(file_id=file.filename, chunks=chunks)
     except Exception as e:
         print(f"[Embedding Error]: {e}")  # or raise a warning log
 
@@ -76,36 +71,6 @@ async def upload_file(background_tasks: BackgroundTasks, file: UploadFile = File
         "filename": file.filename,
         "preview": preview  # Optional: parsed preview from CSV/JSON/XLSX
     })
-
-@router.get("/kb/entries", summary="List knowledge base entries")
-async def list_kb_entries():
-    """List all uploaded knowledge base files with their metadata"""
-    try:
-        entries = []
-        
-        # Check upload directory
-        if UPLOAD_DIR.exists():
-            for file_path in UPLOAD_DIR.iterdir():
-                if file_path.is_file():
-                    # Check if vector embeddings exist
-                    vector_file = Path(VECTOR_DIR) / f"{file_path.name}.index"
-                    chunks_file = Path(VECTOR_DIR) / f"{file_path.name}_chunks.pkl"
-                    
-                    entry = {
-                        "filename": file_path.name,
-                        "size": file_path.stat().st_size,
-                        "created_at": file_path.stat().st_mtime,
-                        "has_embeddings": vector_file.exists() and chunks_file.exists(),
-                        "file_type": file_path.suffix.lower()
-                    }
-                    entries.append(entry)
-        
-        return JSONResponse(content={
-            "entries": entries,
-            "total": len(entries)
-        })
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to list knowledge base entries: {str(e)}")
 
 # async def upload_file(file: UploadFile = File(...)):
 #     # Validate extension

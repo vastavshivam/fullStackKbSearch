@@ -51,19 +51,23 @@ export default function Sidebar({
       <div className="sidebar-header">
         <div className="logo-wrapper">
           {sidebarOpen ? (
-            <>
-              <img
-                src="/logo192.png"
-                alt="AppG Logo"
-                className="sidebar-logo"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = 'none';
-                }}
-              />
-              <span className="logo-text">AppG</span>
-            </>
+            <img
+              src="/AppgallopLG.png"
+              alt="AppGallop Logo"
+              className="sidebar-logo-large"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
+            />
           ) : (
-            <BiRocket size={28} />
+            <img
+              src="/AppgallopSM.png"
+              alt="AppGallop Logo"
+              className="sidebar-logo-small"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
+            />
           )}
         </div>
 
