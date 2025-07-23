@@ -6,9 +6,12 @@ from sentence_transformers import SentenceTransformer
 import faiss, pickle, os, logging, torch
 from jose.exceptions import ExpiredSignatureError
 import httpx
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from utils.auth_utils import decode_jwt_token  # <-- Make sure you have this
-# Or define your decode_jwt_token function here
+from database.database import get_db
+from models.db_models import User
+from utils.auth_utils import decode_jwt_token
 
 router = APIRouter()
 auth_scheme = HTTPBearer()
@@ -26,11 +29,8 @@ model = AutoModelForCausalLM.from_pretrained(MODEL_PATH)
 chatbot = pipeline("text-generation", model=model, tokenizer=tokenizer)
 embedder = SentenceTransformer(VECTOR_MODEL_NAME)
 
-
 class ChatRequest(BaseModel):
     query: str
-    file_id: str
-
 
 def generate_clean_response(prompt, model, tokenizer):
     input_ids = tokenizer(prompt, return_tensors="pt").input_ids
@@ -51,12 +51,12 @@ def generate_clean_response(prompt, model, tokenizer):
         return output_text.split("Agent:")[-1].strip()
     return output_text.strip()
 
-
 @router.post("/vchat")
 async def chat(
     request: ChatRequest,
     credentials: HTTPAuthorizationCredentials = Depends(auth_scheme),
-    refresh_token: str = Query(None)
+    refresh_token: str = Query(None),
+    db: AsyncSession = Depends(get_db)
 ):
     try:
         try:
@@ -72,11 +72,20 @@ async def chat(
                 new_token = res.json()["token"]
                 payload = decode_jwt_token(new_token)
 
-        user_id = payload.get("sub", "anonymous")
+        user_id = payload.get("sub")
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Invalid token payload.")
+
         logger.info(f"👤 Authenticated user: {user_id}")
 
+        # ✅ Use email instead of id if user_id is an email
+        result = await db.execute(select(User).where(User.email == user_id))
+        user = result.scalar_one_or_none()
+        if not user or not user.file_id:
+            raise HTTPException(status_code=404, detail="No file_id found for this user.")
+
+        file_id = user.file_id
         query = request.query
-        file_id = request.file_id
         logger.info(f"🟢 Received query: {query} for file_id: {file_id}")
 
         index_path = os.path.join(VECTOR_DIR, f"{file_id}.index")

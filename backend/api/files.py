@@ -1,25 +1,62 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException, BackgroundTasks
+from fastapi import APIRouter, UploadFile, File, HTTPException, BackgroundTasks, Depends, Query
 from fastapi.responses import JSONResponse
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pathlib import Path
 from utils.embed_store import chunk_text, save_embeddings
-import shutil
+from utils.auth_utils import decode_jwt_token
+from jose.exceptions import ExpiredSignatureError
+import httpx
 import os
+from sqlalchemy import select
+
+from database.database import get_db
+from models.db_models import User
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from training.fine_tune import fine_tune
 from utils.file_parser import parse_file, clean_json
 from utils.email_notify import send_upload_notification
 
 router = APIRouter()
 
-UPLOAD_DIR = Path("uploads") 
+UPLOAD_DIR = Path("uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
 
-ALLOWED_EXTENSIONS = {".csv", ".json", ".xlsx" , ".txt", ".pdf", ".jpg", ".jpeg", ".png", ".gif", ".bmp"}
+auth_scheme = HTTPBearer()
+REFRESH_URL = "http://localhost:8000/auth/refresh"
+
+ALLOWED_EXTENSIONS = {".csv", ".json", ".xlsx", ".txt", ".pdf", ".jpg", ".jpeg", ".png", ".gif", ".bmp"}
 MAX_FILE_SIZE_MB = 10
 
+
 @router.post("/upload", summary="Upload training/WhatsApp file")
-async def upload_file(background_tasks: BackgroundTasks, file: UploadFile = File(...)):
+async def upload_file(
+    background_tasks: BackgroundTasks,
+    file: UploadFile = File(...),
+    credentials: HTTPAuthorizationCredentials = Depends(auth_scheme),
+    refresh_token: str = Query(None),
+    db: AsyncSession = Depends(get_db)
+):
+    # ─── JWT Decode ───
+    try:
+        try:
+            payload = decode_jwt_token(credentials.credentials)
+        except ExpiredSignatureError:
+            if not refresh_token:
+                raise HTTPException(status_code=401, detail="Token expired. Provide refresh_token.")
+            async with httpx.AsyncClient() as client:
+                res = await client.post(REFRESH_URL, json={"refresh_token": refresh_token})
+                if res.status_code != 200:
+                    raise HTTPException(status_code=401, detail="Refresh token invalid")
+                new_token = res.json()["token"]
+                payload = decode_jwt_token(new_token)
+
+        user_email = payload.get("sub", "anonymous")  # using email (string)
+    except Exception as e:
+        raise HTTPException(status_code=401, detail=f"Invalid token: {str(e)}")
+
+    # ─── File Type & Size Check ───
     ext = Path(file.filename).suffix.lower()
-    print(f"File extension===============>: {ext}")
     if ext not in ALLOWED_EXTENSIONS:
         raise HTTPException(status_code=400, detail=f"❌ Unsupported file type: {ext}")
 
@@ -29,18 +66,18 @@ async def upload_file(background_tasks: BackgroundTasks, file: UploadFile = File
         raise HTTPException(status_code=400, detail=f"❌ File too large (max {MAX_FILE_SIZE_MB}MB)")
 
     file_path = UPLOAD_DIR / file.filename
-    print(f"File path===============>: {file_path}")
     with open(file_path, "wb") as f:
         f.write(contents)
 
+    # ─── Parse Preview ───
     try:
         preview = parse_file(file_path, limit=5)
         preview = clean_json(preview)
-        print(f"Preview data===============>: {preview}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"❌ Failed to parse file: {str(e)}")
-    
-    try:  
+
+    # ─── Embedding and Save ───
+    try:
         full_text = parse_file(file_path)
         if isinstance(full_text, list):
             full_text = " ".join(
@@ -51,16 +88,34 @@ async def upload_file(background_tasks: BackgroundTasks, file: UploadFile = File
             full_text = " ".join(str(v) for v in full_text.values())
         elif not isinstance(full_text, str):
             full_text = str(full_text)
+
         chunks = chunk_text(full_text)
         save_embeddings(file_id=file.filename, chunks=chunks)
     except Exception as e:
         print(f"[Embedding Error]: {e}")
 
+    # ─── Update user's file_id in DB ───
+    try:
+        result = await db.execute(select(User).where(User.email == user_email))
+        user = result.scalar_one_or_none()
+        if user:
+            user.file_id = file.filename  # Store filename as file_id
+            await db.commit()
+        else:
+            raise HTTPException(status_code=404, detail="User not found")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"❌ Failed to update user with file_id: {str(e)}")
+
+    # ─── Optional: Background fine-tune ───
     # background_tasks.add_task(fine_tune)
+
+    # ─── Email Notification ───
     send_upload_notification("vastavshivam@gmai.com", "uploaded successfully.", body="File uploaded ...")
 
+    # ─── Return Response ───
     return JSONResponse(content={
         "message": f"✅ File {file.filename} uploaded successfully.",
-        "filename": file.filename,  # <-- Pass this to chat API as file_id
-        "preview": preview
+        "filename": file.filename,
+        "preview": preview,
+        "uploaded_by": user_email
     })

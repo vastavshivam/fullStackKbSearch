@@ -176,5 +176,27 @@ async def websocket_endpoint(websocket: WebSocket):
 
 # ───── Conversation History ─────
 @router.get("/history/{session_id}")
-def get_history(session_id: str):
-    return get_conversation_context(session_id)
+def get_history(
+    session_id: str,
+    credentials: HTTPAuthorizationCredentials = Depends(auth_scheme),
+    refresh_token: str = Query(None)
+):
+    try:
+        try:
+            payload = decode_jwt_token(credentials.credentials)
+        except ExpiredSignatureError:
+            if not refresh_token:
+                raise HTTPException(status_code=401, detail="Token expired. Provide refresh_token.")
+            with httpx.Client() as client:
+                res = client.post(REFRESH_URL, json={"refresh_token": refresh_token})
+                if res.status_code != 200:
+                    raise HTTPException(status_code=401, detail="Refresh token invalid")
+                new_token = res.json()["token"]
+                payload = decode_jwt_token(new_token)
+
+        # Optionally use user_id = payload.get("sub") to validate ownership
+        return get_conversation_context(session_id)
+
+    except Exception as e:
+        raise HTTPException(status_code=401, detail=f"Unauthorized: {str(e)}")
+
