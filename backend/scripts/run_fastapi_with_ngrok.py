@@ -2,10 +2,9 @@ import subprocess
 import time
 import requests
 import re
-
 # === CONFIG ===
-PORT = 8080  # Your FastAPI port
-UVICORN_CMD = f"uvicorn main:app --reload --port {PORT}"  # Change `main:app` to your FastAPI entrypoint
+PORT = 8082  # Your FastAPI port
+UVICORN_CMD = f"uvicorn backend.main:app --reload --port {PORT}"  # Use correct module path
 ngrok_path = "./frontend/node_modules/.bin/ngrok"
 def start_fastapi():
     print(" Starting FastAPI server...")
@@ -27,7 +26,7 @@ def get_ngrok_url():
         print(" Failed to fetch ngrok URL:", e)
     return None
 
-def main():
+def main1():
     fastapi_proc = start_fastapi()
     ngrok_proc = start_ngrok(PORT)
 
@@ -53,4 +52,4 @@ def main():
         ngrok_proc.terminate()
 
 if __name__ == "__main__":
-    main()
+    main1()

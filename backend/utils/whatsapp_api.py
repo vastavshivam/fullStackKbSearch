@@ -9,17 +9,26 @@
 # ==========================================
 import requests
 import json
+import httpx
 import os
 from fastapi import Request, HTTPException
 from models.db_models import ChatHistory
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
-WHATSAPP_TOKEN = os.getenv("WHATSAPP_TOKEN")
-WHATSAPP_PHONE_ID = os.getenv("WHATSAPP_PHONE_ID")
-WHATSAPP_API_URL = f"https://graph.facebook.com/v17.0/{WHATSAPP_PHONE_ID}/messages"
+CURRENT_API_VERSION = "v23.0" 
+BASE_URL = f"https://graph.facebook.com/{CURRENT_API_VERSION}"
+
+# WHATSAPP_TOKEN = os.getenv("WHATSAPP_TOKEN")
+WHATSAPP_TOKEN = "EAAJZCYMYFU3QBPJylpZCuqX5NyOGeVVV5ZAtoLZCSDQDekBZAlsByIoHZBKK4uFbcjDp9eUO4NvF02N8dEP0mvcDFT9zj1CoHIYOMiKlzNIBTfvaFQ1qNVPXZCxCIjG0fSonCZAM0ZCveWzFsIT4JFy3rCaikiRZAF8rqAlMuGYwyysTIwVfhowoLuHup0imqFJZCSUk1eoFriK19R0qyzzQI2iBe86ZAtlWDFu4jDIgpouAEZC5L3DFUpAHKoWTidqvZBJyMZD"
+# WHATSAPP_PHONE_ID = os.getenv("WHATSAPP_PHONE_ID")
+WHATSAPP_PHONE_ID = "719977304529790"  # Replace with your actual phone ID
+ # Update as needed
+WHATSAPP_API_URL = f"https://graph.facebook.com/{CURRENT_API_VERSION}/{WHATSAPP_PHONE_ID}"
 
 # ✅ Verify Webhook Token (GET)
 def verify_webhook(mode: str, token: str, challenge: str):
-    VERIFY_TOKEN = os.getenv("WHATSAPP_VERIFY_TOKEN", "my_secret_token")
+    # VERIFY_TOKEN = os.getenv("WHATSAPP_VERIFY_TOKEN", "my_secret_token")
+    VERIFY_TOKEN = "9a4bfcf0a3d96d86b873ee23e8e09314"
     if mode == "subscribe" and token == VERIFY_TOKEN:
         return int(challenge)
     raise HTTPException(status_code=403, detail="Webhook verification failed")
@@ -122,7 +131,8 @@ def send_whatsapp_message(to: str, message: str):
     return response.json()
 
 def send_whatsapp_message_dynamic(token: str, phone_id: str, to: str, message: str):
-    url = f"https://graph.facebook.com/v17.0/{phone_id}/messages"
+    # url = f"https://graph.facebook.com/v18.0/{phone_id}/messages"
+    url = f"{BASE_URL}/{phone_id}/messages"
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json"
@@ -137,3 +147,70 @@ def send_whatsapp_message_dynamic(token: str, phone_id: str, to: str, message: s
     if response.status_code != 200:
         print("WhatsApp API Error:", response.text)
     return response.json()
+
+
+async def send_whatsapp_message_dynamic(token, phone_id, to, message):
+    url = f"{BASE_URL}/{phone_id}/messages"
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "messaging_product": "whatsapp",
+        "to": to,
+        "type": "text",
+        "text": {"body": message}
+    }
+    async with httpx.AsyncClient() as client:
+        response = await client.post(url, json=payload, headers=headers)
+        return response.json()
+
+async def mark_message_as_read(token, message_id):
+    url = f"{BASE_URL}/messages"
+    headers = {"Authorization": f"Bearer {token}"}
+    payload = {"messaging_product": "whatsapp", "status": "read", "message_id": message_id}
+    async with httpx.AsyncClient() as client:
+        return (await client.post(url, json=payload, headers=headers)).json()
+    
+
+
+
+
+async def send_template_message(token, phone_id, to, template_name, language_code, components=None):
+    url = f"{BASE_URL}/{phone_id}/messages"
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+    payload = {
+        "messaging_product": "whatsapp",
+        "to": to,
+        "type": "template",
+        "template": {
+            "name": template_name,
+            "language": {"code": language_code}
+        }
+    }
+    async with httpx.AsyncClient() as client:
+        return (await client.post(url, json=payload, headers=headers)).json()
+    
+async def get_message_status(token, message_id):
+    url = f"{BASE_URL}/{message_id}"
+    headers = {"Authorization": f"Bearer {token}"}
+    async with httpx.AsyncClient() as client:
+        return (await client.get(url, headers=headers)).json()
+
+async def get_business_profile(token, phone_id):
+    url = f"{BASE_URL}/{phone_id}/whatsapp_business_profile"
+    headers = {"Authorization": f"Bearer {token}"}
+    async with httpx.AsyncClient() as client:
+        return (await client.get(url, headers=headers)).json()
+
+async def subscribe_webhook(app_id, token, webhook_url, verify_token):
+    url = f"https://graph.facebook.com/v19.0/{app_id}/subscriptions"
+    headers = {"Authorization": f"Bearer {token}"}
+    payload = {
+        "object": "whatsapp_business_account",
+        "callback_url": webhook_url,
+        "verify_token": verify_token,
+        "fields": "messages"
+    }
+    async with httpx.AsyncClient() as client:
+        return (await client.post(url, data=payload, headers=headers)).json()

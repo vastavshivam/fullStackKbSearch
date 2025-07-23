@@ -34,7 +34,7 @@ async def get_db():
         async def endpoint(db: AsyncSession = Depends(get_db)):
             ...
     """
-    db = SessionLocal()
+    # db = SessionLocal()
     async with async_session() as session:
         try:
             yield session

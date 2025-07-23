@@ -82,12 +82,16 @@ class ClientConfig(Base):
     __tablename__ = "client_config"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    client_id = Column(String, nullable=False)
-    sender = Column(String, nullable=False)  # e.g., 'user' or 'bot'
-    user_number = Column(String, nullable=False)  # WhatsApp number
-    message = Column(Text, nullable=False)
-    message_type = Column(String, default="text")  # Optional: 'text', 'image', etc.
-    direction = Column(String, nullable=False)  # 'incoming' or 'outgoing'
+    client_id = Column(String, unique=True, index=True, nullable=False)  # Change to Integer if your DB column is INT
+    sender = Column(String, nullable=True)
+    user_number = Column(String, nullable=True)
+    phone_id = Column(String, nullable=False)
+    message = Column(Text, nullable=True)
+    token = Column(String, nullable=False)
+    verify_token = Column(String, nullable=False)
+    message_type = Column(String, default="text")
+    status = Column(String, default="active", nullable=True)  # e.g., 'active', 'inactive'
+    direction = Column(String, nullable=True)
     timestamp = Column(DateTime(timezone=True), server_default=func.now())
 
 class ChatHistory(Base):
