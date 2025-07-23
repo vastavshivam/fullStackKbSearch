@@ -4,6 +4,23 @@ import axios from 'axios';
 // Use relative paths for proxy support
 const API_BASE = '';
 
+// Set up axios defaults
+axios.defaults.baseURL = API_BASE;
+
+// Add token to requests if available
+axios.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
 export const uploadFile = (formData) => {
   return axios.post(`${API_BASE}/api/files/upload`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
@@ -70,4 +87,17 @@ export const login = (email, password, role) => {
     password,
     role,
   });
+};
+
+// Chat session API functions
+export const createChatSession = (userId) => {
+  return axios.post(`/api/chat/session`, { user_id: userId });
+};
+
+export const storeChatMessage = (sessionId, sender, message) => {
+  return axios.post(`/api/chat/message`, { session_id: sessionId, sender, message });
+};
+
+export const getChatHistory = (sessionId) => {
+  return axios.get(`/api/chat/history/${sessionId}`);
 };

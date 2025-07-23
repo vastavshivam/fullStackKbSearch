@@ -4,9 +4,9 @@
   display: flex;
   height: 100vh;
   width: 100%;
-  background: linear-gradient(135deg, #e8f4fd 0%, #b8dcf2 100%);
+  overflow-y: auto;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   font-family: 'Segoe UI', 'Trebuchet MS', sans-serif;
-  overflow: hidden;
   position: relative;
 }
 
@@ -16,10 +16,11 @@
   flex-direction: column;
   justify-content: space-between;
   padding: 60px 50px;
-  background: linear-gradient(135deg, #e8f4fd 0%, #b8dcf2 40%, #87ceeb 100%);
-  color: #1e40af;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 40%, #e2e8f0 100%);
+  color: #334155;
   position: relative;
   overflow: hidden;
+  border-right: 1px solid #e2e8f0;
 }
 
 .brand-section {
@@ -30,34 +31,48 @@
 .login-logo {
   display: flex;
   justify-content: flex-start;
-  margin-bottom: 30px;
+  margin-bottom: 50px;
+}
+
+.logo-image {
+  height: 200px;
+  width: auto;
+  max-width: 400px;
+  object-fit: contain;
+  border-radius: 16px;
+  transition: transform 0.2s ease;
+  background: transparent;
+}
+
+.logo-image:hover {
+  transform: scale(1.05);
 }
 
 .logo-icon {
-  background: rgba(37, 99, 235, 0.15);
+  background: rgba(99, 102, 241, 0.1);
   padding: 12px;
   border-radius: 16px;
   backdrop-filter: blur(10px);
-  color: #2563eb;
-  border: 1px solid rgba(37, 99, 235, 0.2);
+  color: #6366f1;
+  border: 1px solid rgba(99, 102, 241, 0.15);
 }
 
 .brand-name {
-  font-size: 42px;
-  font-weight: 700;
-  margin: 0 0 16px 0;
-  letter-spacing: -1px;
-  color: #1e40af;
-  text-shadow: 0 2px 4px rgba(30, 64, 175, 0.1);
+  font-size: 22px;
+  font-weight: 500;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.3px;
+  color: #64748b;
+  text-shadow: 0 1px 2px rgba(30, 41, 59, 0.1);
 }
 
 .brand-tagline {
-  font-size: 18px;
-  opacity: 0.8;
+  font-size: 14px;
+  opacity: 0.7;
   margin: 0 0 40px 0;
   max-width: 350px;
   line-height: 1.6;
-  color: #3b82f6;
+  color: #64748b;
 }
 
 .login-benefits {
@@ -73,37 +88,38 @@
   align-items: flex-start;
   gap: 20px;
   padding: 24px 28px;
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.9);
   border-radius: 20px;
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(226, 232, 240, 0.8);
   transition: all 0.3s ease;
-  box-shadow: 0 8px 32px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 4px 20px rgba(100, 116, 139, 0.08);
 }
 
 .benefit-item:hover {
-  transform: translateY(-4px);
-  background: rgba(255, 255, 255, 0.85);
-  box-shadow: 0 12px 40px rgba(37, 99, 235, 0.15);
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 8px 30px rgba(100, 116, 139, 0.12);
+  border-color: rgba(99, 102, 241, 0.2);
 }
 
 .benefit-icon {
-  background: rgba(37, 99, 235, 0.1);
+  background: rgba(99, 102, 241, 0.1);
   padding: 12px;
   border-radius: 12px;
   font-size: 20px;
   backdrop-filter: blur(10px);
   flex-shrink: 0;
   margin-top: 4px;
-  color: #2563eb;
-  border: 1px solid rgba(37, 99, 235, 0.15);
+  color: #6366f1;
+  border: 1px solid rgba(99, 102, 241, 0.15);
 }
 
 .benefit-item h4 {
   margin: 0 0 8px 0;
   font-size: 18px;
   font-weight: 600;
-  color: #1e40af;
+  color: #1e293b;
 }
 
 .benefit-item p {
@@ -126,10 +142,10 @@
 
 .floating-shape {
   position: absolute;
-  background: rgba(37, 99, 235, 0.1);
+  background: rgba(99, 102, 241, 0.06);
   border-radius: 50%;
   backdrop-filter: blur(5px);
-  border: 1px solid rgba(37, 99, 235, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.1);
 }
 
 .shape-1 {
@@ -138,7 +154,7 @@
   top: 15%;
   right: -75px;
   animation: float 8s ease-in-out infinite;
-  background: linear-gradient(135deg, rgba(37, 99, 235, 0.15), rgba(147, 197, 253, 0.1));
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(165, 180, 252, 0.06));
 }
 
 .shape-2 {
@@ -147,7 +163,7 @@
   bottom: 25%;
   right: 15%;
   animation: float 10s ease-in-out infinite reverse;
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(191, 219, 254, 0.15));
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.06), rgba(191, 219, 254, 0.08));
 }
 
 .shape-3 {
@@ -156,7 +172,7 @@
   top: 55%;
   right: 8%;
   animation: float 12s ease-in-out infinite;
-  background: linear-gradient(135deg, rgba(96, 165, 250, 0.1), rgba(219, 234, 254, 0.12));
+  background: linear-gradient(135deg, rgba(129, 140, 248, 0.06), rgba(219, 234, 254, 0.08));
 }
 
 @keyframes float {
@@ -463,48 +479,6 @@
   }
 }
 
-/* Features Preview - Cleaner Design */
-.features-preview {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-top: 40px;
-}
-
-.feature-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 0;
-  color: #1e40af;
-}
-
-.feature-icon {
-  font-size: 18px;
-  color: #2563eb;
-  background: rgba(37, 99, 235, 0.1);
-  padding: 8px;
-  border-radius: 8px;
-  backdrop-filter: blur(5px);
-}
-
-.feature-item span {
-  font-weight: 500;
-  font-size: 14px;
-}
-
-/* Login Header - Cleaner */
-.login-header {
-  text-align: center;
-  margin-bottom: 32px;
-}
-
-.login-subtitle {
-  color: #6b7280;
-  font-size: 14px;
-  margin-top: 8px;
-}
-
 @media (max-width: 480px) {
   .login-card {
     padding: 24px 20px;
@@ -518,7 +492,12 @@
     padding: 14px 14px 14px 44px;
   }
   
-  .features-preview {
-    margin-top: 24px;
+  .logo-image {
+    height: 140px;
+    max-width: 280px;
+  }
+  
+  .brand-name {
+    font-size: 18px;
   }
 }

@@ -1,7 +1,7 @@
 # This file contains Pydantic schemas for the application.
 
-from pydantic import BaseModel, EmailStr, Field
-from typing import Optional, List, Union
+from pydantic import BaseModel, Field
+from typing import Optional, List, Union, Dict, Any
 from datetime import datetime
 from enum import Enum  
 
@@ -10,7 +10,7 @@ from enum import Enum
 
 class UserBase(BaseModel):
     name: str
-    email: EmailStr
+    email: str  # Changed from EmailStr to str for MongoDB compatibility
     password: str
     role: str  # <-- add this
 
@@ -62,6 +62,7 @@ class ItemResponse(ItemBase):
 class Token(BaseModel):
     access_token: str
     token_type: str
+    user: Optional[Dict[str, Any]] = None
 
 
 class TokenData(BaseModel):
@@ -133,13 +134,15 @@ class EscalationCreate(BaseModel):
 
 class UserCreate(BaseModel):
     name: str
-    email: EmailStr
+    email: str  # Changed from EmailStr to str for MongoDB compatibility
     password: str
     role: RoleEnum = Field(default=RoleEnum.user)
 
 class UserOut(BaseModel):
-    id: str  # Supabase uses UUID strings
-    email: str
+    id: str  # Changed from int to str for MongoDB ObjectId compatibility
+    name: str
+    email: str  # Changed from EmailStr to str for MongoDB compatibility
+    is_active: bool
 
     class Config:
         # orm_mode = True

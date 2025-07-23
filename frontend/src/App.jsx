@@ -18,6 +18,7 @@ import JourneyDetail from './pages/JourneyDetail'; // ✅ New page
 import Integrations from './pages/Integrations'; // ✅ New integrations page
 import Layout from './components/Layout';
 import TemplatePage from './pages/TemplatePage';
+import { AuthProvider } from './hooks/useAuth';
 // import PrivateRoute from './components/PrivateRoute';
 
 function App() {
@@ -28,29 +29,31 @@ function App() {
   }
   
   return (
-    <WidgetConfigProvider>
-      <Router>
-        <div className="App">
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            {/* Commented out PrivateRoute for now */}
-            <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
-            <Route path="/chat" element={<Layout><Chat /></Layout>} />
-            <Route path="/knowledge-base" element={<Layout><KnowledgeBase /></Layout>} />
-            <Route path="/user-dashboard" element={<Layout><UserDashboard /></Layout>} />
-            <Route path="/campaigns" element={<Layout><Campaigns /></Layout>} />
-            <Route path="/journeys" element={<Layout><Journeys /></Layout>} />
-            <Route path="/journeys/:id" element={<Layout><JourneyDetail /></Layout>} />
-            <Route path="/settings" element={<Layout><Settings /></Layout>} />
-            <Route path="/integrations" element={<Layout><Integrations /></Layout>} />
-            <Route path="/template" element={<Layout><TemplatePage /></Layout>} />
-            <Route path="/" element={<Login />} />
-          </Routes>
-          <ChatWidgetConditional />
-        </div>
-      </Router>
-    </WidgetConfigProvider>
+    <AuthProvider>
+      <WidgetConfigProvider>
+        <Router>
+          <div className="App">
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              {/* Commented out PrivateRoute for now */}
+              <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
+              <Route path="/chat" element={<Layout><Chat /></Layout>} />
+              <Route path="/knowledge-base" element={<Layout><KnowledgeBase /></Layout>} />
+              <Route path="/user-dashboard" element={<Layout><UserDashboard /></Layout>} />
+              <Route path="/campaigns" element={<Layout><Campaigns /></Layout>} />
+              <Route path="/journeys" element={<Layout><Journeys /></Layout>} />
+              <Route path="/journeys/:id" element={<Layout><JourneyDetail /></Layout>} />
+              <Route path="/settings" element={<Layout><Settings /></Layout>} />
+              <Route path="/integrations" element={<Layout><Integrations /></Layout>} />
+              <Route path="/template" element={<Layout><TemplatePage /></Layout>} />
+              <Route path="/" element={<Login />} />
+            </Routes>
+            <ChatWidgetConditional />
+          </div>
+        </Router>
+      </WidgetConfigProvider>
+    </AuthProvider>
   );
 }
 

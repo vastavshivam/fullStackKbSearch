@@ -24,17 +24,71 @@
 }
 
 .chat-sidebar {
-  width: 280px;
+  width: 320px;
   background-color: var(--bg-light-secondary);
   color: var(--text-dark-secondary);
   padding: 20px;
   border-right: 1px solid var(--border-light);
   overflow-y: auto;
+  transition: width 0.3s ease;
+}
+
+.chat-sidebar.collapsed {
+  width: 100px;
+  padding: 20px 15px;
+}
+
+.sidebar-header {
+  margin-bottom: 20px;
+}
+
+.sidebar-logo-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.sidebar-logo-large {
+  height: 80px;
+  width: auto;
+  max-width: 250px;
+}
+
+.sidebar-logo-small {
+  height: 60px;
+  width: 60px;
+  cursor: pointer;
+  border-radius: 12px;
+  object-fit: contain;
+  margin: 0 auto;
+  display: block;
+  transition: transform 0.2s ease;
+}
+
+.sidebar-logo-small:hover {
+  transform: scale(1.1);
+}
+
+.collapse-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: var(--text-dark);
+  padding: 5px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.collapse-btn:hover {
+  background-color: #e4e7ec;
 }
 
 .chat-history {
   display: flex;
   flex-direction: column;
+  height: 100%;
 }
 
 .chat-history h4 {
@@ -47,6 +101,7 @@
   list-style: none;
   padding: 0;
   margin: 0;
+  flex: 1;
 }
 
 .chat-history li {
@@ -56,6 +111,9 @@
   transition: background 0.2s ease;
   background: var(--bg-light-card);
   color: var(--text-dark);
+  margin-bottom: 4px;
+  font-size: 13px;
+  line-height: 1.4;
 }
 
 .chat-history li:hover {
@@ -65,6 +123,8 @@
 .no-history {
   font-size: 13px;
   color: #888;
+  text-align: center;
+  margin-top: 20px;
 }
 
 .new-chat {
@@ -77,6 +137,7 @@
   cursor: pointer;
   margin-bottom: 16px;
   transition: background-color 0.2s ease;
+  font-size: 14px;
 }
 
 .new-chat:hover {
@@ -95,6 +156,17 @@
   padding: 20px;
   background-color: #ffffff0a;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.header-logo {
+  height: 65px;
+  width: auto;
+  max-width: 280px;
+  object-fit: contain;
+  background: transparent;
 }
 
 .chat-body {

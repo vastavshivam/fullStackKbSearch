@@ -1,26 +1,53 @@
 import React, { useState } from 'react';
 import './Login.css';
-import { FaEnvelope, FaLock, FaRocket, FaShieldAlt } from 'react-icons/fa';
+import { FaEnvelope, FaLock, FaBolt, FaChartLine, FaFish, FaShieldAlt, FaRocket } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from "../hooks/useAuth";
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [role, setRole] = useState('user');
+  const [role, setRole] = useState('admin');
   const navigate = useNavigate();
+  const { login } = useAuth();
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    if (!email || !password || !role) {
+      setError('Please enter email, password and role.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const success = await login(email, password, role);
+      
+      if (success) {
+        navigate('/dashboard');
+      } else {
+        setError('Invalid credentials or role mismatch.');
+      }
+    } catch (err) {
+      setError('An error occurred during login.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const Logo = () => (
     <div className="login-logo">
-      <FaRocket size={40} className="logo-icon" />
+      <img src="/AppgallopLG.png" alt="AppGallop Logo" className="logo-image" />
     </div>
   );
 
   const WelcomeMessage = () => (
     <>
-      <h2 className="login-title">Welcome to AppG</h2>
-      <p className="login-subtext">Your gateway to intelligent automation.</p>
+      <h2 className="login-title">Welcome to AppGallop</h2>
+      <p className="login-subtext">Access your intelligent platform and manage your business operations with ease.</p>
     </>
   );
 
@@ -41,7 +68,7 @@ export default function Login() {
         </div>
       </div>
       <div className="benefit-item">
-        <FaRocket className="benefit-icon" />
+        <FaChartLine className="benefit-icon" />
         <div>
           <h4>Fast Performance</h4>
           <p>Get instant results with our optimized platform</p>
@@ -55,34 +82,26 @@ export default function Login() {
       <div className="login-left-panel">
         <div className="brand-section">
           <Logo />
-          <h1 className="brand-name">AppG</h1>
-          <p className="brand-tagline">Your intelligent business platform</p>
+          <h1 className="brand-name">AppGallop</h1>
+          <p className="brand-tagline">Intelligent business solutions at your fingertips</p>
         </div>
-        <div className="features-preview">
-          <div className="feature-item">
-            <FaRocket className="feature-icon" />
-            <span>Lightning Fast</span>
-          </div>
-          <div className="feature-item">
-            <FaShieldAlt className="feature-icon" />
-            <span>Secure & Private</span>
-          </div>
+        <Benefits />
+        <div className="decorative-elements">
+          <div className="floating-shape shape-1"></div>
+          <div className="floating-shape shape-2"></div>
+          <div className="floating-shape shape-3"></div>
         </div>
       </div>
 
       <div className="login-right-panel">
         <div className="login-card">
-          <div className="login-header">
-            <h2 className="login-title">Welcome Back</h2>
-            <p className="login-subtitle">Sign in to your account</p>
-          </div>
-          
+          <WelcomeMessage />
           {error && <div className="login-error">{typeof error === 'string' ? error : 'An error occurred'}</div>}
           <form onSubmit={async (e) => {
             e.preventDefault();
             setLoading(true);
             try {
-              const res = await fetch('/api/auth/login', {
+              const res = await fetch('http://localhost:8004/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password, role }),
