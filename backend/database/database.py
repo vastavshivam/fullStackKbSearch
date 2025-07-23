@@ -6,7 +6,7 @@ from sqlalchemy.pool import NullPool
 
 
 # Update with your local DB credentials
-DATABASE_URL = "postgresql+asyncpg://postgres:root@localhost:5432/support_db"
+DATABASE_URL = "postgresql+asyncpg://postgres:12345@localhost:5432/support_db"
 
 # Create async engine
 engine = create_async_engine(

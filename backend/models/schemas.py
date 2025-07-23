@@ -13,6 +13,7 @@ class UserBase(BaseModel):
     email: EmailStr
     password: str
     role: str  # <-- add this
+    file_id: str
 
 class RoleEnum(str, Enum):
     user = "user"
