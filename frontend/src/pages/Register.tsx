@@ -51,7 +51,7 @@ export default function Register() {
 
   const Logo = () => (
     <div className="login-logo">
-      <img src="/AppgallopLG.png" alt="AppGallop Logo" className="logo-image" />
+      <img src="/AppgallopLG1.png" alt="AppGallop Logo" className="logo-image" />
     </div>
   );
 
