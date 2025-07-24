@@ -33,12 +33,20 @@ def get_password_hash(password):
 
 async def authenticate_user(db: AsyncSession, email: str, password: str, role: str):
     """
-    Temporarily hardcoded authentication for development.
+    Enhanced authentication for development with proper role handling.
     """
-    if email == "krish.ishaan@gmail.com" and password == "root":
-        return schemas.UserOut(id=1, name="Krish Ishaan", email=email, is_active=True)
+    # Special user with both admin and user access
+    if email == "krish.ishaan@gmail.com" and password == "root123":
+        # Return user with the requested role
+        return schemas.UserOut(
+            id=1, 
+            name="Krish Ishaan", 
+            email=email, 
+            is_active=True,
+            role=role  # Return the role that was requested
+        )
 
-    # Original logic
+    # Original logic for other users
     user = await get_user_by_email(db, email)
     if not user:
         return None

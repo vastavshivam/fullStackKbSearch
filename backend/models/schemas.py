@@ -1,7 +1,7 @@
 # This file contains Pydantic schemas for the application.
 
-from pydantic import BaseModel, Field
-from typing import Optional, List, Union, Dict, Any
+from pydantic import BaseModel, EmailStr, Field
+from typing import Optional, List, Union
 from datetime import datetime
 from enum import Enum  
 
@@ -10,7 +10,7 @@ from enum import Enum
 
 class UserBase(BaseModel):
     name: str
-    email: str  # Changed from EmailStr to str for MongoDB compatibility
+    email: EmailStr
     password: str
     role: str  # <-- add this
 
@@ -62,7 +62,8 @@ class ItemResponse(ItemBase):
 class Token(BaseModel):
     access_token: str
     token_type: str
-    user: Optional[Dict[str, Any]] = None
+    role: Optional[str] = None
+    user: Optional[dict] = None
 
 
 class TokenData(BaseModel):
@@ -134,15 +135,16 @@ class EscalationCreate(BaseModel):
 
 class UserCreate(BaseModel):
     name: str
-    email: str  # Changed from EmailStr to str for MongoDB compatibility
+    email: EmailStr
     password: str
     role: RoleEnum = Field(default=RoleEnum.user)
 
 class UserOut(BaseModel):
-    id: str  # Changed from int to str for MongoDB ObjectId compatibility
+    id: int
     name: str
-    email: str  # Changed from EmailStr to str for MongoDB compatibility
+    email: EmailStr
     is_active: bool
+    role: Optional[str] = None
 
     class Config:
         # orm_mode = True

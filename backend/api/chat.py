@@ -69,6 +69,27 @@ async def websocket_endpoint(websocket: WebSocket):
             break
 
 
+@router.post("/session")
+async def create_chat_session(request: dict):
+    """Create a new chat session"""
+    user_id = request.get("user_id", "anonymous")
+    # Generate a unique session ID
+    import uuid
+    session_id = str(uuid.uuid4())
+    
+    return {"session_id": session_id, "user_id": user_id, "status": "created"}
+
+@router.post("/message")
+async def store_chat_message(request: dict):
+    """Store a chat message"""
+    session_id = request.get("session_id")
+    sender = request.get("sender")
+    message = request.get("message")
+    
+    # Here you would typically save to database
+    # For now, just return success
+    return {"status": "stored", "session_id": session_id, "sender": sender}
+
 @router.get("/history/{session_id}")
 def get_history(session_id: str):
     return get_conversation_context(session_id)

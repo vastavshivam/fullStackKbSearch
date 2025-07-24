@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import './Register.css';
 import { FaEnvelope, FaLock, FaUser } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from "../hooks/useAuth";
 
 // You can use Boxicons or Bootstrap Icons by adding their CDN in public/index.html
 // Example for Boxicons: <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
@@ -10,13 +9,11 @@ import { useAuth } from "../hooks/useAuth";
 
 export default function Register() {
   const navigate = useNavigate();
-  const { register } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,20 +29,32 @@ export default function Register() {
       return;
     }
 
-    setLoading(true);
     try {
-      const success = await register(name, email, password);
-      
-      if (success) {
+      const res = await fetch('http://localhost:8004/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
         alert('✅ Registered! Now login.');
         navigate('/login');
       } else {
-        setError('Registration failed. Please try again.');
+        // Handle different error response formats
+        let errorMessage = 'Registration failed.';
+        if (data.detail) {
+          if (typeof data.detail === 'string') {
+            errorMessage = data.detail;
+          } else if (Array.isArray(data.detail) && data.detail.length > 0) {
+            errorMessage = data.detail.join(', ');
+          }
+        }
+        alert(`❌ ${errorMessage}`);
       }
     } catch (err) {
-      setError('An error occurred during registration.');
-    } finally {
-      setLoading(false);
+      alert('❌ An error occurred during registration.');
     }
   };
 
@@ -116,9 +125,7 @@ export default function Register() {
                 <input type="password" value={confirm} onChange={e => setConfirm(e.target.value)} placeholder="Confirm password..." />
               </div>
             </div>
-            <button className="login-btn" type="submit" disabled={loading}>
-              {loading ? 'Registering...' : 'Register'}
-            </button>
+            <button className="login-btn" type="submit">Register</button>
           </form>
           <div className="login-footer">
             <a href="/login">Already have an account? Login</a>

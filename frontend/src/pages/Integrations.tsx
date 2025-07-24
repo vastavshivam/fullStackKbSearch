@@ -248,7 +248,6 @@ const [waConfig, setWaConfig] = useState({
 const [waConfigLoading, setWaConfigLoading] = useState(false);
 const [waConfigSuccess, setWaConfigSuccess] = useState(false);
 const [waConfigError, setWaConfigError] = useState('');
-const [clientIdGenerated, setClientIdGenerated] = useState(false);
 
 const handleWaConfigChange = (e) => {
   setWaConfig({ ...waConfig, [e.target.name]: e.target.value });
@@ -267,7 +266,6 @@ const generateRandomToken = () => {
 const generateClientId = () => {
   const newClientId = generateRandomToken();
   setWaConfig({ ...waConfig, client_id: newClientId });
-  setClientIdGenerated(true);
   showToast('Client ID generated successfully!', 'success');
 };
 
@@ -349,7 +347,7 @@ const renderSetupTab = () => (
                         <BiRefresh />
                         Generate
                       </button>
-                      {waConfig.client_id && clientIdGenerated && (
+                      {waConfig.client_id && (
                         <button type="button" className="btn btn-copy" onClick={() => copyToClipboard(waConfig.client_id, 'Client ID')} title="Copy Client ID">
                           <BiCopy />
                         </button>

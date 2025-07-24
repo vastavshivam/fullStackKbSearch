@@ -9,10 +9,10 @@ from langchain_community.chat_message_histories import RedisChatMessageHistory
 from langchain.memory import ConversationBufferMemory
 
 # MongoDB setup
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
+MONGO_URI = os.getenv("MONGO_URI", "mongodb+srv://AppGallop:<appgallop123>@cluster0.tpatz5r.mongodb.net/")
 mongo_client = MongoClient(MONGO_URI)
 
-mongo_db = mongo_client["chat_db"]
+mongo_db = mongo_client["chat_support"]
 
 # Collections
 chat_logs_col = mongo_db["chat_logs"]
