@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  BiBarChartAlt2, BiRocket, BiGroup, BiEnvelope,
-  BiCog, BiCube, BiLayer, BiChevronRight, BiMenu, BiX
+  BiBarChartAlt2, BiUser, BiRocket, BiGroup, BiEnvelope,
+  BiCog, BiCube, BiLayer, BiChevronRight, BiChevronDown, BiChevronUp, BiMenu, BiX, BiPlug, BiMessageRounded
 } from 'react-icons/bi';
 import '../pages/Dashboard.css';
 
@@ -11,7 +11,7 @@ const sidebarLinks = [
   { label: 'Campaigns', icon: <BiRocket />, route: '/campaigns' },
   { label: 'Journeys', icon: <BiLayer />, route: '/Journeys' },
   { label: 'Audience', icon: <BiGroup />, route: '/audience' },
-  { label: 'Templates', icon: <BiEnvelope />, route: '/templates' },
+  { label: 'Template', icon: <BiEnvelope />, route: '/template' },
   { label: 'Content', icon: <BiCube />, route: '/content' },
   { label: 'Products', icon: <BiCube />, route: '/products' },
   { label: 'Settings', icon: <BiCog />, route: '/settings' },
@@ -29,10 +29,21 @@ export default function Sidebar({
   setSidebarOpen: (open: boolean) => void
 }) {
   const navigate = useNavigate();
+  const [showIntegrations, setShowIntegrations] = useState(false);
 
   const handleSidebarClick = (label: string, route: string) => {
     setActiveSidebar(label);
     if (route) navigate(route);
+  };
+
+  const handleIntegrationClick = () => {
+    setShowIntegrations(!showIntegrations);
+    setActiveSidebar('Integrations');
+  };
+
+  const handleSubItemClick = (label: string, route: string) => {
+    setActiveSidebar(label);
+    navigate(route);
   };
 
   return (
@@ -40,19 +51,23 @@ export default function Sidebar({
       <div className="sidebar-header">
         <div className="logo-wrapper">
           {sidebarOpen ? (
-            <>
-              <img
-                src="/logo192.png"
-                alt="Bird Corp Logo"
-                className="sidebar-logo"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = 'none';
-                }}
-              />
-              <span className="logo-text">Bird Corp.</span>
-            </>
+            <img
+              src="/AppgallopLG.png"
+              alt="AppGallop Logo"
+              className="sidebar-logo-large"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
+            />
           ) : (
-            <BiRocket size={28} />
+            <img
+              src="/AppgallopSM.png"
+              alt="AppGallop Logo"
+              className="sidebar-logo-small"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
+            />
           )}
         </div>
 
@@ -81,6 +96,34 @@ export default function Sidebar({
             )}
           </li>
         ))}
+
+        {/* Integrations as expandable menu with WhatsApp submenu */}
+        <li
+          className={`sidebar-link ${activeSidebar === 'Integrations' ? 'active' : ''}`}
+          onClick={handleIntegrationClick}
+          role="button"
+          tabIndex={0}
+        >
+          <span className="sidebar-icon"><BiPlug /></span>
+          {sidebarOpen && <span className="sidebar-label">Integrations</span>}
+          {sidebarOpen && (
+            showIntegrations ? <BiChevronDown className="sidebar-chevron" /> : <BiChevronRight className="sidebar-chevron" />
+          )}
+        </li>
+        {/* WhatsApp submenu, only visible if Integrations expanded */}
+        {showIntegrations && sidebarOpen && (
+          <li
+            className={`sidebar-link ${activeSidebar === 'WhatsApp' ? 'active' : ''}`}
+            onClick={() => handleSubItemClick('WhatsApp', '/integrations')}
+            role="button"
+            tabIndex={0}
+            style={{ paddingLeft: 32 }}
+          >
+            <span className="sidebar-icon"><BiMessageRounded /></span>
+            <span className="sidebar-label">WhatsApp</span>
+            {activeSidebar === 'WhatsApp' && <BiChevronRight className="sidebar-chevron" />}
+          </li>
+        )}
       </ul>
 
       {sidebarOpen && (

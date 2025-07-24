@@ -35,7 +35,9 @@ async def ask_question(data: AskRequest):
     output = model.generate(**inputs, max_new_tokens=150)
     answer = tokenizer.decode(output[0], skip_special_tokens=True)
 
-    return AskResponse(answer=answer.split("AI:")[-1].strip())
+    clean_answer = answer.split("AI:")[-1].lstrip().strip()
+    # return AskResponse(answer=answer.split("AI:")[-1].strip())
+    return AskResponse(answer=clean_answer)
 
 
 @router.post("/v1/ask", response_model=AskResponse)
@@ -49,8 +51,42 @@ async def ask_question(request: AskRequest):
         outputs = model.generate(**inputs, max_new_tokens=150, do_sample=True)
         answer = tokenizer.decode(outputs[0], skip_special_tokens=True)
 
-        return {"answer": answer.split("AI:")[-1].strip()}
+        clean_answer = answer.split("AI:")[-1].lstrip().strip()
+        return {"answer": clean_answer}
     except FileNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"❌ Failed: {str(e)}")
+
+
+@router.post("/static-chat")
+async def static_chat(request: dict):
+    """
+    Simple chat endpoint for general questions without specific file context
+    """
+    try:
+        question = request.get("question", "")
+        if not question:
+            raise HTTPException(status_code=400, detail="Question is required")
+        
+        # For static chat, we can use a default general context
+        prompt = f"You are AppGallop AI Assistant, a helpful and friendly AI chatbot. Answer the user's question in a conversational way.\n\nUser: {question}\nAssistant:"
+        
+        inputs = tokenizer(prompt, return_tensors="pt")
+        outputs = model.generate(
+            **inputs, 
+            max_new_tokens=100, 
+            do_sample=True, 
+            temperature=0.7,
+            pad_token_id=tokenizer.eos_token_id
+        )
+        answer = tokenizer.decode(outputs[0], skip_special_tokens=True)
+        
+        # Clean the answer
+        clean_answer = answer.split("Assistant:")[-1].lstrip().strip()
+        if not clean_answer or len(clean_answer) < 5:
+            clean_answer = "I'm doing well, thank you for asking! How can I help you today?"
+            
+        return {"answer": clean_answer}
+    except Exception as e:
+        return {"answer": "I'm here to help! Could you please ask me something else?"}

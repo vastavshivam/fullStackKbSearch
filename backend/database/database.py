@@ -5,9 +5,6 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-
-
-
 # Update with your local DB credentials
 DATABASE_URL = os.getenv("DATABASE_URL")
 
