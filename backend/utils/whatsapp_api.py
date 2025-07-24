@@ -14,21 +14,25 @@ import os
 from fastapi import Request, HTTPException
 from models.db_models import ChatHistory
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+import dotenv
 
-CURRENT_API_VERSION = "v23.0" 
+dotenv.load_dotenv()
+
+CURRENT_API_VERSION = os.getenv("CURRENT_API_VERSION", "v23.0")  # Default to v23.0 if not set
+
 BASE_URL = f"https://graph.facebook.com/{CURRENT_API_VERSION}"
 
-# WHATSAPP_TOKEN = os.getenv("WHATSAPP_TOKEN")
-WHATSAPP_TOKEN = "EAAJZCYMYFU3QBPJylpZCuqX5NyOGeVVV5ZAtoLZCSDQDekBZAlsByIoHZBKK4uFbcjDp9eUO4NvF02N8dEP0mvcDFT9zj1CoHIYOMiKlzNIBTfvaFQ1qNVPXZCxCIjG0fSonCZAM0ZCveWzFsIT4JFy3rCaikiRZAF8rqAlMuGYwyysTIwVfhowoLuHup0imqFJZCSUk1eoFriK19R0qyzzQI2iBe86ZAtlWDFu4jDIgpouAEZC5L3DFUpAHKoWTidqvZBJyMZD"
-# WHATSAPP_PHONE_ID = os.getenv("WHATSAPP_PHONE_ID")
-WHATSAPP_PHONE_ID = "719977304529790"  # Replace with your actual phone ID
+WHATSAPP_TOKEN = os.getenv("WHATSAPP_TOKEN")
+
+WHATSAPP_PHONE_ID = os.getenv("WHATSAPP_PHONE_ID")
+  # Replace with your actual phone ID
  # Update as needed
 WHATSAPP_API_URL = f"https://graph.facebook.com/{CURRENT_API_VERSION}/{WHATSAPP_PHONE_ID}"
 
 # ✅ Verify Webhook Token (GET)
 def verify_webhook(mode: str, token: str, challenge: str):
-    # VERIFY_TOKEN = os.getenv("WHATSAPP_VERIFY_TOKEN", "my_secret_token")
-    VERIFY_TOKEN = "9a4bfcf0a3d96d86b873ee23e8e09314"
+    VERIFY_TOKEN = os.getenv("VERIFY_TOKEN")
+    
     if mode == "subscribe" and token == VERIFY_TOKEN:
         return int(challenge)
     raise HTTPException(status_code=403, detail="Webhook verification failed")

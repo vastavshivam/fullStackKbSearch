@@ -16,47 +16,55 @@ from utils.auth_utils import (
 router = APIRouter()
 
 @router.post("/login", response_model=schemas.Token)
-async def login(form_data: schemas.LoginRequest = Depends(), db: AsyncSession = Depends(get_db)):
+async def login(data: schemas.LoginRequest):
     """
-    Authenticate a user and return an access token if credentials are valid.
-    Args:
-        form_data (schemas.LoginRequest): The login request data containing email and password.
-        db (AsyncSession): The async database session.
-    Returns:
-        dict: Access token and token type if authentication is successful.
-    Raises:
-        HTTPException: If authentication fails.
-    """
-    user = await authenticate_user(db, form_data.email, form_data.password, form_data.role)
-    print(f"User authenticated:================> {user}")
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid credentials or role mismatch",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(data={"sub": user.email}, expires_delta=access_token_expires)
-    return {"access_token": access_token, "token_type": "bearer"}
-    return("success!!")
-
-
-@router.post("/register", response_model=schemas.UserOut, status_code=201)
-async def register_user(user: schemas.UserCreate, db: AsyncSession = Depends(get_db)):
-    """
-    Register a new user in the system.
-    Args:
-        user (schemas.UserCreate): The user creation data.
-        db (AsyncSession): The async database session.
-    Returns:
-        schemas.UserOut: The created user object.
+    User login endpoint using MongoDB
     """
     try:
-        return await register_user_helper(db, user)
-    except Exception as exc:
-        # Log the exception for debugging
-        print(f"Error in register_user: {exc}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred during registration."
+        user = await authenticate_user(data.email, data.password, data.role)
+        
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid credentials",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        
+        # Create access token
+        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = create_access_token(
+            data={
+                "sub": user["email"],
+                "user_id": user["user_id"],
+                "name": user["name"],
+                "role": user["role"]
+            },
+            expires_delta=access_token_expires
         )
+        
+        return {
+            "access_token": access_token, 
+            "token_type": "bearer",
+            "user": {
+                "id": user["user_id"],
+                "name": user["name"],
+                "email": user["email"],
+                "role": user["role"]
+            }
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+@router.post("/register", response_model=schemas.UserOut, status_code=201)
+async def register_user(user: schemas.UserCreate):
+    """
+    User registration endpoint using MongoDB
+    """
+    return await register_user_helper(user)
