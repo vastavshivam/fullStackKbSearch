@@ -1,16 +1,29 @@
 # api/qa.py
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from models.schemas import AskRequest, AskResponse
 from utils.embed_store import load_index, embed_question, query_embeddings
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
 import os
 import re
+import time
+import asyncio
 from difflib import SequenceMatcher
+from PIL import Image
+import pytesseract
+import base64
+import io
+import requests
+import json
+import logging
 
 from utils.embed_store import VECTOR_DIR
 
 router = APIRouter()
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 LLM_MODEL = "tiiuae/falcon-rw-1b"
 tokenizer = AutoTokenizer.from_pretrained(LLM_MODEL)
@@ -254,54 +267,396 @@ async def ask_question(request: AskRequest):
 
 @router.post("/static-chat")
 async def static_chat(request: dict):
-    """Advanced conversational AI with fuzzy matching and extensive conversation patterns"""
+    """Advanced conversational AI with knowledge base search and fuzzy matching"""
     try:
         question = request.get("question", "").strip()
         if not question:
             raise HTTPException(status_code=400, detail="Question is required")
         
-        # Find the best matching conversation pattern
+        # First, check for basic conversational patterns (high priority for greetings, etc.)
         best_match, confidence = find_best_match(question, CONVERSATION_PATTERNS)
         
-        if best_match and confidence > 0.6:
+        # Handle basic conversational patterns first (with higher confidence threshold)
+        if best_match and confidence > 0.7:
+            # These are clearly conversational - respond immediately
+            if best_match in ['greetings', 'wellbeing', 'gratitude', 'farewells', 'compliments', 'fun_questions']:
+                responses = CONVERSATION_PATTERNS[best_match]["responses"]
+                response = random.choice(responses)
+                return {"answer": response}
+        
+        # For business/knowledge queries, search the knowledge base first
+        try:
+            # 1. Try JSON file similarity search first (more accurate for exact questions)
+            # Load knowledge base entries from uploaded JSON files
+            kb_entries = []
+            from pathlib import Path
+            import json
+            
+            upload_dir = Path("uploads")
+            upload_files = list(upload_dir.glob("*.json"))
+            
+            for file_path in upload_files:
+                try:
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        data = json.load(f)
+                        if isinstance(data, list):
+                            for item in data:
+                                if isinstance(item, dict) and 'question' in item and 'answer' in item:
+                                    kb_entries.append({
+                                        "question": item['question'],
+                                        "answer": item['answer'],
+                                        "category": item.get('category', 'General')
+                                    })
+                except Exception as e:
+                    print(f"Error reading {file_path}: {e}")
+                    continue
+            
+            # Search for the best matching knowledge base entry
+            if kb_entries:
+                best_match_entry = None
+                best_similarity = 0
+                
+                for entry in kb_entries:
+                    # Calculate similarity with the question
+                    question_similarity = similarity_score(question.lower(), entry['question'].lower())
+                    
+                    # Boost score for exact key phrase matches
+                    question_words = question.lower().split()
+                    entry_question_words = entry['question'].lower().split()
+                    
+                    # Check for important keyword matches
+                    important_keywords = ['time', 'long', 'develop', 'cost', 'price', 'services', 'offer', 'technologies', 'what', 'how']
+                    keyword_boost = 0
+                    for word in question_words:
+                        if word in important_keywords and word in entry_question_words:
+                            keyword_boost += 0.2
+                    
+                    # Also check similarity with answer keywords (but lower weight)
+                    answer_similarity = similarity_score(question.lower(), entry['answer'].lower()) * 0.5
+                    
+                    max_similarity = max(question_similarity + keyword_boost, answer_similarity)
+                    
+                    if max_similarity > best_similarity:
+                        best_similarity = max_similarity
+                        best_match_entry = entry
+                
+                # If we found a good match (similarity > 0.4), return it
+                if best_match_entry and best_similarity > 0.4:
+                    return {"answer": best_match_entry['answer']}
+            
+            # 2. Try vector embedding search as fallback (for more complex queries)
+            try:
+                from utils.embed_store import query_embeddings
+                # Look for vector indexes in the vector_stores directory
+                import os
+                vector_dir = "vector_stores"
+                if os.path.exists(vector_dir):
+                    index_files = [f for f in os.listdir(vector_dir) if f.endswith('.index')]
+                    if index_files:
+                        # Use the first available index (or you could search all)
+                        file_id = index_files[0].replace('.index', '')
+                        relevant_chunks = query_embeddings(file_id, question, top_k=3)
+                        if relevant_chunks:
+                            # Extract clean answers from the chunks
+                            clean_answers = []
+                            for chunk in relevant_chunks[:2]:  # Take top 2 chunks
+                                # Extract answer part from "Q: ... A: ..." format
+                                if "A:" in chunk:
+                                    answer_part = chunk.split("A:")[-1].strip()
+                                    if answer_part and len(answer_part) > 20:
+                                        clean_answers.append(answer_part)
+                                elif len(chunk) > 20:  # If no Q&A format, use the chunk directly
+                                    clean_answers.append(chunk.strip())
+                            
+                            if clean_answers:
+                                # Return the most relevant answer, or combine if multiple
+                                if len(clean_answers) == 1:
+                                    return {"answer": clean_answers[0]}
+                                else:
+                                    # Combine answers intelligently
+                                    combined = clean_answers[0]
+                                    if len(clean_answers) > 1 and not clean_answers[0].endswith('.'):
+                                        combined += ". " + clean_answers[1]
+                                    return {"answer": combined}
+            except Exception as e:
+                print(f"Vector search error: {e}")
+            
+        except Exception as e:
+            print(f"Knowledge base search error: {e}")
+            # Continue to conversational patterns if KB search fails
+        
+        # Now try conversational patterns (for questions that didn't match KB well)
+        if best_match and confidence > 0.5:
             # Get a random response from the matched category
             responses = CONVERSATION_PATTERNS[best_match]["responses"]
             response = random.choice(responses)
             return {"answer": response}
         
-        # Handle specific keywords with fuzzy matching
+        # Handle specific keywords with fuzzy matching for edge cases
         question_lower = question.lower()
         
-        # Business/AppGallop related questions
-        if any(word in question_lower for word in ["appgallop", "company", "business", "service", "product"]):
-            return {"answer": "AppGallop is focused on providing excellent AI-powered solutions! I'm here to help you with any questions about our services. What would you like to know more about?"}
+        # Business/AppGallop related questions that didn't match KB
+        if any(word in question_lower for word in ["appgallop", "company", "business"]) and "what is" not in question_lower:
+            return {"answer": "I'd be happy to help you with AppGallop-related questions! For specific details about our services, pricing, or processes, please feel free to ask more specific questions. What would you like to know?"}
         
-        # Programming/Development questions
+        # Programming/Development questions that didn't match KB
         if any(word in question_lower for word in ["code", "programming", "development", "api", "software", "bug", "debug"]):
             return {"answer": "I can help with programming and development questions! While I'd need a relevant knowledge base for specific technical details, I'm happy to discuss general concepts. What are you working on?"}
         
-        # General knowledge questions
-        if any(word in question_lower for word in ["what is", "how does", "why", "when", "where", "explain"]):
-            return {"answer": f"That's a great question about '{question}'! While I can discuss general topics, I'd be much more helpful with a relevant knowledge base uploaded. For now, I can try to help with what I know - what specific aspect interests you most?"}
+        # Very general questions
+        if any(word in question_lower for word in ["what", "how", "why", "when", "where"]) and len(question.split()) <= 3:
+            return {"answer": f"That's a broad question! Could you be more specific about what aspect of '{question}' you'd like to know about? I'm here to help with both general conversation and specific topics if you have a knowledge base uploaded."}
         
-        # Problem-solving requests
-        if any(word in question_lower for word in ["problem", "issue", "trouble", "fix", "solve", "broken", "not working"]):
-            return {"answer": "I'm here to help solve problems! Could you tell me more details about what's not working or what issue you're facing? The more specific you can be, the better I can assist you."}
-        
-        # Learning requests
-        if any(word in question_lower for word in ["learn", "study", "understand", "tutorial", "guide", "how to"]):
-            return {"answer": "I love helping people learn! What subject or skill are you interested in? While I can provide general guidance, uploading a relevant knowledge base would give you much more detailed and specific information."}
-        
-        # Personal questions about user
-        if any(word in question_lower for word in ["my", "i am", "i'm", "i have", "i need", "i want"]):
-            return {"answer": "I'd be happy to help with whatever you need! Could you tell me more about your situation or what you're looking for? I'm here to assist in any way I can."}
-        
-        # Questions with numbers or data
-        if re.search(r'\d+', question):
-            return {"answer": "I see you're asking about something with specific numbers or data. While I can discuss general concepts, for precise calculations or data-specific questions, a relevant knowledge base would be most helpful. What can I help you understand about this topic?"}
-        
-        # Default response for unmatched questions
-        return {"answer": f"That's an interesting question! While I'd love to give you a detailed answer about '{question}', I work best when you upload a knowledge base with specific information on the topic. For now, I'm here to chat and help with general questions. Could you tell me more about what you're looking for, or would you like to discuss something else?"}
+        # Default helpful response
+        return {"answer": f"I'd love to help you with that! While I can chat about general topics, I work best when you upload a knowledge base with specific information. For now, feel free to ask me anything - whether it's a casual conversation or if you'd like to know more about AppGallop's services. What's on your mind?"}
             
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"❌ Failed: {str(e)}")
+
+
+# Image processing helper functions
+def extract_text_from_image_simple(image: Image.Image) -> str:
+    """Fast text extraction from image using OCR"""
+    try:
+        if not image:
+            return "No text detected in the image."
+            
+        # Convert to RGB if necessary
+        if image.mode != 'RGB':
+            image = image.convert('RGB')
+        
+        # Resize if too large (faster processing)
+        width, height = image.size
+        if width > 1200 or height > 1200:
+            ratio = min(1200/width, 1200/height)
+            new_size = (int(width * ratio), int(height * ratio))
+            image = image.resize(new_size, Image.Resampling.LANCZOS)
+        
+        # Fast OCR with single config
+        config = r'--oem 3 --psm 6'
+        text = pytesseract.image_to_string(image, config=config)
+        
+        if not text.strip():
+            return "No text detected in the image."
+        
+        # Quick cleanup
+        text = ' '.join(text.split())
+        return text
+        
+    except Exception as e:
+        error_msg = f"OCR extraction failed: {type(e).__name__}: {str(e)}"
+        logger.error(error_msg)
+        print(f"DEBUG: {error_msg}")  # Also print for debugging
+        return "Failed to extract text from image."
+        return "Failed to extract text from image."
+
+def image_to_base64_simple(image: Image.Image) -> str:
+    """Fast conversion of PIL Image to base64 string"""
+    try:
+        if not image:
+            raise ValueError("Image is None or empty")
+            
+        if image.mode != 'RGB':
+            image = image.convert('RGB')
+        
+        # Quick compression for speed
+        width, height = image.size
+        if width > 800 or height > 800:
+            ratio = min(800/width, 800/height)
+            new_size = (int(width * ratio), int(height * ratio))
+            image = image.resize(new_size, Image.Resampling.LANCZOS)
+        
+        buffer = io.BytesIO()
+        image.save(buffer, format='JPEG', quality=60, optimize=True)  # Lower quality for speed
+        
+        img_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+        
+        if not img_base64:
+            raise ValueError("Base64 conversion resulted in empty string")
+            
+        return img_base64
+        
+    except Exception as e:
+        error_msg = f"Base64 conversion failed: {type(e).__name__}: {str(e)}"
+        logger.error(error_msg)
+        print(f"DEBUG: {error_msg}")  # Also print for debugging
+        raise HTTPException(status_code=500, detail=f"Failed to process image: {str(e)}")
+
+async def query_ollama_for_chat(base64_image: str, question: str, ocr_text: str) -> str:
+    """Fast query to local Ollama LLaVA model for chat"""
+    try:
+        # Simple, focused prompt optimized for LLaVA
+        if question and question.strip():
+            prompt = question.strip()[:150]  # Shorter prompt for LLaVA
+        else:
+            prompt = "What do you see?"  # Very simple default
+        
+        # Don't include OCR text in prompt for faster processing
+        # LLaVA can see text in images directly
+        
+        payload = {
+            "model": "llava:latest",
+            "prompt": prompt,
+            "images": [base64_image],
+            "stream": False,
+            "options": {
+                "temperature": 0.1,  # Lower for consistency
+                "top_p": 0.9,
+                "num_predict": 100   # Shorter responses for speed
+            }
+        }
+        
+        # Optimized timeout for LLaVA
+        response = requests.post(
+            "http://localhost:11434/api/generate",
+            json=payload,
+            headers={"Content-Type": "application/json"},
+            timeout=45  # Reasonable timeout for LLaVA
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            analysis = result.get("response", "").strip()
+            if analysis:
+                return analysis
+            else:
+                return "Vision model processed the image but provided no description."
+        else:
+            return f"Vision model temporarily unavailable (Error: {response.status_code})"
+                
+    except requests.exceptions.Timeout:
+        return "Vision analysis timed out. Please try again."
+        
+    except requests.exceptions.ConnectionError:
+        return "Vision model is not available. Please ensure Ollama is running."
+        
+    except Exception as e:
+        logger.error(f"Ollama query failed: {e}")
+        return f"Vision analysis failed: {str(e)[:50]}..."
+
+
+@router.post("/static-chat-with-image")
+async def static_chat_with_image(
+    question: str = Form(...),
+    image: UploadFile = File(None)
+):
+    """Chat endpoint that supports both text and image inputs"""
+    try:
+        # If no image, use regular text chat
+        if not image:
+            return await static_chat({"question": question})
+        
+        # Validate image
+        if not image.content_type or not image.content_type.startswith('image/'):
+            raise HTTPException(status_code=400, detail="Invalid file type. Please upload an image.")
+        
+        # Read and process image
+        file_content = await image.read()
+        if len(file_content) > 10 * 1024 * 1024:  # 10MB limit
+            raise HTTPException(status_code=400, detail="Image file too large. Maximum size is 10MB.")
+        
+        try:
+            pil_image = Image.open(io.BytesIO(file_content))
+        except Exception:
+            raise HTTPException(status_code=400, detail="Invalid image file.")
+        
+        # Extract text from image
+        ocr_text = extract_text_from_image_simple(pil_image)
+        logger.info(f"OCR extracted: {ocr_text[:100]}...")
+        
+        # Convert to base64 for vision model
+        base64_image = image_to_base64_simple(pil_image)
+        
+        # Query vision model
+        vision_response = await query_ollama_for_chat(base64_image, question, ocr_text)
+        
+        # Combine OCR and vision response
+        if ocr_text and ocr_text != "No text detected in the image.":
+            combined_response = f"I can see text in your image: '{ocr_text}'\n\n{vision_response}"
+        else:
+            combined_response = vision_response
+        
+        return {"answer": combined_response}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Image chat processing failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to process request: {str(e)}")
+
+
+@router.post("/chat-multimodal")
+async def chat_multimodal(
+    question: str = Form(None),
+    image: UploadFile = File(None)
+):
+    """
+    Multimodal chat endpoint for handling text questions, images, or both
+    """
+    try:
+        if not question and not image:
+            raise HTTPException(status_code=400, detail="Please provide either a question or an image.")
+        
+        # Handle text-only question
+        if question and not image:
+            return await static_chat({"question": question})
+        
+        # Handle image processing
+        if image:
+            # Validate image
+            if not image.content_type or not image.content_type.startswith('image/'):
+                raise HTTPException(status_code=400, detail="Invalid file type. Please upload an image.")
+            
+            # Read image
+            file_content = await image.read()
+            if len(file_content) > 10 * 1024 * 1024:  # 10MB limit
+                raise HTTPException(status_code=400, detail="Image file too large. Maximum size is 10MB.")
+            
+            try:
+                pil_image = Image.open(io.BytesIO(file_content))
+            except Exception:
+                raise HTTPException(status_code=400, detail="Invalid image file.")
+            
+            # Process image sequentially for better error handling
+            try:
+                # Extract text from image
+                ocr_text = extract_text_from_image_simple(pil_image)
+                logger.info(f"OCR completed: {len(ocr_text) if ocr_text else 0} characters extracted")
+                
+                # Convert to base64
+                base64_image = image_to_base64_simple(pil_image)
+                logger.info(f"Base64 conversion completed: {len(base64_image) if base64_image else 0} characters")
+                
+                # Validate results
+                if not base64_image:
+                    raise ValueError("Base64 conversion failed - empty result")
+                    
+            except Exception as e:
+                logger.error(f"Image processing failed: {type(e).__name__}: {str(e)}")
+                print(f"DEBUG: Image processing error: {e}")
+                raise HTTPException(status_code=500, detail=f"Failed to process image: {str(e)}")
+            
+            # If no question provided, use default image analysis prompt
+            if not question:
+                question = "What can you tell me about this image?"
+            
+            # Query vision model
+            vision_response = await query_ollama_for_chat(base64_image, question, ocr_text)
+            
+            # Format response
+            response_parts = []
+            
+            if ocr_text and ocr_text != "No text detected in the image." and ocr_text != "Failed to extract text from image.":
+                response_parts.append(f"📝 Text found in image: {ocr_text}")
+            
+            response_parts.append(f"🔍 Image analysis: {vision_response}")
+            
+            final_response = "\n\n".join(response_parts)
+            
+            return {"answer": final_response}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Multimodal chat failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to process request: {str(e)}")

@@ -4,6 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy.ext.declarative import declarative_base
 from api.qa import router as qa_router
 from api.auth import router as auth_router
+from api.image_processing import router as image_router
 from fastapi.responses import JSONResponse
 import logging
 
@@ -46,6 +47,7 @@ app.add_middleware(
 app.include_router(chat.router, prefix="/api/chat", tags=["Chat"])
 app.include_router(files.router, prefix="/api/files", tags=["Files"])
 app.include_router(qa_router, prefix="/api/qa", tags=["Q&A"])
+app.include_router(image_router, prefix="/api/image", tags=["Image Processing"])
 app.include_router(training.router, prefix="/api/training", tags=["Training"])
 app.include_router(websocket.router, tags=["WebSocket"])
 app.include_router(whatsapp.router, prefix="/whatsapp")
@@ -63,6 +65,29 @@ async def startup():
 @app.on_event("shutdown")
 async def shutdown():
     pass  # Cleanup tasks (if any)
+
+# ✅ Test endpoint for debugging file uploads
+from fastapi import File, UploadFile, Form
+
+@app.post("/test-upload", tags=["Testing"])
+async def test_upload(image: UploadFile = File(None)):
+    """Minimal test endpoint for file upload debugging"""
+    try:
+        if not image:
+            return {"status": "no_file", "message": "No file provided"}
+        
+        # Just read the file bytes
+        file_content = await image.read()
+        
+        return {
+            "status": "success", 
+            "filename": image.filename,
+            "content_type": image.content_type,
+            "size": len(file_content)
+        }
+        
+    except Exception as e:
+        return {"status": "error", "error": str(e)}
 
 # ✅ Health check
 @app.get("/", tags=["Health"])

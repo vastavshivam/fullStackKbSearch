@@ -1,9 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './ChatWidget.css';
 import { useWidgetConfig } from './WidgetConfigContext';
+import { askStaticChat, chatWithImage } from '../services/api';
 
+interface Message {
+  sender: 'user' | 'bot';
+  text: string;
+  image?: string;
+}
 
-const initialMessages = [
+const initialMessages: Message[] = [
   { sender: 'bot', text: 'Hi! I am AppGallop AI. How can I help you today?' }
 ];
 
@@ -11,27 +17,18 @@ const ChatWidget: React.FC = () => {
 
   const { config } = useWidgetConfig();
   const [open, setOpen] = useState(false);
-  const [messages, setMessages] = useState(initialMessages);
+  const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState('');
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const bodyRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (open) {
-      const fetchHistory = async () => {
-        try {
-          const res = await fetch('/api/qa/static-chat/history', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_id: '123' }) // Replace with dynamic user ID
-          });
-          if (!res.ok) throw new Error('Failed to fetch history');
-          const data = await res.json();
-          setMessages(data.conversation_history || []);
-        } catch (err) {
-          console.error('Error fetching conversation history:', err);
-        }
-      };
-      fetchHistory();
+    // Start with initial messages when widget opens
+    if (open && messages.length === 0) {
+      setMessages(initialMessages);
     }
   }, [open]);
 
@@ -43,21 +40,84 @@ const ChatWidget: React.FC = () => {
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim()) return;
-    setMessages([...messages, { sender: 'user', text: input }]);
+    if (!input.trim() && !selectedImage) return;
+    
+    setIsLoading(true);
+    
+    // Add user message to chat
+    const userMessage: Message = {
+      sender: 'user',
+      text: input || '📷 Shared an image',
+      image: imagePreview || undefined
+    };
+    setMessages(prev => [...prev, userMessage]);
+    
     const userInput = input;
     setInput('');
+    
+    // Clear image after sending
+    setSelectedImage(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+    
     try {
-      const res = await fetch('/api/qa/static-chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: userInput, user_id: '123' }) // Replace with dynamic user ID
-      });
-      if (!res.ok) throw new Error('Network response was not ok');
-      const data = await res.json();
-      setMessages(data.conversation_history || []);
+      let response;
+      
+      if (selectedImage) {
+        // Send image with optional text
+        response = await chatWithImage(userInput, selectedImage);
+      } else {
+        // Send text only
+        response = await askStaticChat(userInput);
+      }
+      
+      const data = response.data;
+      setMessages(prev => [...prev, { sender: 'bot', text: data.answer }]);
+      
     } catch (err) {
-      setMessages(msgs => [...msgs, { sender: 'bot', text: 'Sorry, I could not get a response from the server.' }]);
+      console.error('Error sending message:', err);
+      setMessages(prev => [...prev, { 
+        sender: 'bot', 
+        text: 'Sorry, I could not get a response from the server.' 
+      }]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file.');
+        return;
+      }
+      
+      // Validate file size (10MB limit)
+      if (file.size > 10 * 1024 * 1024) {
+        alert('Image file too large. Maximum size is 10MB.');
+        return;
+      }
+      
+      setSelectedImage(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const clearImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -121,21 +181,117 @@ const ChatWidget: React.FC = () => {
           <div className="chat-widget-body" ref={bodyRef}>
             {messages.map((msg, idx) => (
               <div key={idx} className={`chat-widget-message ${msg.sender}`}>
-                <div className="chat-widget-bubble">{msg.text}</div>
+                <div className="chat-widget-bubble">
+                  {msg.image && (
+                    <img 
+                      src={msg.image} 
+                      alt="Shared image" 
+                      style={{ 
+                        maxWidth: '200px', 
+                        maxHeight: '200px', 
+                        borderRadius: '8px', 
+                        marginBottom: '8px',
+                        display: 'block'
+                      }} 
+                    />
+                  )}
+                  {msg.text}
+                </div>
               </div>
             ))}
+            {isLoading && (
+              <div className="chat-widget-message bot">
+                <div className="chat-widget-bubble">
+                  <div className="typing-indicator">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
+          
+          {/* Image preview section */}
+          {imagePreview && (
+            <div style={{ 
+              padding: '10px', 
+              backgroundColor: '#f5f5f5', 
+              borderTop: '1px solid #e0e0e0',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px'
+            }}>
+              <img 
+                src={imagePreview} 
+                alt="Preview" 
+                style={{ 
+                  width: '50px', 
+                  height: '50px', 
+                  objectFit: 'cover', 
+                  borderRadius: '4px' 
+                }} 
+              />
+              <span style={{ flex: 1, fontSize: '14px', color: '#666' }}>
+                Image selected
+              </span>
+              <button 
+                type="button"
+                onClick={clearImage}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#999',
+                  cursor: 'pointer',
+                  fontSize: '18px',
+                  padding: '2px'
+                }}
+              >
+                ×
+              </button>
+            </div>
+          )}
+          
           <form className="chat-widget-input" onSubmit={handleSend}>
             <input
               type="text"
               value={input}
               onChange={e => setInput(e.target.value)}
-              placeholder="Type your message..."
+              placeholder={selectedImage ? "Ask about your image..." : "Type your message..."}
               autoFocus
               style={{ fontFamily: config.widgetFont }}
+              disabled={isLoading}
             />
-            <button type="submit" aria-label="Send" style={{ background: config.widgetColor }}>
-              ➤
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleImageSelect}
+              style={{ display: 'none' }}
+            />
+            <button 
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              aria-label="Upload image"
+              style={{ 
+                background: 'none', 
+                border: 'none', 
+                color: config.widgetColor,
+                cursor: 'pointer',
+                fontSize: '18px',
+                padding: '8px'
+              }}
+              disabled={isLoading}
+            >
+              📷
+            </button>
+            <button 
+              type="submit" 
+              aria-label="Send" 
+              style={{ background: config.widgetColor }}
+              disabled={isLoading || (!input.trim() && !selectedImage)}
+            >
+              {isLoading ? '⏳' : '➤'}
             </button>
           </form>
         </div>

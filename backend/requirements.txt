@@ -43,6 +43,11 @@ flask
 slack_sdk>=3.27.0
 email-validator==2.1.1
 
+# === Image Processing & OCR ===
+Pillow==10.2.0
+pytesseract==0.3.10
+opencv-python==4.9.0.80
+
 # === Utilities ===
 python-dotenv==1.0.1
 aiofiles==23.2.1

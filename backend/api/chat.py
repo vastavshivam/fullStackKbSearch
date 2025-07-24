@@ -2,10 +2,12 @@ from fastapi import APIRouter, WebSocket, HTTPException
 from models.schemas import ChatMessage
 from db.crud import save_chat_message, get_conversation_context
 from services.rag import generate_response_with_rag
+import logging
 
 # Optional: sentiment and embedding generators
 from utils.nlp import analyze_sentiment, compute_embedding
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 @router.post("/send")
@@ -92,4 +94,9 @@ async def store_chat_message(request: dict):
 
 @router.get("/history/{session_id}")
 def get_history(session_id: str):
-    return get_conversation_context(session_id)
+    try:
+        return get_conversation_context(session_id)
+    except Exception as e:
+        logger.error(f"Failed to get chat history: {e}")
+        # Return empty conversation instead of failing
+        return []

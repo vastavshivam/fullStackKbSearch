@@ -88,3 +88,43 @@ export const getChatHistory = (sessionId) => {
 export const askStaticChat = (question) => {
   return axios.post(`${API_BASE}/api/qa/static-chat`, { question });
 };
+
+// Image processing API functions
+export const processImage = (imageFile) => {
+  const formData = new FormData();
+  formData.append('file', imageFile);
+  
+  return axios.post(`${API_BASE}/api/image/process-image`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+};
+
+export const analyzeImageWithQuestion = (imageFile, question) => {
+  const formData = new FormData();
+  formData.append('file', imageFile);
+  if (question) {
+    formData.append('question', question);
+  }
+  
+  return axios.post(`${API_BASE}/api/image/analyze-image-with-question`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+};
+
+export const chatWithImage = (question, imageFile) => {
+  const formData = new FormData();
+  if (question) {
+    formData.append('question', question);
+  }
+  if (imageFile) {
+    formData.append('image', imageFile);
+  }
+  
+  return axios.post(`${API_BASE}/api/qa/chat-multimodal`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+};
+
+export const checkImageProcessingHealth = () => {
+  return axios.get(`${API_BASE}/api/image/health`);
+};
