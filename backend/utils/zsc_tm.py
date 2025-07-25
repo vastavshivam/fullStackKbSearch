@@ -18,7 +18,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # -------------------- Core Classification Function --------------------
-async def classify_documents(file_id):
+async def classify_documents():
     auth_scheme = HTTPBearer()
     REFRESH_URL = "http://localhost:8000/auth/refresh"
     credentials: HTTPAuthorizationCredentials = Depends(auth_scheme),
@@ -96,6 +96,11 @@ async def classify_documents(file_id):
 
         logger.info("✅ BERTopic Modeling Done.")
 
+        db: Session = Depends(get_db)
+
+        user_labels = db.query(ClassifyLabels.label).filter(ClassifyLabels.user_id == user_id).all()
+        label_set = set(label[0].lower() for label in user_labels)
+
         # Show results with final topic logic
         for i in range(len(documents)):
             text = df_classified.iloc[i]['text']
@@ -109,12 +114,17 @@ async def classify_documents(file_id):
                 final_topic = f"BERTopic-{topic_id}"
                 print(f"✅ Final Classification Topic: {final_topic} (from BERTopic)")
 
+            match_result = 'y1' if final_topic.lower() in label_set else '-1'
+            print(f"🔁 Match Result: {match_result}")
+
             print(f"[{i}] Text: {text}")
             print(f"    🔖 ZSC Label: {top_label}")
             print(f"    🧠 Topic ID: {topic_id}")
             print("")
 
         print("\n📊 Topic Info:\n", topic_model.get_topic_info())
+        return match_result
 
     except Exception as e:
         logger.error(f"❌ Error in topic modeling: {e}")
+        return []
