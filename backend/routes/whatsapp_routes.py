@@ -14,6 +14,7 @@ from typing import Optional, Literal
 
 router = APIRouter()
 
+
 class WhatsAppConfig(BaseModel):
     client_id: str
     phone_id: str
@@ -159,44 +160,50 @@ async def configure_whatsapp(config: WhatsAppConfig, db: AsyncSession = Depends(
         await db.rollback()
         raise HTTPException(status_code=500, detail="Unexpected error: " + str(e))
 
-@router.get("/webhook", tags=["Webhook Verification"])
+# @router.get("/webhook", tags=["Webhook Verification"])
+# async def verify_webhook(
+#     mode: str = Query(..., alias="hub.mode", description="Subscription mode"),
+#     token: str = Query(..., alias="hub.verify_token", description="Verification token"),
+#     challenge: str = Query(..., alias="hub.challenge", description="Challenge string"),
+#     db: AsyncSession = Depends(get_db)
+# ):
+#     """
+#     WhatsApp webhook verification endpoint.
+
+#     - **mode**: Should be 'subscribe'
+#     - **token**: Must match the verify_token stored in DB
+#     - **challenge**: Returned as-is if verification passes
+#     """
+#     # Check if token exists in DB
+#     result = await db.execute(
+#         select(ClientConfig).where(ClientConfig.verify_token == token)
+#     )
+#     config = result.scalars().first()
+
+#     if config:
+#         return whatsapp_api.verify_webhook(mode, token, challenge)
+
+#     raise HTTPException(status_code=403, detail="Invalid verify_token")
+
+
+@router.get("/webhook", tags=["Webhook Verification"])  
 async def verify_webhook(
-    mode: str = Query(..., alias="hub.mode", description="Subscription mode"),
-    token: str = Query(..., alias="hub.verify_token", description="Verification token"),
-    challenge: str = Query(..., alias="hub.challenge", description="Challenge string"),
+    mode: str = Query(..., alias="hub.mode"),
+    token: str = Query(..., alias="hub.verify_token"),
+    challenge: str = Query(..., alias="hub.challenge"),
     db: AsyncSession = Depends(get_db)
 ):
     """
     WhatsApp webhook verification endpoint.
-
-    - **mode**: Should be 'subscribe'
-    - **token**: Must match the verify_token stored in DB
-    - **challenge**: Returned as-is if verification passes
     """
-    # Check if token exists in DB
     result = await db.execute(
         select(ClientConfig).where(ClientConfig.verify_token == token)
     )
     config = result.scalars().first()
 
-    if config:
-        return whatsapp_api.verify_webhook(mode, token, challenge)
-
-    raise HTTPException(status_code=403, detail="Invalid verify_token")
-
-
-# @router.get("/webhook")
-# async def verify_webhook(request: Request, db: Session = Depends(get_db)):
-#     params = request.query_params
-#     mode = params.get("hub.mode")
-#     token = params.get("hub.verify_token")
-#     challenge = params.get("hub.challenge")
-
-#     # 🔐 Match token with DB
-#     config = db.query(ClientConfig).filter(ClientConfig.verify_token == token).first()
-#     if config:
-#         return whatsapp_api.verify_webhook(mode, token, challenge)
-#     raise HTTPException(status_code=403, detail="Invalid verify_token")
+    if config and mode == "subscribe":
+        return int(challenge)  # WhatsApp expects the challenge to be echoed
+    raise HTTPException(status_code=403, detail="Invalid verification")
 
 
 @router.post("/webhook", tags=["Webhook Events"], summary="Receive WhatsApp messages", description="This endpoint handles POST requests from the WhatsApp webhook.")
@@ -223,7 +230,7 @@ async def webhook_listener(
         raise HTTPException(status_code=500, detail=f"Error processing webhook: {str(e)}")
 
 
-@router.post("/send-message", tags=["WhatsApp Messaging"], summary="Send a WhatsApp message")
+# @router.post("/send-message", tags=["WhatsApp Messaging"], summary="Send a WhatsApp message")
 async def send_message(payload: SendMessagePayload, db: AsyncSession = Depends(get_db)):
     result = await db.execute(
         select(ClientConfig).where(ClientConfig.client_id == payload.client_id)
@@ -267,24 +274,24 @@ async def mark_as_read(payload: MarkReadPayload, db: AsyncSession = Depends(get_
     config = await db.get(ClientConfig, payload.client_id)
     return await whatsapp_api.mark_message_as_read(config.token, payload.message_id)
 
-@router.get("/profile")
-async def get_business_profile(client_id: str, db: AsyncSession = Depends(get_db)):
-    ...
-    return await whatsapp_api.get_profile(token=ClientConfig.token)
+# @router.get("/profile")
+# async def get_business_profile(client_id: str, db: AsyncSession = Depends(get_db)):
+#     ...
+#     return await whatsapp_api.get_profile(token=ClientConfig.token)
 
-@router.post("/profile/update")
-async def update_profile(payload: UpdateProfilePayload, db: AsyncSession = Depends(get_db)):
-    ...
-    return await whatsapp_api.update_profile(token=ClientConfig.token, profile_data=payload.dict())
+# @router.post("/profile/update")
+# async def update_profile(payload: UpdateProfilePayload, db: AsyncSession = Depends(get_db)):
+#     ...
+#     return await whatsapp_api.update_profile(token=ClientConfig.token, profile_data=payload.dict())
 
-@router.post("/send-media")
-async def send_media_message(payload: MediaMessagePayload, db: AsyncSession = Depends(get_db)):
-    ...
-    return await whatsapp_api.send_media_message(
-        token=config.token,
-        phone_id=config.phone_id,
-        to=payload.to,
-        media_id=payload.media_id,
-        media_type=payload.media_type,
-        caption=payload.caption
-    )
+# @router.post("/send-media")
+# async def send_media_message(payload: MediaMessagePayload, db: AsyncSession = Depends(get_db)):
+#     ...
+#     return await whatsapp_api.send_media_message(
+#         token=config.token,
+#         phone_id=config.phone_id,
+#         to=payload.to,
+#         media_id=payload.media_id,
+#         media_type=payload.media_type,
+#         caption=payload.caption
+#     )
