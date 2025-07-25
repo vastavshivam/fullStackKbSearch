@@ -8,14 +8,21 @@ import os
 import re
 import time
 import asyncio
+import json
+import random
 from difflib import SequenceMatcher
 from PIL import Image
 import pytesseract
 import base64
 import io
 import requests
-import json
 import logging
+
+# Import Gemini Vision processing
+from services.gemini_vision import process_image_with_gemini_and_ocr
+
+# Setup logging
+logger = logging.getLogger(__name__)
 
 from utils.embed_store import VECTOR_DIR
 
@@ -617,43 +624,24 @@ async def chat_multimodal(
             except Exception:
                 raise HTTPException(status_code=400, detail="Invalid image file.")
             
-            # Process image sequentially for better error handling
+            # Use Gemini Vision API instead of local models
             try:
-                # Extract text from image
+                logger.info("Starting Gemini image analysis...")
+                
+                # Extract text with OCR
                 ocr_text = extract_text_from_image_simple(pil_image)
                 logger.info(f"OCR completed: {len(ocr_text) if ocr_text else 0} characters extracted")
                 
-                # Convert to base64
-                base64_image = image_to_base64_simple(pil_image)
-                logger.info(f"Base64 conversion completed: {len(base64_image) if base64_image else 0} characters")
+                # Use Gemini for image analysis
+                gemini_response = process_image_with_gemini_and_ocr(pil_image, question, ocr_text)
                 
-                # Validate results
-                if not base64_image:
-                    raise ValueError("Base64 conversion failed - empty result")
+                logger.info("Gemini analysis completed successfully")
+                return {"answer": gemini_response}
                     
             except Exception as e:
-                logger.error(f"Image processing failed: {type(e).__name__}: {str(e)}")
-                print(f"DEBUG: Image processing error: {e}")
-                raise HTTPException(status_code=500, detail=f"Failed to process image: {str(e)}")
-            
-            # If no question provided, use default image analysis prompt
-            if not question:
-                question = "What can you tell me about this image?"
-            
-            # Query vision model
-            vision_response = await query_ollama_for_chat(base64_image, question, ocr_text)
-            
-            # Format response
-            response_parts = []
-            
-            if ocr_text and ocr_text != "No text detected in the image." and ocr_text != "Failed to extract text from image.":
-                response_parts.append(f"📝 Text found in image: {ocr_text}")
-            
-            response_parts.append(f"🔍 Image analysis: {vision_response}")
-            
-            final_response = "\n\n".join(response_parts)
-            
-            return {"answer": final_response}
+                logger.error(f"Gemini image processing failed: {type(e).__name__}: {str(e)}")
+                # Provide a friendly fallback response
+                return {"answer": f"I can see your image ({pil_image.size[0]}x{pil_image.size[1]} pixels) and it looks interesting! However, I'm having some technical difficulties analyzing it right now. Could you try asking a specific question about what you'd like to know, or try uploading the image again?"}
         
     except HTTPException:
         raise
