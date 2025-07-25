@@ -527,16 +527,6 @@ export default function Chat() {
               <div className="message-content">
                 <div className="message-text-wrapper">
                   {msg.text}
-                  {/* Copy button for bot messages */}
-                  {msg.sender === 'bot' && !msg.text.includes("Let me analyze") && !msg.text.includes("Welcome to AppGallop") && (
-                    <button
-                      className={`copy-btn ${copiedMessageIndex === i ? 'copied' : ''}`}
-                      onClick={() => handleCopyMessage(msg.text, i)}
-                      title={copiedMessageIndex === i ? "Copied!" : "Copy message"}
-                    >
-                      {copiedMessageIndex === i ? '✓' : '📋'}
-                    </button>
-                  )}
                 </div>
                 {isLoading && msg.text.includes("Let me analyze") && (
                   <div className="typing-indicator">
@@ -550,6 +540,14 @@ export default function Chat() {
               {msg.sender === 'bot' && !msg.text.includes("Let me analyze") && !msg.text.includes("Welcome to AppGallop") && (
                 <div className="feedback-section">
                   <div className="feedback-buttons">
+                    {/* Copy button moved to feedback section */}
+                    <button
+                      className={`copy-btn ${copiedMessageIndex === i ? 'copied' : ''}`}
+                      onClick={() => handleCopyMessage(msg.text, i)}
+                      title={copiedMessageIndex === i ? "Copied!" : "Copy message"}
+                    >
+                      {copiedMessageIndex === i ? '✓' : '📋'}
+                    </button>
                     <button
                       className={`feedback-btn thumbs-up ${messageFeedback[i] === 'up' ? 'active' : ''}`}
                       onClick={() => handleFeedback(i, 'up')}

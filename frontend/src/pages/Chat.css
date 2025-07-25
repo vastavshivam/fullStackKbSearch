@@ -407,8 +407,9 @@
 }
 
 .feedback-section {
-  margin-top: 8px;
+  margin-top: 12px;
   padding-top: 8px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .feedback-buttons {
@@ -416,6 +417,8 @@
   gap: 8px;
   opacity: 0;
   transition: opacity 0.2s ease;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 .chat-bubble.bot:hover .feedback-buttons {
@@ -424,40 +427,39 @@
 
 .feedback-btn {
   background: transparent;
-  border: 1px solid #e0e0e0;
-  border-radius: 20px;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  border-radius: 16px;
   padding: 6px 12px;
-  font-size: 14px;
+  font-size: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 36px;
-  height: 32px;
+  min-width: 32px;
+  height: 30px;
+  color: rgba(0, 0, 0, 0.7);
 }
 
 .feedback-btn:hover {
-  background-color: #f5f5f5;
-  border-color: #ccc;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.5);
   transform: scale(1.05);
 }
 
 .feedback-btn.active {
-  background-color: #007bff;
-  border-color: #007bff;
-  color: white;
   transform: scale(1.1);
+  color: white;
 }
 
 .feedback-btn.thumbs-up.active {
-  background-color: #28a745;
-  border-color: #28a745;
+  background-color: rgba(40, 167, 69, 0.9);
+  border-color: rgba(40, 167, 69, 1);
 }
 
 .feedback-btn.thumbs-down.active {
-  background-color: #dc3545;
-  border-color: #dc3545;
+  background-color: rgba(220, 53, 69, 0.9);
+  border-color: rgba(220, 53, 69, 1);
 }
 
 .feedback-btn.comment-btn {
@@ -595,18 +597,21 @@
 }
 
 .copy-btn {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  background: rgba(0, 0, 0, 0.1);
-  border: none;
-  border-radius: 4px;
-  padding: 4px 8px;
+  background: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  border-radius: 16px;
+  padding: 6px 12px;
   font-size: 12px;
   cursor: pointer;
   opacity: 0;
   transition: all 0.2s ease;
   z-index: 10;
+  min-width: 32px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(0, 0, 0, 0.7);
 }
 
 .chat-bubble.bot:hover .copy-btn {
@@ -614,12 +619,14 @@
 }
 
 .copy-btn:hover {
-  background: rgba(0, 0, 0, 0.2);
-  transform: scale(1.1);
+  background-color: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.5);
+  transform: scale(1.05);
 }
 
 .copy-btn.copied {
-  background: #28a745;
+  background-color: rgba(40, 167, 69, 0.9);
+  border-color: rgba(40, 167, 69, 1);
   color: white;
   opacity: 1;
 }

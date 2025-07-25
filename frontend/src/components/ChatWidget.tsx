@@ -1,16 +1,22 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './ChatWidget.css';
 import { useWidgetConfig } from './WidgetConfigContext';
-import { askStaticChat, chatWithImage } from '../services/api';
+import { askStaticChat, chatWithImage, submitMessageFeedback } from '../services/api';
 
 interface Message {
   sender: 'user' | 'bot';
   text: string;
   image?: string;
+  id?: string;
+  feedback?: 'up' | 'down' | null;
 }
 
 const initialMessages: Message[] = [
-  { sender: 'bot', text: 'Hi! I am AppGallop AI. How can I help you today?' }
+  { 
+    sender: 'bot', 
+    text: 'Hi! I am AppGallop AI. How can I help you today?',
+    id: 'initial_message'
+  }
 ];
 
 const ChatWidget: React.FC = () => {
@@ -24,6 +30,48 @@ const ChatWidget: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const bodyRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
+
+  // Generate unique message ID
+  const generateMessageId = () => {
+    return 'msg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+  };
+
+  // Handle copy message functionality
+  const handleCopyMessage = async (text: string, messageId: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedMessageId(messageId);
+      setTimeout(() => {
+        setCopiedMessageId(null);
+      }, 2000);
+    } catch (error) {
+      console.error('Failed to copy message:', error);
+    }
+  };
+
+  // Handle feedback submission
+  const handleFeedback = async (messageId: string, feedbackType: 'up' | 'down') => {
+    try {
+      await submitMessageFeedback(
+        messageId,
+        feedbackType,
+        'widget_session_' + Date.now(),
+        null
+      );
+
+      // Update the message with feedback
+      setMessages(prev => prev.map(msg => 
+        msg.id === messageId 
+          ? { ...msg, feedback: feedbackType }
+          : msg
+      ));
+
+      console.log(`Feedback submitted: ${feedbackType} for message ${messageId}`);
+    } catch (error) {
+      console.error('Failed to submit feedback:', error);
+    }
+  };
 
   useEffect(() => {
     // Start with initial messages when widget opens
@@ -48,7 +96,8 @@ const ChatWidget: React.FC = () => {
     const userMessage: Message = {
       sender: 'user',
       text: input || '📷 Shared an image',
-      image: imagePreview || undefined
+      image: imagePreview || undefined,
+      id: generateMessageId()
     };
     setMessages(prev => [...prev, userMessage]);
     
@@ -74,14 +123,23 @@ const ChatWidget: React.FC = () => {
       }
       
       const data = response.data;
-      setMessages(prev => [...prev, { sender: 'bot', text: data.answer }]);
+      const botMessage: Message = {
+        sender: 'bot',
+        text: data.answer,
+        id: generateMessageId(),
+        feedback: null
+      };
+      setMessages(prev => [...prev, botMessage]);
       
     } catch (err) {
       console.error('Error sending message:', err);
-      setMessages(prev => [...prev, { 
-        sender: 'bot', 
-        text: 'Sorry, I could not get a response from the server.' 
-      }]);
+      const errorMessage: Message = {
+        sender: 'bot',
+        text: 'Sorry, I could not get a response from the server.',
+        id: generateMessageId(),
+        feedback: null
+      };
+      setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
@@ -195,8 +253,45 @@ const ChatWidget: React.FC = () => {
                       }} 
                     />
                   )}
-                  {msg.text}
+                  <div>
+                    {msg.text}
+                  </div>
                 </div>
+                {/* Enhanced feedback section for bot messages - positioned below response */}
+                {msg.sender === 'bot' && msg.id && (
+                  <div className="widget-feedback-section">
+                    <div className="widget-feedback-buttons">
+                      <button
+                        className={`widget-copy-btn ${copiedMessageId === msg.id ? 'copied' : ''}`}
+                        onClick={() => handleCopyMessage(msg.text, msg.id!)}
+                        title="Copy message"
+                      >
+                        {copiedMessageId === msg.id ? '✓' : '📋'}
+                      </button>
+                      <button
+                        className={`widget-feedback-btn thumbs-up ${msg.feedback === 'up' ? 'active' : ''}`}
+                        onClick={() => handleFeedback(msg.id!, 'up')}
+                        title="This was helpful"
+                        disabled={msg.feedback !== null}
+                      >
+                        👍
+                      </button>
+                      <button
+                        className={`widget-feedback-btn thumbs-down ${msg.feedback === 'down' ? 'active' : ''}`}
+                        onClick={() => handleFeedback(msg.id!, 'down')}
+                        title="This was not helpful"
+                        disabled={msg.feedback !== null}
+                      >
+                        👎
+                      </button>
+                      {msg.feedback && (
+                        <span className="widget-feedback-thank-you">
+                          Thanks for your feedback!
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
             {isLoading && (
