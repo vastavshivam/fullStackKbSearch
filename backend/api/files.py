@@ -16,6 +16,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from training.fine_tune import fine_tune
 from utils.file_parser import parse_file, clean_json
 from utils.email_notify import send_upload_notification
+from utils.zsc_tm import classify_documents
 
 router = APIRouter()
 
