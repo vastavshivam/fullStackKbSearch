@@ -32,6 +32,10 @@ export default function Chat() {
   const [feedbackStats, setFeedbackStats] = useState<{satisfaction_rate: number, total_feedback: number}>({satisfaction_rate: 0, total_feedback: 0});
   const [showFeedbackComment, setShowFeedbackComment] = useState<{[key: string]: boolean}>({});
   const [feedbackComments, setFeedbackComments] = useState<{[key: string]: string}>({});
+  const [copiedMessageIndex, setCopiedMessageIndex] = useState<number | null>(null);
+  const [showRatingPopup, setShowRatingPopup] = useState(false);
+  const [hasShownRatingPopup, setHasShownRatingPopup] = useState(false);
+  const [inactivityTimer, setInactivityTimer] = useState<NodeJS.Timeout | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -40,6 +44,12 @@ export default function Chat() {
       try {
         const res = await createChatSession('anonymous');
         setSessionId(res.data.session_id);
+        
+        // Check if rating popup has been shown for this session
+        const ratingShown = localStorage.getItem(`rating_shown_${res.data.session_id}`);
+        if (ratingShown === 'true') {
+          setHasShownRatingPopup(true);
+        }
         
         // Try to get chat history with better error handling
         try {
@@ -74,21 +84,51 @@ export default function Chat() {
     initSession();
     loadFeedbackStats();
     
+    // Start inactivity timer
+    resetInactivityTimer();
+    
+    // Add event listeners for user activity
+    const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+    const handleUserActivity = () => {
+      resetInactivityTimer();
+    };
+    
+    activityEvents.forEach(event => {
+      document.addEventListener(event, handleUserActivity, true);
+    });
+    
+    // WebSocket connection
+    let ws: WebSocket | null = null;
     try {
-      const ws = connectWebSocketChat();
+      ws = connectWebSocketChat();
       ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
         setMessages((prev) => [...prev, { sender: 'bot', text: data.message }]);
       };
-      return () => ws.close();
     } catch (err) {
       console.error('WebSocket connection failed:', err);
     }
+    
+    // Cleanup function
+    return () => {
+      activityEvents.forEach(event => {
+        document.removeEventListener(event, handleUserActivity, true);
+      });
+      if (inactivityTimer) {
+        clearTimeout(inactivityTimer);
+      }
+      if (ws) {
+        ws.close();
+      }
+    };
   }, []);
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() && !selectedImage) return;
+    
+    // Reset inactivity timer when user sends a message
+    resetInactivityTimer();
     
     setIsLoading(true);
     const userMessage = input || '📷 Shared an image';
@@ -283,15 +323,153 @@ export default function Chat() {
     }));
   };
 
+  const handleCopyMessage = async (messageText: string, messageIndex: number) => {
+    try {
+      await navigator.clipboard.writeText(messageText);
+      setCopiedMessageIndex(messageIndex);
+      
+      // Reset copy indicator after 2 seconds
+      setTimeout(() => {
+        setCopiedMessageIndex(null);
+      }, 2000);
+      
+      console.log('Message copied to clipboard');
+    } catch (error) {
+      console.error('Failed to copy message:', error);
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = messageText;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      
+      setCopiedMessageIndex(messageIndex);
+      setTimeout(() => {
+        setCopiedMessageIndex(null);
+      }, 2000);
+    }
+  };
+
+  const resetInactivityTimer = () => {
+    // Clear existing timer
+    if (inactivityTimer) {
+      clearTimeout(inactivityTimer);
+    }
+    
+    // Only set new timer if popup hasn't been shown yet
+    if (!hasShownRatingPopup) {
+      const newTimer = setTimeout(() => {
+        setShowRatingPopup(true);
+        setHasShownRatingPopup(true); // Mark as shown
+      }, 60000); // 60 seconds
+      
+      setInactivityTimer(newTimer);
+    }
+  };
+
+  const handleRatingSubmit = async (rating: number, comment?: string) => {
+    try {
+      // Submit rating as feedback
+      const ratingId = `rating_${sessionId}_${Date.now()}`;
+      const feedbackType = rating >= 4 ? 'up' : 'down';
+      await submitMessageFeedback(ratingId, feedbackType, sessionId, comment);
+      
+      // Update stats
+      try {
+        const statsRes = await getFeedbackAnalytics();
+        setFeedbackStats(statsRes.data);
+      } catch (statsErr) {
+        console.warn('Failed to update feedback stats:', statsErr);
+      }
+      
+      // Close popup and mark as completed (don't show again)
+      setShowRatingPopup(false);
+      setHasShownRatingPopup(true);
+      
+      // Save to localStorage to persist across page refreshes
+      if (sessionId) {
+        localStorage.setItem(`rating_shown_${sessionId}`, 'true');
+      }
+      
+      // Clear any existing timer since user has provided feedback
+      if (inactivityTimer) {
+        clearTimeout(inactivityTimer);
+        setInactivityTimer(null);
+      }
+      
+      // Show success toast
+      setFeedbackToast({
+        show: true,
+        message: 'Thank you for your rating! 🌟',
+        type: 'success'
+      });
+      
+      setTimeout(() => {
+        setFeedbackToast({show: false, message: '', type: 'success'});
+      }, 3000);
+      
+    } catch (error) {
+      console.error('Failed to submit rating:', error);
+      setFeedbackToast({
+        show: true,
+        message: 'Failed to submit rating. Please try again.',
+        type: 'error'
+      });
+      
+      setTimeout(() => {
+        setFeedbackToast({show: false, message: '', type: 'success'});
+      }, 3000);
+    }
+  };
+
+  const handleCloseRatingPopup = () => {
+    // Close popup and mark as shown (don't show again)
+    setShowRatingPopup(false);
+    setHasShownRatingPopup(true);
+    
+    // Save to localStorage to persist across page refreshes
+    if (sessionId) {
+      localStorage.setItem(`rating_shown_${sessionId}`, 'true');
+    }
+    
+    // Clear any existing timer
+    if (inactivityTimer) {
+      clearTimeout(inactivityTimer);
+      setInactivityTimer(null);
+    }
+  };
+
   const handleNewChat = async () => {
     const userId = localStorage.getItem('userId') || 'guest';
+    
+    // Clear old session rating state
+    if (sessionId) {
+      localStorage.removeItem(`rating_shown_${sessionId}`);
+    }
+    
     try {
       const res = await createChatSession(userId);
       setSessionId(res.data.session_id);
       setMessages([{ sender: 'bot', text: "New chat started! 👋" }]);
+      
+      // Reset rating popup state for new session
+      setHasShownRatingPopup(false);
+      setShowRatingPopup(false);
+      
+      // Start fresh inactivity timer
+      resetInactivityTimer();
+      
     } catch (err) {
       setSessionId('');
       setMessages([{ sender: 'bot', text: "New chat started! 👋" }]);
+      
+      // Reset rating popup state even on error
+      setHasShownRatingPopup(false);
+      setShowRatingPopup(false);
+      
+      // Start fresh inactivity timer
+      resetInactivityTimer();
     }
   };
 
@@ -347,7 +525,19 @@ export default function Chat() {
                 />
               )}
               <div className="message-content">
-                {msg.text}
+                <div className="message-text-wrapper">
+                  {msg.text}
+                  {/* Copy button for bot messages */}
+                  {msg.sender === 'bot' && !msg.text.includes("Let me analyze") && !msg.text.includes("Welcome to AppGallop") && (
+                    <button
+                      className={`copy-btn ${copiedMessageIndex === i ? 'copied' : ''}`}
+                      onClick={() => handleCopyMessage(msg.text, i)}
+                      title={copiedMessageIndex === i ? "Copied!" : "Copy message"}
+                    >
+                      {copiedMessageIndex === i ? '✓' : '📋'}
+                    </button>
+                  )}
+                </div>
                 {isLoading && msg.text.includes("Let me analyze") && (
                   <div className="typing-indicator">
                     <span></span>
@@ -485,6 +675,45 @@ export default function Chat() {
           </button>
         </form>
       </div>
+      
+      {/* Rating Popup */}
+      {showRatingPopup && (
+        <div className="rating-popup-overlay">
+          <div className="rating-popup">
+            <div className="rating-popup-header">
+              <h3>How was your experience?</h3>
+              <button 
+                className="close-popup-btn"
+                onClick={handleCloseRatingPopup}
+              >
+                ×
+              </button>
+            </div>
+            <div className="rating-popup-content">
+              <p>Please rate your overall experience with AppGallop Assistant</p>
+              <div className="star-rating">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    className="star-btn"
+                    onClick={() => handleRatingSubmit(star)}
+                  >
+                    ⭐
+                  </button>
+                ))}
+              </div>
+              <div className="rating-actions">
+                <button 
+                  className="rating-action-btn later"
+                  onClick={handleCloseRatingPopup}
+                >
+                  Maybe Later
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
