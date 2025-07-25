@@ -128,3 +128,21 @@ export const chatWithImage = (question, imageFile) => {
 export const checkImageProcessingHealth = () => {
   return axios.get(`${API_BASE}/api/image/health`);
 };
+
+// Feedback API functions
+export const submitMessageFeedback = (messageId, feedbackType, sessionId = null, comment = null) => {
+  return axios.post(`${API_BASE}/api/feedback/message-feedback`, {
+    message_id: messageId,
+    feedback_type: feedbackType,
+    session_id: sessionId,
+    comment: comment
+  });
+};
+
+export const getMessageFeedback = (messageId) => {
+  return axios.get(`${API_BASE}/api/feedback/message-feedback/${messageId}`);
+};
+
+export const getFeedbackAnalytics = () => {
+  return axios.get(`${API_BASE}/api/feedback/feedback-analytics`);
+};

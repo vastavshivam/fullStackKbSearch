@@ -20,6 +20,11 @@ import logging
 
 # Import Gemini Vision processing
 from services.gemini_vision import process_image_with_gemini_and_ocr
+import google.generativeai as genai
+
+# Configure Gemini for text chat as well
+GEMINI_API_KEY = "AIzaSyB5V3qgB25MFkv79JGaHUH75G047iQ5VIU"
+genai.configure(api_key=GEMINI_API_KEY)
 
 # Setup logging
 logger = logging.getLogger(__name__)
@@ -226,6 +231,40 @@ def find_best_match(user_input, patterns, threshold=0.6):
     
     return best_match, best_score
 
+def get_gemini_chat_response(question: str) -> str:
+    """Use Gemini AI for intelligent chat responses when KB/patterns don't match well"""
+    try:
+        logger.info("Using Gemini for intelligent chat response...")
+        
+        # Initialize Gemini model for text
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        
+        # Create a conversational prompt
+        prompt = f"""
+You are AppGallop's helpful AI assistant. A user asked: "{question}"
+
+Please provide a friendly, conversational response that:
+1. Directly addresses their question in a natural, helpful way
+2. Keeps the tone warm and professional 
+3. Offers to help further if needed
+4. Stays concise (2-3 sentences max)
+5. If you don't know something specific, admit it but offer general help
+
+Respond as a knowledgeable, friendly assistant would in a conversation.
+"""
+        
+        # Generate response
+        response = model.generate_content(prompt)
+        
+        if response and response.text:
+            return response.text.strip()
+        else:
+            return "I'd be happy to help you with that! Could you tell me a bit more about what you're looking for?"
+            
+    except Exception as e:
+        logger.error(f"Gemini chat response failed: {e}")
+        return "I'm here to help! While I'm having some technical difficulties right now, feel free to ask me anything and I'll do my best to assist you."
+
 import random
 
 @router.post("/ask", response_model=AskResponse)
@@ -349,6 +388,7 @@ async def static_chat(request: dict):
                 
                 # If we found a good match (similarity > 0.4), return it
                 if best_match_entry and best_similarity > 0.4:
+                    logger.info(f"Found KB match with similarity {best_similarity:.2f}")
                     return {"answer": best_match_entry['answer']}
             
             # 2. Try vector embedding search as fallback (for more complex queries)
@@ -378,12 +418,14 @@ async def static_chat(request: dict):
                             if clean_answers:
                                 # Return the most relevant answer, or combine if multiple
                                 if len(clean_answers) == 1:
+                                    logger.info("Found vector search match")
                                     return {"answer": clean_answers[0]}
                                 else:
                                     # Combine answers intelligently
                                     combined = clean_answers[0]
                                     if len(clean_answers) > 1 and not clean_answers[0].endswith('.'):
                                         combined += ". " + clean_answers[1]
+                                    logger.info("Found combined vector search match")
                                     return {"answer": combined}
             except Exception as e:
                 print(f"Vector search error: {e}")
@@ -397,6 +439,7 @@ async def static_chat(request: dict):
             # Get a random response from the matched category
             responses = CONVERSATION_PATTERNS[best_match]["responses"]
             response = random.choice(responses)
+            logger.info(f"Using conversation pattern: {best_match} (confidence: {confidence:.2f})")
             return {"answer": response}
         
         # Handle specific keywords with fuzzy matching for edge cases
@@ -414,8 +457,15 @@ async def static_chat(request: dict):
         if any(word in question_lower for word in ["what", "how", "why", "when", "where"]) and len(question.split()) <= 3:
             return {"answer": f"That's a broad question! Could you be more specific about what aspect of '{question}' you'd like to know about? I'm here to help with both general conversation and specific topics if you have a knowledge base uploaded."}
         
-        # Default helpful response
-        return {"answer": f"I'd love to help you with that! While I can chat about general topics, I work best when you upload a knowledge base with specific information. For now, feel free to ask me anything - whether it's a casual conversation or if you'd like to know more about AppGallop's services. What's on your mind?"}
+        # 🚀 NEW: Use Gemini AI as intelligent fallback for unmatched questions
+        try:
+            logger.info("No good KB/pattern match found, using Gemini AI for intelligent response...")
+            gemini_response = get_gemini_chat_response(question)
+            return {"answer": gemini_response}
+        except Exception as e:
+            logger.error(f"Gemini fallback failed: {e}")
+            # Final fallback to default response
+            return {"answer": f"I'd love to help you with that! While I can chat about general topics, I work best when you upload a knowledge base with specific information. For now, feel free to ask me anything - whether it's a casual conversation or if you'd like to know more about AppGallop's services. What's on your mind?"}
             
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"❌ Failed: {str(e)}")

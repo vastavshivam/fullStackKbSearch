@@ -5,6 +5,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from api.qa import router as qa_router
 from api.auth import router as auth_router
 from api.image_processing import router as image_router
+from api.feedback import router as feedback_router
 from fastapi.responses import JSONResponse
 import logging
 
@@ -48,6 +49,7 @@ app.include_router(chat.router, prefix="/api/chat", tags=["Chat"])
 app.include_router(files.router, prefix="/api/files", tags=["Files"])
 app.include_router(qa_router, prefix="/api/qa", tags=["Q&A"])
 app.include_router(image_router, prefix="/api/image", tags=["Image Processing"])
+app.include_router(feedback_router, prefix="/api/feedback", tags=["Feedback"])
 app.include_router(training.router, prefix="/api/training", tags=["Training"])
 app.include_router(websocket.router, tags=["WebSocket"])
 app.include_router(whatsapp.router, prefix="/whatsapp")
