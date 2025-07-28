@@ -2,6 +2,7 @@ import os
 import json
 import logging
 import pandas as pd
+from database.database import get_db
 from transformers import pipeline
 from bertopic import BERTopic
 from sentence_transformers import SentenceTransformer
@@ -11,6 +12,7 @@ from utils.auth_utils import decode_jwt_token
 from utils.common_functions_api import get_file_id_from_token
 from models.db_models import ClassifyLabels
 from sqlalchemy.orm import Session
+import numpy as np
 
 
 # -------------------- Setup Logging --------------------
@@ -18,6 +20,10 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # -------------------- Core Classification Function --------------------
+def cosine_similarity(vec1, vec2):
+    return np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
+
+
 async def classify_documents():
     auth_scheme = HTTPBearer()
     REFRESH_URL = "http://localhost:8000/auth/refresh"
@@ -114,8 +120,16 @@ async def classify_documents():
                 final_topic = f"BERTopic-{topic_id}"
                 print(f"✅ Final Classification Topic: {final_topic} (from BERTopic)")
 
-            match_result = 'y1' if final_topic.lower() in label_set else '-1'
-            print(f"🔁 Match Result: {match_result}")
+            final_topic_embedding = sentence_model.encode(final_topic.lower())
+            max_similarity = -1
+            for label in label_set:
+                label_embedding = sentence_model.encode(label.lower())
+                similarity = cosine_similarity(final_topic_embedding, label_embedding)
+                if similarity > max_similarity:
+                    max_similarity = similarity
+
+    # 60% similarity threshold (0.6)
+            match_result = 'y1' if max_similarity >= 0.6 else '-1'
 
             print(f"[{i}] Text: {text}")
             print(f"    🔖 ZSC Label: {top_label}")
