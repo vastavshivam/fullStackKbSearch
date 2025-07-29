@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './Login.css';
 import { FaEnvelope, FaLock, FaBolt, FaChartLine, FaFish, FaShieldAlt, FaRocket } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -25,15 +25,20 @@ export default function Login() {
     setLoading(true);
     try {
       const success = await login(email, password, role);
-      
+      setLoading(false);
+
       if (success) {
-        navigate('/dashboard');
+        // Redirect based on role
+        if (role === 'admin') {
+          navigate('/dashboard');
+        } else {
+          navigate('/user-dashboard');
+        }
       } else {
-        setError('Invalid credentials or role mismatch.');
+        setError('Login failed. Please check your credentials.');
       }
     } catch (err) {
       setError('An error occurred during login.');
-    } finally {
       setLoading(false);
     }
   };
@@ -113,7 +118,15 @@ export default function Login() {
                 localStorage.setItem('authToken', data.access_token);
                 localStorage.setItem('userRole', data.role);
                 localStorage.setItem('userData', JSON.stringify(data.user));
-                navigate('/dashboard');
+                
+                // Role-based redirection
+                if (role === 'user') {
+                  navigate('/user-dashboard');
+                } else if (role === 'admin') {
+                  navigate('/dashboard');
+                } else {
+                  navigate('/dashboard'); // Default fallback
+                }
               } else {
                 let errorMessage = 'Login failed.';
                 if (data.detail) {

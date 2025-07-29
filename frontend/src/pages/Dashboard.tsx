@@ -9,9 +9,8 @@ import {
 
 import ChartPanel from "./ChartPanel";
 import "./Dashboard.css";
-import "../styles/auth.css";
 import InsightCards from "../components/InsightCards";
-import { useAuth, ProtectedRoute } from "../hooks/useAuth";
+import { useAuth } from "../contexts/AuthContext";
 
 const kpiData = [
   { label: "Campaigns", value: "25", icon: <BiRocket /> },
@@ -42,7 +41,7 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<"Overview" | "Analytics">("Overview");
   const [darkMode, setDarkMode] = useState(false);
   const navigate = useNavigate();
-  const { user, logout, isAdmin, isUser } = useAuth();
+  const { logout } = useAuth();
 
   useEffect(() => {
     const storedTheme = localStorage.getItem("darkMode");
@@ -56,7 +55,7 @@ export default function Dashboard() {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate("/");
   };
 
   return (
@@ -64,15 +63,7 @@ export default function Dashboard() {
       <div className="dashboard-header-wrapper">
         <div className="dashboard-header">
           <div className="header-left">
-            <h1 className="dashboard-title">AppGallop Dashboard</h1>
-            {user && (
-              <div className="user-info">
-                <span className="welcome-text">Welcome, {user.name}</span>
-                <span className={`role-badge ${user.role}`}>
-                  {user.role.toUpperCase()}
-                </span>
-              </div>
-            )}
+            <h1 className="dashboard-title">AppGallop Dashboard</h1>            
           </div>
           <div className="header-right">
             {/* Tabs with icons - moved to header */}

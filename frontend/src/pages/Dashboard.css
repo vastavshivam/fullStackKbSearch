@@ -48,177 +48,6 @@ body, html {
     overflow-x: hidden;
 }
 
-/* --- Sidebar --- */
-.sidebar {
-    background: rgba(255, 255, 255, 0.9); /* Slightly transparent for depth */
-    backdrop-filter: var(--glass-blur);
-    width: 260px; /* Slightly wider for better content display */
-    transition: width 0.3s ease, background 0.3s;
-    box-shadow: var(--shadow-light);
-    display: flex;
-    flex-direction: column;
-    border-right: var(--border-light);
-    padding: 20px 0; /* Add vertical padding */
-    box-sizing: border-box; /* Include padding in width */
-}
-
-.sidebar-collapsed.sidebar {
-    width: 80px; /* Slightly wider collapsed state for better icon visibility */
-}
-
-.sidebar-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 24px 20px 24px; /* Adjust padding for visual balance */
-    margin-bottom: 20px;
-    border-bottom: var(--border-light);
-    padding-bottom: 20px;
-}
-
-.logo-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.sidebar-logo {
-    width: 40px; /* Larger logo */
-    height: 40px;
-    border-radius: 8px;
-    background: linear-gradient(45deg, var(--accent-blue), var(--accent-dark-blue)); /* Gradient logo */
-    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
-}
-
-.sidebar-logo-large {
-    width: 100%;
-    height: 100px;
-    max-width: 280px;
-    object-fit: contain;
-    border-radius: 12px;
-    background: transparent;
-    box-shadow: none;
-}
-
-.sidebar-logo-small {
-    width: 70px;
-    height: 70px;
-    object-fit: contain;
-    border-radius: 12px;
-    background: transparent;
-    cursor: pointer;
-    transition: transform 0.2s ease;
-}
-
-.sidebar-logo-small:hover {
-    transform: scale(1.1);
-}
-
-.logo-text {
-    display: none; /* Hidden since we're showing only logo */
-}
-
-.sidebar-toggle {
-    background: none;
-    border: none;
-    font-size: 24px; /* Larger icon */
-    cursor: pointer;
-    color: var(--text-secondary);
-    transition: color 0.2s;
-    padding: 8px; /* Add padding for easier clicking */
-    border-radius: 8px;
-}
-
-.sidebar-toggle:hover {
-    color: var(--accent-blue);
-    background-color: #eef6ff;
-}
-
-.sidebar-links {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    flex-grow: 1; /* Allows links to take up available space */
-}
-
-.sidebar-link {
-    display: flex;
-    align-items: center;
-    gap: 16px; /* Increased gap */
-    padding: 14px 24px; /* More padding for a bolder look */
-    color: var(--text-primary);
-    cursor: pointer;
-    transition: background 0.2s, color 0.2s;
-    font-size: 16px; /* Slightly larger text */
-    font-weight: 500;
-    position: relative; /* For active indicator */
-}
-
-.sidebar-link:hover {
-    background-color: #eef6ff;
-}
-
-.sidebar-link.active {
-    background: linear-gradient(90deg, #e0e7ff 0%, rgba(224, 231, 255, 0.0) 100%); /* Subtle gradient for active */
-    color: var(--accent-blue);
-    font-weight: 700;
-}
-
-.sidebar-link.active::before { /* Left border as a pseudo-element */
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 6px;
-    background: linear-gradient(to bottom, var(--accent-blue), var(--accent-dark-blue));
-    border-radius: 0 4px 4px 0;
-}
-
-.sidebar-icon {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 22px; /* Larger icons */
-    color: var(--text-secondary); /* Default icon color */
-    transition: color 0.2s;
-}
-
-.sidebar-link.active .sidebar-icon {
-    color: var(--accent-dark-blue); /* Active icon color */
-}
-
-.sidebar-footer {
-    margin-top: auto;
-    padding: 20px 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 15px; /* Spacing for buttons */
-    border-top: var(--border-light);
-    padding-top: 20px;
-}
-
-.action-button {
-    padding: 12px 18px; /* More comfortable padding */
-    border-radius: 10px; /* Softer corners */
-    color: white;
-    text-decoration: none;
-    font-weight: 600; /* Bolder text */
-    font-size: 15px; /* Slightly larger font */
-    text-align: center;
-    transition: background 0.3s, box-shadow 0.3s;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Add shadow */
-}
-
-.action-button.blue { background: linear-gradient(45deg, #1DA1F2, #0e8ace); } /* Gradient for blue */
-.action-button.gray { background: linear-gradient(45deg, #6c757d, #5a6268); } /* Gradient for gray */
-.action-button.purple { background: linear-gradient(45deg, #6f42c1, #563d7c); } /* Gradient for purple */
-
-.action-button:hover {
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2); /* Lift on hover */
-    transform: translateY(-2px);
-}
-
 /* --- Main Dashboard Content Area --- */
 .main-dashboard {
     flex: 1;
@@ -883,76 +712,6 @@ background-color: var(--bg-main);
   }
 }
 
-/* Sidebar Dropdown Styles */
-.integrations-menu {
-    display: flex;
-    flex-direction: column;
-}
-
-.sidebar-dropdown-header {
-    display: flex;
-    align-items: center;
-    padding: 14px 24px; /* Consistent with sidebar links */
-    gap: 16px;
-    color: var(--text-primary);
-    cursor: pointer;
-    transition: background 0.2s, color 0.2s;
-    font-size: 16px;
-    font-weight: 500;
-}
-
-.sidebar-dropdown-header:hover {
-    background-color: #eef6ff;
-    color: var(--accent-blue);
-}
-
-.sidebar-dropdown-header i.bi-chevron-down,
-.sidebar-dropdown-header i.bi-chevron-right {
-    margin-left: auto; /* Push icon to the right */
-    font-size: 18px;
-    transition: transform 0.2s;
-}
-
-.sidebar-dropdown-header.expanded i.bi-chevron-down {
-    transform: rotate(180deg);
-}
-
-.sidebar-submenu {
-    display: flex;
-    flex-direction: column;
-    padding-left: 40px; /* Indent sub-links */
-    margin-top: 8px; /* More space */
-    border-left: 2px solid #e0e7ff; /* Subtle vertical line for submenu */
-    margin-left: 30px; /* Align with primary link icons */
-}
-
-.sidebar-sublink {
-    padding: 10px 0; /* More padding */
-    color: var(--text-secondary);
-    font-size: 15px; /* Slightly larger */
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 12px; /* More gap */
-    transition: background 0.2s, color 0.2s;
-    font-weight: 500;
-}
-
-.sidebar-sublink:hover {
-    background-color: #f1faff;
-    border-radius: 8px; /* Slightly more rounded */
-    color: var(--accent-blue);
-}
-
-.sidebar-sublink.active {
-    font-weight: 700;
-    color: var(--accent-dark-blue); /* Stronger active color */
-}
-
-.sidebar-sublink .sidebar-icon {
-    font-size: 20px; /* Consistent with other icons */
-}
-
 /* --- Background Shapes (for glassmorphism effect) --- */
 .background-shapes {
     position: absolute;
@@ -984,9 +743,6 @@ background-color: var(--bg-main);
 
 /* --- Responsive Adjustments --- */
 @media (max-width: 1200px) {
-    .sidebar {
-        width: 240px;
-    }
     .main-dashboard {
         padding: 30px;
     }
@@ -999,25 +755,6 @@ background-color: var(--bg-main);
 }
 
 @media (max-width: 992px) {
-    .sidebar {
-        width: 220px;
-    }
-    .sidebar-header {
-        padding: 0 20px 15px 20px;
-    }
-    .logo-text {
-        font-size: 20px;
-    }
-    .sidebar-link, .sidebar-dropdown-header {
-        padding: 12px 20px;
-    }
-    .sidebar-icon {
-        font-size: 20px;
-    }
-    .action-button {
-        padding: 10px 15px;
-        font-size: 14px;
-    }
     .main-dashboard {
         padding: 25px;
     }
@@ -1076,62 +813,7 @@ background-color: var(--bg-main);
 
 @media (max-width: 768px) {
     .dashboard-layout {
-        flex-direction: column; /* Stack sidebar and main content */
-    }
-    .sidebar {
-        width: 100%;
-        height: auto;
-        border-right: none;
-        border-bottom: var(--border-light);
-        padding: 15px 0;
-        border-radius: 0 0 20px 20px;
-    }
-    .sidebar-header {
-        justify-content: center;
-        padding-bottom: 15px;
-        margin-bottom: 15px;
-    }
-    .sidebar-toggle {
-        display: none; /* Hide toggle button in mobile as sidebar is always open */
-    }
-    .sidebar-links {
-        flex-direction: row; /* Horizontal tabs for links */
-        justify-content: center;
-        flex-wrap: wrap;
-        gap: 10px;
-        padding: 0 10px;
-    }
-    .sidebar-link {
-        padding: 10px 15px;
-        font-size: 14px;
-        gap: 8px;
-        border-left: none;
-        border-bottom: 3px solid transparent; /* Use bottom border for active */
-        border-radius: 8px; /* Round buttons */
-        background: rgba(255, 255, 255, 0.7); /* Lighter background for tabs */
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    }
-    .sidebar-link.active {
-        background: linear-gradient(0deg, var(--accent-blue) 0%, var(--accent-dark-blue) 100%); /* Gradient for active tab */
-        color: #fff;
-        border-bottom: 3px solid transparent;
-        box-shadow: var(--shadow-accent);
-    }
-    .sidebar-link.active::before { /* Remove left border */
-        display: none;
-    }
-    .sidebar-link.active .sidebar-icon {
-        color: #fff;
-    }
-    .sidebar-icon {
-        font-size: 18px;
-    }
-    .sidebar-footer {
-        padding: 15px 20px;
-        flex-direction: row; /* Horizontal buttons */
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 10px;
+        flex-direction: column;
     }
     .main-dashboard {
         padding: 20px;
@@ -1196,44 +878,5 @@ background-color: var(--bg-main);
     .insight-section .export-button {
         font-size: 13px;
         padding: 6px 12px;
-    }
-
-    /* Submenu for collapsed sidebar */
-    .sidebar-collapsed .sidebar-links {
-        display: block; /* Show individual links */
-    }
-
-    .sidebar-collapsed .sidebar-link .text-label,
-    .sidebar-collapsed .logo-text,
-    .sidebar-collapsed .action-button,
-    .sidebar-collapsed .sidebar-dropdown-header .text-label {
-        display: none; /* Hide text in collapsed mode */
-    }
-
-    .sidebar-collapsed .sidebar-dropdown-header i.bi-chevron-down,
-    .sidebar-collapsed .sidebar-dropdown-header i.bi-chevron-right {
-        margin-left: 0; /* Center icon */
-    }
-
-    .sidebar-collapsed .sidebar-link,
-    .sidebar-collapsed .sidebar-dropdown-header {
-        justify-content: center;
-        padding: 14px 0; /* Center horizontally in collapsed state */
-        width: 80px; /* Match collapsed sidebar width */
-    }
-    .sidebar-collapsed .sidebar-submenu {
-        padding-left: 0;
-        margin-left: 0;
-        text-align: center; /* Center submenu items */
-        border-left: none;
-    }
-    .sidebar-collapsed .sidebar-sublink {
-        justify-content: center;
-        padding: 8px 0;
-        font-size: 12px;
-        gap: 0;
-    }
-    .sidebar-collapsed .sidebar-sublink .sidebar-icon {
-        font-size: 16px;
     }
 }

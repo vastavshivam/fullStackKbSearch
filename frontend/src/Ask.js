@@ -1,15 +1,3 @@
-<<<<<<< HEAD
-import React from 'react';
-
-export default function Ask() {
-  return (
-    <div>
-      <h2>Ask Component</h2>
-      {/* Add your component logic here */}
-    </div>
-  );
-} 
-=======
 import React, { useState } from "react";
 import { askQuestion } from "./services/api";
 
@@ -43,4 +31,3 @@ function Ask() {
 }
 
 export default Ask;
->>>>>>> radhika/feature

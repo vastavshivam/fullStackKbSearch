@@ -1,25 +1,8 @@
 // src/services/api.js
 import axios from 'axios';
 
-// Use relative paths for proxy support
-const API_BASE = '';
-
-// Set up axios defaults
-axios.defaults.baseURL = API_BASE;
-
-// Add token to requests if available
-axios.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
+// Use absolute URL for backend API
+const API_BASE = 'http://localhost:8004';
 
 export const uploadFile = (formData) => {
   return axios.post(`${API_BASE}/api/files/upload`, formData, {
@@ -91,13 +74,75 @@ export const login = (email, password, role) => {
 
 // Chat session API functions
 export const createChatSession = (userId) => {
-  return axios.post(`/api/chat/session`, { user_id: userId });
+  return axios.post(`${API_BASE}/api/chat/session`, { user_id: userId });
 };
 
 export const storeChatMessage = (sessionId, sender, message) => {
-  return axios.post(`/api/chat/message`, { session_id: sessionId, sender, message });
+  return axios.post(`${API_BASE}/api/chat/message`, { session_id: sessionId, sender, message });
 };
 
 export const getChatHistory = (sessionId) => {
-  return axios.get(`/api/chat/history/${sessionId}`);
+  return axios.get(`${API_BASE}/api/chat/history/${sessionId}`);
+};
+
+export const askStaticChat = (question) => {
+  return axios.post(`${API_BASE}/api/qa/static-chat`, { question });
+};
+
+// Image processing API functions
+export const processImage = (imageFile) => {
+  const formData = new FormData();
+  formData.append('file', imageFile);
+  
+  return axios.post(`${API_BASE}/api/image/process-image`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+};
+
+export const analyzeImageWithQuestion = (imageFile, question) => {
+  const formData = new FormData();
+  formData.append('file', imageFile);
+  if (question) {
+    formData.append('question', question);
+  }
+  
+  return axios.post(`${API_BASE}/api/image/analyze-image-with-question`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+};
+
+export const chatWithImage = (question, imageFile) => {
+  const formData = new FormData();
+  if (question) {
+    formData.append('question', question);
+  }
+  if (imageFile) {
+    formData.append('image', imageFile);
+  }
+  
+  return axios.post(`${API_BASE}/api/qa/chat-multimodal`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+};
+
+export const checkImageProcessingHealth = () => {
+  return axios.get(`${API_BASE}/api/image/health`);
+};
+
+// Feedback API functions
+export const submitMessageFeedback = (messageId, feedbackType, sessionId = null, comment = null) => {
+  return axios.post(`${API_BASE}/api/feedback/message-feedback`, {
+    message_id: messageId,
+    feedback_type: feedbackType,
+    session_id: sessionId,
+    comment: comment
+  });
+};
+
+export const getMessageFeedback = (messageId) => {
+  return axios.get(`${API_BASE}/api/feedback/message-feedback/${messageId}`);
+};
+
+export const getFeedbackAnalytics = () => {
+  return axios.get(`${API_BASE}/api/feedback/feedback-analytics`);
 };

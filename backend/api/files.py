@@ -1,3 +1,10 @@
+# ==========================================
+# 💡 Support Assistant Project .gitignore
+# For FastAPI + PostgreSQL + React + Docker
+# Author: Shivam Srivastav
+# ==========================================
+# File: backend/api/files.py    
+# ==========================================
 from fastapi import APIRouter, UploadFile, File, HTTPException, BackgroundTasks, Depends, Query
 from fastapi.responses import JSONResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -14,7 +21,7 @@ from models.db_models import User
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from training.fine_tune import fine_tune
-from utils.file_parser import parse_file, clean_json
+from utils.file_parser import parse_file, clean_json, extract_full_text
 from utils.email_notify import send_upload_notification
 from utils.zsc_tm import classify_documents
 from logging import getLogger
@@ -27,7 +34,7 @@ UPLOAD_DIR = Path("uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
 
 auth_scheme = HTTPBearer()
-REFRESH_URL = "http://localhost:8000/auth/refresh"
+REFR_URL = "http://localhost:8000/auth/refresh"
 
 ALLOWED_EXTENSIONS = {".csv", ".json", ".xlsx", ".txt", ".pdf", ".jpg", ".jpeg", ".png", ".gif", ".bmp"}
 MAX_FILE_SIZE_MB = 10
@@ -51,7 +58,7 @@ async def upload_file(
             if not refresh_token:
                 raise HTTPException(status_code=401, detail="Token expired. Provide refresh_token.")
             async with httpx.AsyncClient() as client:
-                res = await client.post(REFRESH_URL, json={"refresh_token": refresh_token})
+                res = await client.post(REFR_URL, json={"refresh_token": refresh_token})
                 if res.status_code != 200:
                     raise HTTPException(status_code=401, detail="Refresh token invalid")
                 new_token = res.json()["token"]

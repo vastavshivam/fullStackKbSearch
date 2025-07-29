@@ -25,7 +25,7 @@ router = APIRouter()
 logger.info("📦 Loading fine-tuned Mistral model...")
 tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)
 model = AutoModelForCausalLM.from_pretrained(MODEL_PATH)
-chatbot = pipeline("text-generation", model=model, tokenizer=tokenizer)
+chatbot = pipeline("text-generation", model=model, tokenizer=tokenizer, device=torch.device("cpu"))
 
 # --- Load Embedding Model ---
 embedder = SentenceTransformer(VECTOR_MODEL_NAME)

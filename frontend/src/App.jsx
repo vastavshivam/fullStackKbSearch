@@ -18,8 +18,8 @@ import JourneyDetail from './pages/JourneyDetail'; // New page
 import Integrations from './pages/Integrations'; // New integrations page
 import Layout from './components/Layout';
 import TemplatePage from './pages/TemplatePage';
-import { AuthProvider } from './hooks/useAuth';
-// import PrivateRoute from './components/PrivateRoute';
+import ProtectedRoute from './components/ProtectedRoute';
+import { AuthProvider } from './contexts/AuthContext';
 
 function App() {
   // Helper to render ChatWidget only if enabled
@@ -36,24 +36,69 @@ function App() {
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-              {/* Commented out PrivateRoute for now */}
-              <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
-              <Route path="/chat" element={<Layout><Chat /></Layout>} />
-              <Route path="/knowledge-base" element={<Layout><KnowledgeBase /></Layout>} />
-              <Route path="/user-dashboard" element={<Layout><UserDashboard /></Layout>} />
-              <Route path="/campaigns" element={<Layout><Campaigns /></Layout>} />
-              <Route path="/journeys" element={<Layout><Journeys /></Layout>} />
-              <Route path="/journeys/:id" element={<Layout><JourneyDetail /></Layout>} />
-              <Route path="/settings" element={<Layout><Settings /></Layout>} />
-              <Route path="/integrations" element={<Layout><Integrations /></Layout>} />
-              <Route path="/template" element={<Layout><TemplatePage /></Layout>} />
-              <Route path="/" element={<Login />} />
-            </Routes>
-            <ChatWidgetConditional />
-          </div>
-        </Router>
-      </WidgetConfigProvider>
-    </AuthProvider>
+            
+            {/* Admin routes */}
+            <Route path="/dashboard" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <Layout><Dashboard /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/chat" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <Layout><Chat /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/knowledge-base" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <Layout><KnowledgeBase /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/settings" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <Layout><Settings /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/campaigns" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <Layout><Campaigns /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/journeys" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <Layout><Journeys /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/journeys/:id" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <Layout><JourneyDetail /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/integrations" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <Layout><Integrations /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/template" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <Layout><TemplatePage /></Layout>
+              </ProtectedRoute>
+            } />
+            
+            {/* User routes */}
+            <Route path="/user-dashboard" element={
+              <ProtectedRoute allowedRoles={['user', 'admin']}>
+                <Layout><UserDashboard /></Layout>
+              </ProtectedRoute>
+            } />
+            
+            {/* Default redirect */}
+            <Route path="/" element={<Login />} />
+          </Routes>
+          <ChatWidgetConditional />
+        </div>
+      </Router>
+    </WidgetConfigProvider>
+  </AuthProvider>
   );
 }
 
