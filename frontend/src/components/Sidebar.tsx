@@ -14,6 +14,7 @@ const sidebarLinks = [
   { label: 'Template', icon: <BiEnvelope />, route: '/template' },
   { label: 'Content', icon: <BiCube />, route: '/content' },
   { label: 'Products', icon: <BiCube />, route: '/products' },
+  { label: 'Quotes', icon: <BiBarChartAlt2 style={{ color: '#667eea' }} />, route: '/quotes' },
   { label: 'Settings', icon: <BiCog />, route: '/settings' },
 ];
 
@@ -151,6 +152,7 @@ export default function Sidebar({
       {sidebarOpen && (
         <div className="sidebar-footer">
           <Link to="/chat" className="action-button blue">Chat</Link>
+          <Link to="/quotes" className="action-button" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: '#fff' }}>Quotes</Link>
           <Link to="/knowledge-base" className="action-button gray">Knowledge Base</Link>
           <Link to="/settings" className="action-button purple">Settings</Link>
         </div>
