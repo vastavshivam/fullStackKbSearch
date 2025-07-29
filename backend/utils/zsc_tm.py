@@ -14,7 +14,6 @@ from models.db_models import ClassifyLabels
 from sqlalchemy.orm import Session
 import numpy as np
 
-
 # -------------------- Setup Logging --------------------
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -23,16 +22,19 @@ logger = logging.getLogger(__name__)
 def cosine_similarity(vec1, vec2):
     return np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
 
+# Initialize the router
+router = APIRouter()
 
-async def classify_documents():
-    auth_scheme = HTTPBearer()
+@router.get("/classify-documents")
+async def classify_documents(
+    # credentials: HTTPAuthorizationCredentials = Depends(HTTPBearer()),  # This will automatically inject the credentials
+    # refresh_token: str = Query(None),  # Query parameter for refresh_token
+    db: Session = Depends(get_db)  # Dependency to get the database session
+):
     REFRESH_URL = "http://localhost:8000/auth/refresh"
-    credentials: HTTPAuthorizationCredentials = Depends(auth_scheme),
-    refresh_token: str = Query(None)
-
-    user_id, file_id = await get_file_id_from_token(
-        credentials.credentials, refresh_token, REFRESH_URL
-    )
+    
+    # Get user_id, file_id from token
+    # user_id, file_id = await get_file_id_from_token(credentials.credentials, refresh_token, REFRESH_URL)
     folder_path = f"uploads/{file_id}"
     documents = []
 
@@ -52,26 +54,12 @@ async def classify_documents():
                     documents.extend([str(item) for item in json_data])
                 elif isinstance(json_data, dict):
                     documents.extend([str(value) for value in json_data.values()])
-        filepath = os.path.join(folder_path, filename)
-        if filename.endswith(".txt"):
-            with open(filepath, "r", encoding="utf-8") as f:
-                documents.append(f.read().strip())
-        elif filename.endswith(".csv"):
-            df = pd.read_csv(filepath)
-            documents.extend(df.iloc[:, 0].dropna().astype(str).tolist())
-        elif filename.endswith(".json"):
-            with open(filepath, "r", encoding="utf-8") as f:
-                json_data = json.load(f)
-                if isinstance(json_data, list):
-                    documents.extend([str(item) for item in json_data])
-                elif isinstance(json_data, dict):
-                    documents.extend([str(value) for value in json_data.values()])
         else:
             logger.warning(f"⚠️ Skipping unsupported file type: {filename}")
 
     if not documents:
         logger.error("❌ No valid documents found.")
-        return
+        return []
 
     logger.info("🚀 Starting Zero-Shot Classification...")
 
@@ -102,12 +90,12 @@ async def classify_documents():
 
         logger.info("✅ BERTopic Modeling Done.")
 
-        db: Session = Depends(get_db)
-
+        # Query user labels from database
         user_labels = db.query(ClassifyLabels.label).filter(ClassifyLabels.user_id == user_id).all()
         label_set = set(label[0].lower() for label in user_labels)
 
         # Show results with final topic logic
+        match_results = []  # To collect all match results
         for i in range(len(documents)):
             text = df_classified.iloc[i]['text']
             top_label = df_classified.iloc[i]['label']
@@ -115,10 +103,10 @@ async def classify_documents():
 
             if topic_id == -1:
                 final_topic = top_label
-                print(f"✅ Final Classification Topic: {final_topic} (from ZSC)")
+                logger.info(f"✅ Final Classification Topic: {final_topic} (from ZSC)")
             else:
                 final_topic = f"BERTopic-{topic_id}"
-                print(f"✅ Final Classification Topic: {final_topic} (from BERTopic)")
+                logger.info(f"✅ Final Classification Topic: {final_topic} (from BERTopic)")
 
             final_topic_embedding = sentence_model.encode(final_topic.lower())
             max_similarity = -1
@@ -128,16 +116,17 @@ async def classify_documents():
                 if similarity > max_similarity:
                     max_similarity = similarity
 
-    # 60% similarity threshold (0.6)
+            # 60% similarity threshold (0.6)
             match_result = 'y1' if max_similarity >= 0.6 else '-1'
+            match_results.append(match_result)
 
-            print(f"[{i}] Text: {text}")
-            print(f"    🔖 ZSC Label: {top_label}")
-            print(f"    🧠 Topic ID: {topic_id}")
-            print("")
+            logger.info(f"[{i}] Text: {text}")
+            logger.info(f"    🔖 ZSC Label: {top_label}")
+            logger.info(f"    🧠 Topic ID: {topic_id}")
+            logger.info("")
 
-        print("\n📊 Topic Info:\n", topic_model.get_topic_info())
-        return match_result
+        logger.info("\n📊 Topic Info:\n", topic_model.get_topic_info())
+        return match_results
 
     except Exception as e:
         logger.error(f"❌ Error in topic modeling: {e}")
