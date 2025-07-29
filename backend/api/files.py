@@ -1,105 +1,135 @@
-# ==========================================
-# 💡 Support Assistant Project .gitignore
-# For FastAPI + PostgreSQL + React + Docker
-# Author: Shivam Srivastav
-# ==========================================
-# File: backend/api/files.py    
-# ==========================================
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, UploadFile, File, HTTPException, BackgroundTasks, Depends, Query
 from fastapi.responses import JSONResponse
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pathlib import Path
 from utils.embed_store import chunk_text, save_embeddings
-import shutil
+from utils.auth_utils import decode_jwt_token
+from jose.exceptions import ExpiredSignatureError
+import httpx
 import os
+from sqlalchemy import select
+
+from database.database import get_db
+from models.db_models import User
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from training.fine_tune import fine_tune
 from utils.file_parser import parse_file, clean_json
 from utils.email_notify import send_upload_notification
+from utils.zsc_tm import classify_documents
+from logging import getLogger
+
+logger = getLogger(__name__)
 
 router = APIRouter()
 
-UPLOAD_DIR = Path("uploads") 
+UPLOAD_DIR = Path("uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
 
-ALLOWED_EXTENSIONS = {".csv", ".json", ".xlsx" , ".txt", ".pdf", ".jpg", ".jpeg", ".png", ".gif", ".bmp"}
+auth_scheme = HTTPBearer()
+REFRESH_URL = "http://localhost:8000/auth/refresh"
+
+ALLOWED_EXTENSIONS = {".csv", ".json", ".xlsx", ".txt", ".pdf", ".jpg", ".jpeg", ".png", ".gif", ".bmp"}
 MAX_FILE_SIZE_MB = 10
 
+
 @router.post("/upload", summary="Upload training/WhatsApp file")
-async def upload_file(file: UploadFile = File(...)):
-    # Validate extension
+async def upload_file(
+    background_tasks: BackgroundTasks,
+    file: UploadFile = File(...),
+    credentials: HTTPAuthorizationCredentials = Depends(auth_scheme),
+    refresh_token: str = Query(None),
+    db: AsyncSession = Depends(get_db)
+):
+    # ─── JWT Decode ───
+    try:
+        try:
+            payload = decode_jwt_token(credentials.credentials)
+        except ExpiredSignatureError:
+            if not refresh_token:
+                raise HTTPException(status_code=401, detail="Token expired. Provide refresh_token.")
+            async with httpx.AsyncClient() as client:
+                res = await client.post(REFRESH_URL, json={"refresh_token": refresh_token})
+                if res.status_code != 200:
+                    raise HTTPException(status_code=401, detail="Refresh token invalid")
+                new_token = res.json()["token"]
+                payload = decode_jwt_token(new_token)
+
+        user_email = payload.get("sub", "anonymous")  # using email (string)
+    except Exception as e:
+        logger.error(f"Error uploading file: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
+
+    # ─── File Type & Size Check ───
     ext = Path(file.filename).suffix.lower()
-    print(f"File extension===============>: {ext}")
     if ext not in ALLOWED_EXTENSIONS:
         raise HTTPException(status_code=400, detail=f"❌ Unsupported file type: {ext}")
 
-    # Validate size
     contents = await file.read()
     size_mb = len(contents) / (1024 * 1024)
     if size_mb > MAX_FILE_SIZE_MB:
         raise HTTPException(status_code=400, detail=f"❌ File too large (max {MAX_FILE_SIZE_MB}MB)")
 
-    # Save file
     file_path = UPLOAD_DIR / file.filename
-    print(f"File path===============>: {file_path}")
     with open(file_path, "wb") as f:
         f.write(contents)
 
-    # Optional: parse and preview first rows
+    # ─── Parse Preview ───
     try:
         preview = parse_file(file_path, limit=5)
-        preview = clean_json(preview)  # Clean JSON data if needed
-        print(f"Preview data===============>: {preview}")
+        preview = clean_json(preview)
     except Exception as e:
+        logger.error(f"Error uploading file: {str(e)}")
+       
         raise HTTPException(status_code=500, detail=f"❌ Failed to parse file: {str(e)}")
-    
-     # 🔁 Embed full content for retrieval
-    try:  
 
-        full_text = parse_file(file_path)  # No limit here
-        chunks = chunk_text(full_text)
-        save_embeddings(file_id=file.filename, chunks=chunks)
-    except Exception as e:
-        print(f"[Embedding Error]: {e}")  # or raise a warning log
+    # ─── Embedding and Save ───
+    match_result = classify_documents()
+    if (match_result == -1):
+        print("You have provided wrong info we cannot train your model")
 
-    # ✅ Start training automatically after embeddings
-    background_tasks.add_task(fine_tune)
+    else:
+        try:
+            full_text = parse_file(file_path)
+            if isinstance(full_text, list):
+                full_text = " ".join(
+                    str(item.get("prompt", "")) + " " + str(item.get("response", ""))
+                    for item in full_text if isinstance(item, dict)
+            )
+            elif isinstance(full_text, dict):
+                full_text = " ".join(str(v) for v in full_text.values())
 
-    # Optional: send email/slack alert to admin
-    send_upload_notification("vastavshivam@gmai.com", "uploaded successfully.", body="File uploaded ...")
+            elif not isinstance(full_text, str):
+                full_text = str(full_text)
 
-    return JSONResponse(content={
-        "message": f"✅ File {file.filename} uploaded successfully.",
-        "filename": file.filename,
-        "preview": preview  # Optional: parsed preview from CSV/JSON/XLSX
-    })
+            chunks = chunk_text(full_text)
+            save_embeddings(file_id=file.filename, chunks=chunks)
 
-# async def upload_file(file: UploadFile = File(...)):
-#     # Validate extension
-#     ext = Path(file.filename).suffix.lower()
-#     if ext not in ALLOWED_EXTENSIONS:
-#         raise HTTPException(status_code=400, detail=f"❌ Unsupported file type: {ext}")
+        except Exception as e:
+            print(f"[Embedding Error]: {e}")
 
-#     # Validate size
-#     contents = await file.read()
-#     size_mb = len(contents) / (1024 * 1024)
-#     if size_mb > MAX_FILE_SIZE_MB:
-#         raise HTTPException(status_code=400, detail=f"❌ File too large (max {MAX_FILE_SIZE_MB}MB)")
+    # ─── Update user's file_id in DB ───
+        try:
+            result = await db.execute(select(User).where(User.email == user_email))
+            user = result.scalar_one_or_none()
+            if user:
+                user.file_id = file.filename  # Store filename as file_id
+                await db.commit()
+            else:
+                raise HTTPException(status_code=404, detail="User not found")
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"❌ Failed to update user with file_id: {str(e)}")
 
-#     # Save file
-#     file_path = UPLOAD_DIR / file.filename
-#     with open(file_path, "wb") as f:
-#         f.write(contents)
+    # ─── Optional: Background fine-tune ───
+    # background_tasks.add_task(fine_tune)
 
-#     # Optional: parse and preview first rows
-#     try:
-#         preview = parse_file(file_path, limit=5)
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=f"❌ Failed to parse file: {str(e)}")
+    # ─── Email Notification ───
+        send_upload_notification("vastavshivam@gmail.com", "uploaded successfully.", body="File uploaded ...")
 
-#     # Optional: send email/slack alert to admin
-#     send_upload_notification('vastavshivam@gmai.com', "uploaded successfully.", body="File uploaded ...")
-
-#     return JSONResponse(content={
-#     "message": f"✅ File {file.filename} uploaded successfully.",
-#     "filename": file.filename,
-#     "preview": preview  # Optional: parsed preview from CSV/JSON/XLSX
-# })
+    # ─── Return Response ───
+        return JSONResponse(content={
+            "message": f"✅ File {file.filename} uploaded successfully.",
+            "filename": file.filename,
+            "preview": preview,
+            "uploaded_by": user_email
+        })

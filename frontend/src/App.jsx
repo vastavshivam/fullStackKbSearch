@@ -14,8 +14,8 @@ import { WidgetConfigProvider, useWidgetConfig } from './components/WidgetConfig
 import UserDashboard from './pages/UserDashboard';
 import Campaigns from './pages/Campaigns';
 import Journeys from './pages/Journeys';
-import JourneyDetail from './pages/JourneyDetail'; // ✅ New page
-import Integrations from './pages/Integrations'; // ✅ New integrations page
+import JourneyDetail from './pages/JourneyDetail'; // New page
+import Integrations from './pages/Integrations'; // New integrations page
 import Layout from './components/Layout';
 import TemplatePage from './pages/TemplatePage';
 import { AuthProvider } from './hooks/useAuth';

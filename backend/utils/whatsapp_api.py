@@ -142,7 +142,7 @@ async def handle_incoming_message(req: Request, client_config: dict, db=None):
                     print(f"❌ Error inserting incoming chat: {db_err}")
                     
             
-            reply = f"🤖 Bot: You said '{text}'"
+            reply = f"🤖 Bot: hi sir we will connect you soon '{from_id}'"
 
         # Handle image message
         elif msg_type == "image":

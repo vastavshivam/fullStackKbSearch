@@ -6,6 +6,7 @@ from api.qa import router as qa_router
 from api.auth import router as auth_router
 from fastapi.responses import JSONResponse
 import logging
+from fastapi.staticfiles import StaticFiles
 
 from database import database  # Assuming you have a database module for initialization
 
@@ -45,6 +46,7 @@ app.include_router(training.router, prefix="/api/training", tags=["Training"])
 app.include_router(websocket.router, tags=["WebSocket"])
 app.include_router(whatsapp.router, prefix="/whatsapp")
 app.include_router(auth_router, prefix="/api/auth", tags=["Auth"])
+# app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 # ✅ Static file serving (for uploaded images, previews, etc.)
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
