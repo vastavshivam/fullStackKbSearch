@@ -146,3 +146,35 @@ export const getMessageFeedback = (messageId) => {
 export const getFeedbackAnalytics = () => {
   return axios.get(`${API_BASE}/api/feedback/feedback-analytics`);
 };
+
+// Voice Assistant API functions
+export const speechToText = (audioBlob, saveAudio = false) => {
+  const formData = new FormData();
+  formData.append('audio_file', audioBlob, 'voice_input.wav');
+  formData.append('save_audio', saveAudio);
+  
+  return axios.post(`${API_BASE}/api/voice/speech-to-text`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    timeout: 30000 // 30 second timeout for voice processing
+  });
+};
+
+export const voiceChat = (audioBlob, saveAudio = true, sessionId = 'anonymous') => {
+  const formData = new FormData();
+  formData.append('audio_file', audioBlob, 'voice_chat.wav');
+  formData.append('save_audio', saveAudio);
+  formData.append('session_id', sessionId);
+  
+  return axios.post(`${API_BASE}/api/voice/voice-chat`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    timeout: 30000 // 30 second timeout for voice processing
+  });
+};
+
+export const checkVoiceHealth = () => {
+  return axios.get(`${API_BASE}/api/voice/health`);
+};
+
+export const listVoiceFiles = () => {
+  return axios.get(`${API_BASE}/api/voice/files`);
+};

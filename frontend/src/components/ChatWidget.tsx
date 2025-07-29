@@ -1,7 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './ChatWidget.css';
+import VoiceAssistant from './VoiceAssistant';
 import { useWidgetConfig } from './WidgetConfigContext';
-import { askStaticChat, chatWithImage, submitMessageFeedback } from '../services/api';
+import { askStaticChat, submitMessageFeedback, voiceChat } from '../services/api';
+import { processImageForQuote } from '../services/imageQuote';
+import { useNavigate } from 'react-router-dom';
 
 interface Message {
   sender: 'user' | 'bot';
@@ -20,6 +23,7 @@ const initialMessages: Message[] = [
 ];
 
 const ChatWidget: React.FC = () => {
+  const navigate = useNavigate();
 
   const { config } = useWidgetConfig();
   const [open, setOpen] = useState(false);
@@ -78,7 +82,7 @@ const ChatWidget: React.FC = () => {
     if (open && messages.length === 0) {
       setMessages(initialMessages);
     }
-  }, [open]);
+  }, [open, messages.length]);
 
   useEffect(() => {
     if (open && bodyRef.current) {
@@ -115,21 +119,31 @@ const ChatWidget: React.FC = () => {
       let response;
       
       if (selectedImage) {
-        // Send image with optional text
-        response = await chatWithImage(userInput, selectedImage);
+        // Send image for quote extraction
+        const data: any = await processImageForQuote(selectedImage);
+        let botText = data.vision_analysis || 'Image processed.';
+        let quote = data.quote;
+        const botMessage: Message = {
+          sender: 'bot',
+          text: botText,
+          id: generateMessageId(),
+          feedback: null,
+          // @ts-ignore
+          quote: quote
+        };
+        setMessages(prev => [...prev, botMessage]);
       } else {
         // Send text only
-        response = await askStaticChat(userInput);
+        const response = await askStaticChat(userInput);
+        const data = response.data;
+        const botMessage: Message = {
+          sender: 'bot',
+          text: data.answer,
+          id: generateMessageId(),
+          feedback: null
+        };
+        setMessages(prev => [...prev, botMessage]);
       }
-      
-      const data = response.data;
-      const botMessage: Message = {
-        sender: 'bot',
-        text: data.answer,
-        id: generateMessageId(),
-        feedback: null
-      };
-      setMessages(prev => [...prev, botMessage]);
       
     } catch (err) {
       console.error('Error sending message:', err);
@@ -176,6 +190,89 @@ const ChatWidget: React.FC = () => {
     setImagePreview(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
+    }
+  };
+
+  const handleVoiceInput = async (text: string, audioBlob?: Blob) => {
+    console.log('🎤 Widget voice input received:', text);
+    
+    try {
+      if (!text.trim()) {
+        console.warn('Empty voice input received');
+        return;
+      }
+      
+      // Add user voice message to chat
+      const userMessage: Message = { 
+        sender: 'user',
+        text: `🎤 ${text}`, // Add voice emoji to indicate voice input
+        id: generateMessageId()
+      };
+      setMessages(prev => [...prev, userMessage]);
+      setIsLoading(true);
+
+      // Use voiceChat API for complete voice workflow, or fallback to regular chat
+      let response;
+      
+      if (audioBlob) {
+        try {
+          console.log('🗣️ Using voice chat API for widget...');
+          response = await voiceChat(audioBlob, true, 'widget_session');
+          
+          if (response.data.success) {
+            const answer = response.data.bot_response;
+            console.log('✅ Widget voice chat successful:', answer);
+            
+            const botMessage: Message = {
+              sender: 'bot',
+              text: answer,
+              id: generateMessageId(),
+              feedback: null
+            };
+            setMessages(prev => [...prev, botMessage]);
+          } else {
+            throw new Error('Voice chat failed: ' + response.data.message);
+          }
+        } catch (voiceErr) {
+          console.warn('Voice API failed, falling back to text chat:', voiceErr);
+          // Fallback to regular text chat
+          response = await askStaticChat(text);
+          const answer = response.data.answer;
+          
+          const botMessage: Message = {
+            sender: 'bot',
+            text: answer,
+            id: generateMessageId(),
+            feedback: null
+          };
+          setMessages(prev => [...prev, botMessage]);
+        }
+      } else {
+        // No audio blob, just use text
+        response = await askStaticChat(text);
+        const answer = response.data.answer;
+        
+        const botMessage: Message = {
+          sender: 'bot',
+          text: answer,
+          id: generateMessageId(),
+          feedback: null
+        };
+        setMessages(prev => [...prev, botMessage]);
+      }
+      
+    } catch (error) {
+      console.error('Widget voice input error:', error);
+      
+      const errorMessage: Message = {
+        sender: 'bot',
+        text: "Sorry, I couldn't process your voice input. Please try again or type your message.",
+        id: generateMessageId(),
+        feedback: null
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -243,7 +340,7 @@ const ChatWidget: React.FC = () => {
                   {msg.image && (
                     <img 
                       src={msg.image} 
-                      alt="Shared image" 
+                      alt="Shared content" 
                       style={{ 
                         maxWidth: '200px', 
                         maxHeight: '200px', 
@@ -254,7 +351,16 @@ const ChatWidget: React.FC = () => {
                     />
                   )}
                   <div>
-                    {msg.text}
+            {msg.text}
+            {/* Show View/Edit Quote button if quote is present */}
+            {msg.sender === 'bot' && (msg as any).quote && (
+              <button
+                style={{ marginTop: 8, background: '#667eea', color: '#fff', border: 'none', borderRadius: 6, padding: '4px 12px', cursor: 'pointer' }}
+                onClick={() => navigate('/quote-editor', { state: { quote: (msg as any).quote } })}
+              >
+                View/Edit Quote
+              </button>
+            )}
                   </div>
                 </div>
                 {/* Enhanced feedback section for bot messages - positioned below response */}
@@ -352,7 +458,7 @@ const ChatWidget: React.FC = () => {
               type="text"
               value={input}
               onChange={e => setInput(e.target.value)}
-              placeholder={selectedImage ? "Ask about your image..." : "Type your message..."}
+              placeholder={selectedImage ? "Ask about your image..." : "Type your message or use voice..."}
               autoFocus
               style={{ fontFamily: config.widgetFont }}
               disabled={isLoading}
@@ -363,6 +469,11 @@ const ChatWidget: React.FC = () => {
               accept="image/*"
               onChange={handleImageSelect}
               style={{ display: 'none' }}
+            />
+            <VoiceAssistant 
+              onVoiceInput={handleVoiceInput}
+              isLoading={isLoading}
+              disabled={false}
             />
             <button 
               type="button"

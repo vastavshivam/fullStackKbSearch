@@ -1,3 +1,4 @@
+from utils.quote_extraction import is_photo_image, extract_quote_fields
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse
 from PIL import Image, ImageEnhance
@@ -215,29 +216,22 @@ async def process_image(file: UploadFile = File(...)):
         
         # Run OCR and vision analysis in parallel for speed
         logger.info("Processing image with parallel OCR and vision analysis...")
-        
+
         # Create executor for CPU-bound tasks
         executor = ThreadPoolExecutor(max_workers=2)
-        
-        # Run OCR and base64 conversion in parallel
         loop = asyncio.get_event_loop()
-        
-        # Start OCR task
         ocr_task = loop.run_in_executor(executor, extract_text_from_image, image)
-        
-        # Start base64 conversion task
         base64_task = loop.run_in_executor(executor, image_to_base64, image)
-        
-        # Wait for both to complete
         ocr_text, base64_image = await asyncio.gather(ocr_task, base64_task)
-        
-        # Start vision analysis (this is already async)
         vision_task = asyncio.create_task(query_ollama_llava(base64_image, ocr_text))
-        
-        # Wait for vision analysis to complete
         vision_response = await vision_task
-        
-        # Prepare response
+
+        # --- New logic: classify photo and extract quote ---
+        is_photo = is_photo_image(image)
+        quote = None
+        if is_photo:
+            quote = extract_quote_fields(ocr_text)
+
         result = {
             "success": True,
             "ocr_text": ocr_text,
@@ -247,9 +241,11 @@ async def process_image(file: UploadFile = File(...)):
                 "size": f"{len(file_content) / 1024:.1f} KB",
                 "dimensions": f"{image.width}x{image.height}",
                 "format": image.format
-            }
+            },
+            "is_photo": is_photo,
+            "quote": quote
         }
-        
+
         logger.info(f"Successfully processed image: {file.filename}")
         return JSONResponse(content=result)
         

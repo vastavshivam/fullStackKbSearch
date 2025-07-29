@@ -1,3 +1,118 @@
+# Example function to call Gemini and parse quote/invoice table
+import os
+from typing import List, Dict
+
+def parse_quote_table_with_gemini(ocr_text: str) -> List[Dict]:
+    import logging
+    logger = logging.getLogger(__name__)
+    """
+    Use Gemini to extract a structured table from OCR text of a quote/invoice.
+    Returns a list of dicts with keys: description, qty, unit, unit_price, discount, net_price, etc.
+    """
+    # You should replace this with your actual Gemini API call
+    # Here is a pseudo-implementation:
+    import google.generativeai as genai
+    import logging
+    import json
+    logger = logging.getLogger(__name__)
+    # Use env variable if set, else fallback to hardcoded key
+    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") or "AIzaSyB5V3qgB25MFkv79JGaHUH75G047iQ5VIU"
+    genai.configure(api_key=GEMINI_API_KEY)
+    model = genai.GenerativeModel("gemini-pro")
+    prompt = f"""
+    Extract ONLY the line items table from the following OCR text of a quote or invoice. Return ONLY a JSON array of objects with these fields: description, qty, unit, unit_price, discount, net_price. If a field is missing, use null. Only include actual line items, not totals or notes. DO NOT return any explanation, summary, or extra text. Output ONLY the JSON array, wrapped in a markdown code block like this:\n```json\n[{{...}}, ...]\n```.\n\nOCR TEXT:\n{ocr_text}
+    """
+
+    import re, json
+    response = model.generate_content(prompt)
+    text = response.text.strip()
+    logger.info(f"Gemini raw response: {text}")
+    # Try to extract JSON array from code block
+    match = re.search(r"```json\s*(\[.*?\])\s*```", text, re.DOTALL)
+    table = None
+    if match:
+        table_json = match.group(1)
+        try:
+            table = json.loads(table_json)
+        except Exception:
+            pass
+    if table is None:
+        # fallback: try to find any JSON array in the response
+        match = re.search(r"(\[.*?\])", text, re.DOTALL)
+        if match:
+            try:
+                table = json.loads(match.group(1))
+            except Exception:
+                pass
+    # If table is still None, try to build table using vector similarity from OCR text
+    if table is None or not isinstance(table, list) or len(table) == 0:
+        from sentence_transformers import SentenceTransformer, util
+        import numpy as np
+        FIELDS = ["description", "qty", "unit", "unit_price", "discount", "net_price"]
+        FIELD_SYNONYMS = {
+            "description": ["description", "item", "product", "details", "name"],
+            "qty": ["qty", "quantity", "amount", "number", "count"],
+            "unit": ["unit", "units", "pcs", "piece", "type"],
+            "unit_price": ["unit price", "price", "rate", "cost per unit", "per item"],
+            "discount": ["discount", "rebate", "offer"],
+            "net_price": ["net price", "total", "amount", "final", "subtotal"]
+        }
+        model = SentenceTransformer('all-MiniLM-L6-v2')
+        lines = [l.strip() for l in ocr_text.splitlines() if l.strip()]
+        logger.info(f"OCR lines: {lines}")
+        # Try to find table-like lines (with multiple columns)
+        candidate_rows = []
+        for line in lines:
+            # Split by |, tab, or 2+ spaces
+            if '|' in line:
+                parts = [p.strip() for p in line.split('|')]
+            elif '\t' in line:
+                parts = [p.strip() for p in line.split('\t')]
+            else:
+                parts = [p.strip() for p in re.split(r'\s{2,}', line)]
+            if len(parts) >= 2 and len(parts) <= len(FIELDS):
+                candidate_rows.append(parts)
+        logger.info(f"Candidate table rows: {candidate_rows}")
+        # If no candidate rows, just return one row with all text as description
+        if not candidate_rows:
+            logger.info("No candidate rows found, returning all text as description.")
+            return [{"description": ocr_text, "qty": None, "unit": None, "unit_price": None, "discount": None, "net_price": None}]
+        # For each row, assign parts to fields using vector similarity
+        field_phrases = [syn for field in FIELDS for syn in FIELD_SYNONYMS[field]]
+        field_embeds = model.encode(field_phrases)
+        normalized_table = []
+        for row_parts in candidate_rows:
+            row_dict = {field: None for field in FIELDS}
+            part_embeds = model.encode(row_parts)
+            used_fields = set()
+            for i, part in enumerate(row_parts):
+                sims = util.cos_sim(part_embeds[i], field_embeds)[0].cpu().numpy()
+                best_idx = int(np.argmax(sims))
+                # Map best_idx to field
+                field_idx = best_idx // max(1, len(FIELD_SYNONYMS[FIELDS[best_idx // len(FIELD_SYNONYMS)]]))
+                best_field = FIELDS[min(field_idx, len(FIELDS)-1)]
+                if best_field in used_fields:
+                    # Find next best unused field
+                    sorted_idx = np.argsort(sims)[::-1]
+                    for alt_idx in sorted_idx:
+                        alt_field_idx = alt_idx // max(1, len(FIELD_SYNONYMS[FIELDS[alt_idx // len(FIELD_SYNONYMS)]]))
+                        alt_field = FIELDS[min(alt_field_idx, len(FIELDS)-1)]
+                        if alt_field not in used_fields:
+                            best_field = alt_field
+                            break
+                row_dict[best_field] = part
+                used_fields.add(best_field)
+            logger.info(f"Row assignment: {row_dict}")
+            normalized_table.append(row_dict)
+        logger.info(f"Final normalized table: {normalized_table}")
+        return normalized_table
+    # Enforce fixed schema for each row (if table was found)
+    FIELDS = ["description", "qty", "unit", "unit_price", "discount", "net_price"]
+    normalized_table = []
+    for row in table:
+        normalized_row = {field: row.get(field, None) for field in FIELDS}
+        normalized_table.append(normalized_row)
+    return normalized_table
 """
 Gemini Vision API integration for image analysis
 """

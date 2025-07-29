@@ -6,9 +6,11 @@ from api.qa import router as qa_router
 from api.auth import router as auth_router
 from api.image_processing import router as image_router
 from api.feedback import router as feedback_router
+from api.voice import router as voice_router
 from fastapi.responses import JSONResponse
 import logging
 from fastapi.staticfiles import StaticFiles
+from api import quote_parser
 
 from database import database  # Assuming you have a database module for initialization
 
@@ -51,6 +53,7 @@ app.include_router(files.router, prefix="/api/files", tags=["Files"])
 app.include_router(qa_router, prefix="/api/qa", tags=["Q&A"])
 app.include_router(image_router, prefix="/api/image", tags=["Image Processing"])
 app.include_router(feedback_router, prefix="/api/feedback", tags=["Feedback"])
+app.include_router(voice_router, prefix="/api/voice", tags=["Voice Assistant"])
 app.include_router(training.router, prefix="/api/training", tags=["Training"])
 # app.include_router(websocket.router,prefix="/", tags=["WebSocket"])
 app.include_router(whatsapp.router, prefix="/whatsapp", tags=["whatsapp Integration"])

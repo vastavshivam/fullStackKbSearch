@@ -1,7 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import ChatHistory from '../pages/ChatHistory';
+import VoiceAssistant from '../components/VoiceAssistant';
 import '../pages/Chat.css';
-import { connectWebSocketChat, configureWhatsApp, sendWhatsAppMessage, createChatSession, storeChatMessage, getChatHistory, askStaticChat, chatWithImage, submitMessageFeedback, getFeedbackAnalytics } from '../services/api';
+import { connectWebSocketChat, createChatSession, storeChatMessage, getChatHistory, askStaticChat, chatWithImage, submitMessageFeedback, getFeedbackAnalytics, voiceChat } from '../services/api';
 
 function generateSummary(messages) {
   const userMsg = messages.find(m => m.sender === 'user');
@@ -36,8 +37,64 @@ export default function Chat() {
   const [showRatingPopup, setShowRatingPopup] = useState(false);
   const [hasShownRatingPopup, setHasShownRatingPopup] = useState(false);
   const [inactivityTimer, setInactivityTimer] = useState<NodeJS.Timeout | null>(null);
+  const [hasMic, setHasMic] = useState(true);
   const bottomRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Microphone detection logic
+  useEffect(() => {
+    const checkMic = async () => {
+      if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+        try {
+          const devices = await navigator.mediaDevices.enumerateDevices();
+          const hasAudioInput = devices.some(device => device.kind === 'audioinput');
+          setHasMic(hasAudioInput);
+        } catch (e) {
+          setHasMic(false);
+        }
+      } else {
+        setHasMic(false);
+      }
+    };
+    checkMic();
+  }, []);
+
+  const retryMic = () => {
+    if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+      navigator.mediaDevices.enumerateDevices().then(devices => {
+        const hasAudioInput = devices.some(device => device.kind === 'audioinput');
+        setHasMic(hasAudioInput);
+      }).catch(() => setHasMic(false));
+    } else {
+      setHasMic(false);
+    }
+  };
+
+  // Dummy handler for voice button if not already defined
+  const handleVoiceClick = () => {
+    // Implement your voice logic here or integrate with VoiceAssistant
+    alert('Voice input not implemented in this demo.');
+  };
+
+  const resetInactivityTimer = useCallback(() => {
+    // Clear existing timer using a ref to avoid dependency issues
+    setInactivityTimer((prevTimer) => {
+      if (prevTimer) {
+        clearTimeout(prevTimer);
+      }
+      
+      // Only set new timer if popup hasn't been shown yet
+      if (!hasShownRatingPopup) {
+        const newTimer = setTimeout(() => {
+          setShowRatingPopup(true);
+          setHasShownRatingPopup(true); // Mark as shown
+        }, 60000); // 60 seconds
+        
+        return newTimer;
+      }
+      return null;
+    });
+  }, [hasShownRatingPopup]);
 
   useEffect(() => {
     const initSession = async () => {
@@ -90,6 +147,7 @@ export default function Chat() {
     // Add event listeners for user activity
     const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
     const handleUserActivity = () => {
+      // Use callback to avoid direct dependency
       resetInactivityTimer();
     };
     
@@ -114,14 +172,19 @@ export default function Chat() {
       activityEvents.forEach(event => {
         document.removeEventListener(event, handleUserActivity, true);
       });
-      if (inactivityTimer) {
-        clearTimeout(inactivityTimer);
-      }
+      // Clean up any existing timer on unmount
+      setInactivityTimer((prevTimer) => {
+        if (prevTimer) {
+          clearTimeout(prevTimer);
+        }
+        return null;
+      });
       if (ws) {
         ws.close();
       }
     };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty dependency array - this should only run once on mount/unmount
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -247,6 +310,86 @@ export default function Chat() {
     }
   };
 
+  const handleVoiceInput = async (text: string, audioBlob?: Blob) => {
+    console.log('🎤 Voice input received:', text);
+    
+    try {
+      if (!text.trim()) {
+        console.warn('Empty voice input received');
+        return;
+      }
+      
+      // Add user voice message to chat
+      const userMessage = { 
+        sender: 'user' as const, 
+        text: `🎤 ${text}`, // Add voice emoji to indicate voice input
+        id: `voice_${Date.now()}`
+      };
+      setMessages(prev => [...prev, userMessage]);
+      
+      // Add loading message
+      setMessages(prev => [...prev, { sender: 'bot' as const, text: '...' }]);
+      setIsLoading(true);
+
+      // Use voiceChat API for complete voice workflow, or fallback to regular chat
+      let response;
+      
+      if (audioBlob) {
+        try {
+          console.log('🗣️ Using voice chat API...');
+          response = await voiceChat(audioBlob, true, sessionId);
+          
+          if (response.data.success) {
+            const answer = response.data.bot_response;
+            console.log('✅ Voice chat successful:', answer);
+            
+            setMessages(prev => {
+              const msgs = prev.slice(0, -1); // Remove loading message
+              return [...msgs, { sender: 'bot' as const, text: answer }];
+            });
+          } else {
+            throw new Error('Voice chat failed: ' + response.data.message);
+          }
+        } catch (voiceErr) {
+          console.warn('Voice API failed, falling back to text chat:', voiceErr);
+          // Fallback to regular text chat
+          response = await askStaticChat(text);
+          const answer = response.data.answer;
+          
+          setMessages(prev => {
+            const msgs = prev.slice(0, -1); // Remove loading message
+            return [...msgs, { sender: 'bot' as const, text: answer }];
+          });
+        }
+      } else {
+        // No audio blob, just use text
+        response = await askStaticChat(text);
+        const answer = response.data.answer;
+        
+        setMessages(prev => {
+          const msgs = prev.slice(0, -1); // Remove loading message
+          return [...msgs, { sender: 'bot' as const, text: answer }];
+        });
+      }
+
+      // Reset inactivity timer
+      resetInactivityTimer();
+      
+    } catch (error) {
+      console.error('Voice input error:', error);
+      
+      setMessages(prev => {
+        const msgs = prev.slice(0, -1); // Remove loading message
+        return [...msgs, { 
+          sender: 'bot' as const, 
+          text: "Sorry, I couldn't process your voice input. Please try again or type your message." 
+        }];
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleFeedback = async (messageIndex: number, feedbackType: 'up' | 'down') => {
     try {
       const messageId = `${sessionId}_${messageIndex}_${Date.now()}`;
@@ -348,23 +491,6 @@ export default function Chat() {
       setTimeout(() => {
         setCopiedMessageIndex(null);
       }, 2000);
-    }
-  };
-
-  const resetInactivityTimer = () => {
-    // Clear existing timer
-    if (inactivityTimer) {
-      clearTimeout(inactivityTimer);
-    }
-    
-    // Only set new timer if popup hasn't been shown yet
-    if (!hasShownRatingPopup) {
-      const newTimer = setTimeout(() => {
-        setShowRatingPopup(true);
-        setHasShownRatingPopup(true); // Mark as shown
-      }, 60000); // 60 seconds
-      
-      setInactivityTimer(newTimer);
     }
   };
 
@@ -514,7 +640,7 @@ export default function Chat() {
               {msg.image && (
                 <img 
                   src={msg.image} 
-                  alt="Shared image" 
+                  alt="Shared content" 
                   style={{ 
                     maxWidth: '300px', 
                     maxHeight: '300px', 
@@ -636,42 +762,65 @@ export default function Chat() {
         )}
         
         <form className="chat-input" onSubmit={handleSend}>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleImageSelect}
-            style={{ display: 'none' }}
-          />
-          <button 
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="image-upload-btn"
-            disabled={isLoading}
-            title="Upload image"
-          >
-            📷
-          </button>
-          <input
-            type="text"
-            placeholder={selectedImage ? "Ask about your image..." : "Send a message..."}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            disabled={isLoading}
-            onKeyPress={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSend(e);
-              }
-            }}
-          />
-          <button 
-            type="submit" 
-            disabled={isLoading || (!input.trim() && !selectedImage)}
-          >
-            {isLoading ? 'Sending...' : 'Send'}
-          </button>
-        </form>
+  <input
+    ref={fileInputRef}
+    type="file"
+    accept="image/*"
+    onChange={handleImageSelect}
+    style={{ display: 'none' }}
+  />
+
+  <button
+    type="button"
+    onClick={() => fileInputRef.current?.click()}
+    className="image-upload-btn"
+    title="Upload Image"
+  >
+    📷
+  </button>
+
+  <button
+    type="button"
+    className="voice-btn"
+    onClick={handleVoiceClick} // your voice logic
+    disabled={isLoading}
+  >
+    🎙️
+  </button>
+
+  <input
+    type="text"
+    className="chat-text-input"
+    placeholder={selectedImage ? "Ask about your image..." : "Send a message or use voice..."}
+    value={input}
+    onChange={(e) => setInput(e.target.value)}
+    disabled={isLoading}
+    onKeyDown={(e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleSend(e);
+      }
+    }}
+  />
+
+  <button
+    type="submit"
+    className="send-btn"
+    disabled={isLoading || (!input.trim() && !selectedImage)}
+  >
+    {isLoading ? 'Sending...' : 'Send'}
+  </button>
+</form>
+
+{!hasMic && (
+  <div className="voice-warning">
+    No microphone devices found. Please connect a microphone. <br />
+    <span onClick={retryMic} style={{ textDecoration: 'underline', cursor: 'pointer' }}>
+      Click to retry detection
+    </span>
+  </div>
+)}
+
       </div>
       
       {/* Rating Popup */}
