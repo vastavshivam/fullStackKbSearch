@@ -16,6 +16,7 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     is_active = Column(Boolean, default=True)
     role = Column(String, default="user")  # <-- add this line
+    file_id = Column(String, nullable=True)
 
     # these two must correspond to the other side’s back_populates
     items = relationship("Item", back_populates="owner")
@@ -51,7 +52,7 @@ class Ticket(Base):
     __tablename__ = "tickets"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
+    user_id = Column(String, ForeignKey("users.email"))
     title = Column(String(200), nullable=False)
     description = Column(Text, nullable=False)
     status = Column(String(50), default="open")
@@ -62,7 +63,7 @@ class UserFeedback(Base):
     __tablename__ = "user_feedback"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
+    user_id = Column(String, ForeignKey("users.email"))
     feedback_text = Column(Text, nullable=False)
     rating = Column(Integer, nullable=False)  # e.g., 1-5 scale
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -82,16 +83,12 @@ class ClientConfig(Base):
     __tablename__ = "client_config"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    client_id = Column(String, unique=True, index=True, nullable=False)  # Change to Integer if your DB column is INT
-    sender = Column(String, nullable=True)
-    user_number = Column(String, nullable=True)
-    phone_id = Column(String, nullable=False)
-    message = Column(Text, nullable=True)
-    token = Column(String, nullable=False)
-    verify_token = Column(String, nullable=False)
-    message_type = Column(String, default="text")
-    status = Column(String, default="active", nullable=True)  # e.g., 'active', 'inactive'
-    direction = Column(String, nullable=True)
+    client_id = Column(String, nullable=False)
+    sender = Column(String, nullable=False)  # e.g., 'user' or 'bot'
+    user_number = Column(String, nullable=False)  # WhatsApp number
+    message = Column(Text, nullable=False)
+    message_type = Column(String, default="text")  # Optional: 'text', 'image', etc.
+    direction = Column(String, nullable=False)  # 'incoming' or 'outgoing'
     timestamp = Column(DateTime(timezone=True), server_default=func.now())
 
 class ChatHistory(Base):
@@ -106,8 +103,6 @@ class ChatHistory(Base):
     direction = Column(String, nullable=False)  # 'incoming' or 'outgoing'
     timestamp = Column(DateTime(timezone=True), server_default=func.now())
 
-
-# radhika 
 class ClassifyLabels(Base):
     __tablename__ = "classify_labels"
 

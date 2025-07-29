@@ -1,12 +1,9 @@
-# utils/embed_store.py
-
 import os
 import faiss
 import pickle
 from sentence_transformers import SentenceTransformer
 from typing import List, Tuple
 import numpy as np
-import nltk
 from nltk.tokenize import sent_tokenize
 
 # Load embedding model
@@ -16,14 +13,13 @@ EMBED_MODEL = SentenceTransformer("all-MiniLM-L6-v2")
 VECTOR_DIR = "vector_stores"
 os.makedirs(VECTOR_DIR, exist_ok=True)
 
-# ------------------------------
-# Text Chunking using NLTK
-# ------------------------------
-def chunk_text(text: str, chunk_size=500) -> List[str]:
+def chunk_text(text: str, chunk_size: int = 500) -> List[str]:
     """
     Split text into chunks using NLTK sentence tokenizer.
     Each chunk tries not to exceed the given chunk size.
     """
+    if not isinstance(text, str):
+        raise TypeError("Input to chunk_text must be a string.")
     sentences = sent_tokenize(text)
     chunks = []
     current = ""
@@ -31,71 +27,68 @@ def chunk_text(text: str, chunk_size=500) -> List[str]:
         if len(current) + len(sentence) <= chunk_size:
             current += sentence + " "
         else:
-            chunks.append(current.strip())
+            if current.strip():
+                chunks.append(current.strip())
             current = sentence + " "
-    if current:
+    if current.strip():
         chunks.append(current.strip())
+    if not chunks:
+        raise ValueError("No chunks created from input text.")
     return chunks
 
-# ------------------------------
-# Save Embeddings
-# ------------------------------
-def save_embeddings(file_id: str, chunks: List[str]):
+def save_embeddings(file_id: str, chunks: List[str]) -> None:
     """
     Compute and store embeddings using FAISS and pickle.
     """
-    embeddings = EMBED_MODEL.encode(chunks)
-    dim = embeddings.shape[1]
-    index = faiss.IndexFlatL2(dim)
-    index.add(embeddings)
+    if not chunks:
+        raise ValueError("No chunks to embed.")
+    try:
+        embeddings = EMBED_MODEL.encode(chunks)
+        dim = embeddings.shape[1]
+        index = faiss.IndexFlatL2(dim)
+        index.add(embeddings)
+        # Save FAISS index
+        faiss.write_index(index, f"{VECTOR_DIR}/{file_id}.index")
+        # Save original chunks
+        with open(f"{VECTOR_DIR}/{file_id}_chunks.pkl", "wb") as f:
+            pickle.dump(chunks, f)
+    except Exception as e:
+        print(f"[Embedding Error]: {e}")
+        raise
 
-    # Save FAISS index
-    faiss.write_index(index, f"{VECTOR_DIR}/{file_id}.index")
-
-    # Save original chunks
-    with open(f"{VECTOR_DIR}/{file_id}_chunks.pkl", "wb") as f:
-        pickle.dump(chunks, f)
-
-# ------------------------------
-# Load Embeddings
-# ------------------------------
 def load_index(file_id: str) -> Tuple[faiss.IndexFlatL2, List[str]]:
     """
     Load FAISS index and corresponding text chunks.
     """
-    index = faiss.read_index(f"{VECTOR_DIR}/{file_id}.index")
-    with open(f"{VECTOR_DIR}/{file_id}_chunks.pkl", "rb") as f:
+    index_path = f"{VECTOR_DIR}/{file_id}.index"
+    chunks_path = f"{VECTOR_DIR}/{file_id}_chunks.pkl"
+    if not os.path.exists(index_path) or not os.path.exists(chunks_path):
+        raise FileNotFoundError(f"Vector index or chunk file not found for {file_id}.")
+    index = faiss.read_index(index_path)
+    with open(chunks_path, "rb") as f:
         chunks = pickle.load(f)
     return index, chunks
 
-# ------------------------------
-# Embed a Single Question
-# ------------------------------
 def embed_question(question: str) -> np.ndarray:
     """
     Convert a single question into its embedding.
     """
+    if not isinstance(question, str):
+        raise TypeError("Question must be a string.")
     return EMBED_MODEL.encode([question])
 
-# ------------------------------
-# Query Vector Store
-# ------------------------------
-def query_embeddings(file_id, query, top_k=5):
+def query_embeddings(file_id: str, query: str, top_k: int = 5) -> List[str]:
     """
     Search top-k most relevant text chunks for a query.
     """
     index_path = f"{VECTOR_DIR}/{file_id}.index"
     data_path = f"{VECTOR_DIR}/{file_id}_chunks.pkl"
     print(f"[🔍] Searching in: {index_path}")
-    
     if not os.path.exists(index_path) or not os.path.exists(data_path):
-        raise FileNotFoundError("Vector index or chunk file not found.")
-
+        raise FileNotFoundError(f"Vector index or chunk file not found for {file_id}.")
     index = faiss.read_index(index_path)
     with open(data_path, "rb") as f:
         chunks = pickle.load(f)
-
     query_vector = EMBED_MODEL.encode([query])
     D, I = index.search(query_vector, top_k)
-
     return [chunks[i] for i in I[0]]

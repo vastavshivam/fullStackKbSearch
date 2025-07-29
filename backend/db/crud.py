@@ -8,6 +8,8 @@ from mongo.models import save_chat_log_mongo, save_ticket_log_mongo, save_feedba
 from sqlalchemy.ext.asyncio import AsyncSession
 # 💬 Save Chat Message
 from datetime import datetime
+from bson import ObjectId
+
 
 def save_chat_message(user_id, session_id, message, sender, sentiment=None, embedding=None, bot_reply=None):
     chat_data = {
@@ -25,11 +27,24 @@ def save_chat_message(user_id, session_id, message, sender, sentiment=None, embe
 def get_user_chats(db: Session, user_id: int):
     return db.query(ChatLog).filter(ChatLog.user_id == user_id).order_by(ChatLog.timestamp).all()
 
-# 💬 Get Conversation History (multi-turn)
+#from bson import ObjectId
+
+def serialize_mongo_doc(doc):
+    return {
+        "message": doc.get("message"),
+        "bot_reply": doc.get("bot_reply")
+    }
+
 def get_conversation_context(session_id: str, limit: int = 10):
-    return list(chat_logs_col.find(
+    print("Session ID:", session_id)
+    results = list(chat_logs_col.find(
         {"session_id": session_id}
-    ).sort("timestamp", -1).limit(limit))[::-1]
+    ).sort("timestamp", -1).limit(limit))[::-1]  # Oldest to newest
+
+    serialized_results = [serialize_mongo_doc(doc) for doc in results]
+    print(serialized_results)
+
+    return serialized_results
 
 # 🎟️ Create Support Ticket
 def create_ticket(ticket_data):

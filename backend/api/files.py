@@ -38,13 +38,15 @@ async def upload_file(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     credentials: HTTPAuthorizationCredentials = Depends(auth_scheme),
-    refresh_token: str = Query(None),
+    refresh_token: str | None = Query(None),
     db: AsyncSession = Depends(get_db)
-):
+) -> JSONResponse:
     # ─── JWT Decode ───
     try:
+        credentials = credentials.credentials  # Unpacking the tuple
+
         try:
-            payload = decode_jwt_token(credentials.credentials)
+            payload = decode_jwt_token(credentials)
         except ExpiredSignatureError:
             if not refresh_token:
                 raise HTTPException(status_code=401, detail="Token expired. Provide refresh_token.")
@@ -57,18 +59,17 @@ async def upload_file(
 
         user_email = payload.get("sub", "anonymous")  # using email (string)
     except Exception as e:
-        logger.error(f"Error uploading file: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
+        raise HTTPException(status_code=401, detail=f"Invalid token: {str(e)}")
 
     # ─── File Type & Size Check ───
     ext = Path(file.filename).suffix.lower()
     if ext not in ALLOWED_EXTENSIONS:
-        raise HTTPException(status_code=400, detail=f"❌ Unsupported file type: {ext}")
+        raise HTTPException(status_code=400, detail=f"Unsupported file type: {ext}")
 
     contents = await file.read()
     size_mb = len(contents) / (1024 * 1024)
     if size_mb > MAX_FILE_SIZE_MB:
-        raise HTTPException(status_code=400, detail=f"❌ File too large (max {MAX_FILE_SIZE_MB}MB)")
+        raise HTTPException(status_code=400, detail=f"File too large (max {MAX_FILE_SIZE_MB}MB)")
 
     file_path = UPLOAD_DIR / file.filename
     with open(file_path, "wb") as f:
@@ -79,57 +80,59 @@ async def upload_file(
         preview = parse_file(file_path, limit=5)
         preview = clean_json(preview)
     except Exception as e:
-        logger.error(f"Error uploading file: {str(e)}")
-       
-        raise HTTPException(status_code=500, detail=f"❌ Failed to parse file: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to parse file: {str(e)}")
 
     # ─── Embedding and Save ───
-    match_result = classify_documents()
-    if (match_result == -1):
-        print("You have provided wrong info we cannot train your model")
-
-    else:
-        try:
-            full_text = parse_file(file_path)
-            if isinstance(full_text, list):
-                full_text = " ".join(
-                    str(item.get("prompt", "")) + " " + str(item.get("response", ""))
-                    for item in full_text if isinstance(item, dict)
+    match_result = await classify_documents()  # Pass file_path to the function
+    if match_result == '-1':
+        raise HTTPException(status_code=400, detail="Incorrect information provided. Cannot train model.")
+    
+    try:
+        full_text = parse_file(file_path)
+        if isinstance(full_text, list):
+            full_text = " ".join(
+                str(item.get("prompt", "")) + " " + str(item.get("response", ""))
+                for item in full_text if isinstance(item, dict)
             )
-            elif isinstance(full_text, dict):
-                full_text = " ".join(str(v) for v in full_text.values())
+        elif isinstance(full_text, dict):
+            full_text = " ".join(str(v) for v in full_text.values())
 
-            elif not isinstance(full_text, str):
-                full_text = str(full_text)
+        elif not isinstance(full_text, str):
+            full_text = str(full_text)
 
-            chunks = chunk_text(full_text)
+        # ─── Chunk and Save Embeddings ───
+        chunks = chunk_text(full_text)
+        if chunks:
             save_embeddings(file_id=file.filename, chunks=chunks)
+        else:
+            raise HTTPException(status_code=500, detail="No valid chunks generated.")
 
-        except Exception as e:
-            print(f"[Embedding Error]: {e}")
+    except Exception as e:
+        print(f"[Embedding Error]: {e}")
+        raise HTTPException(status_code=500, detail=f"Embedding generation failed: {str(e)}")
 
     # ─── Update user's file_id in DB ───
-        try:
-            result = await db.execute(select(User).where(User.email == user_email))
-            user = result.scalar_one_or_none()
-            if user:
-                user.file_id = file.filename  # Store filename as file_id
-                await db.commit()
-            else:
-                raise HTTPException(status_code=404, detail="User not found")
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"❌ Failed to update user with file_id: {str(e)}")
+    try:
+        result = await db.execute(select(User).where(User.email == user_email))
+        user = result.scalar_one_or_none()
+        if user:
+            user.file_id = file.filename  # Store filename as file_id
+            await db.commit()
+        else:
+            raise HTTPException(status_code=404, detail="User not found")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to update user with file_id: {str(e)}")
 
     # ─── Optional: Background fine-tune ───
     # background_tasks.add_task(fine_tune)
 
     # ─── Email Notification ───
-        send_upload_notification("vastavshivam@gmail.com", "uploaded successfully.", body="File uploaded ...")
+    send_upload_notification("vastavshivam@gmail.com", "uploaded successfully.", body="File uploaded ...")
 
     # ─── Return Response ───
-        return JSONResponse(content={
-            "message": f"✅ File {file.filename} uploaded successfully.",
-            "filename": file.filename,
-            "preview": preview,
-            "uploaded_by": user_email
-        })
+    return JSONResponse(content={
+        "message": f"File {file.filename} uploaded successfully.",
+        "filename": file.filename,
+        "preview": preview,
+        "uploaded_by": user_email
+    }, status_code=200)

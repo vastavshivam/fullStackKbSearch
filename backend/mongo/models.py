@@ -5,14 +5,14 @@ import redis
 import json
 
 # LangChain imports
-from langchain_community.chat_message_histories import RedisChatMessageHistory
-from langchain.memory import ConversationBufferMemory
+from langchain.memory import RedisChatMessageHistory, ConversationBufferMemory
 
 # MongoDB setup
+# MongoDB setup (Local)
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
 mongo_client = MongoClient(MONGO_URI)
 
-mongo_db = mongo_client["chat_db"]
+mongo_db = mongo_client["chat_support"]
 
 # Collections
 chat_logs_col = mongo_db["chat_logs"]

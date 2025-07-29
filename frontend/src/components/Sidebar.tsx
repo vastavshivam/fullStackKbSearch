@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   BiBarChartAlt2, BiUser, BiRocket, BiGroup, BiEnvelope,
   BiCog, BiCube, BiLayer, BiChevronRight, BiChevronDown, BiChevronUp, BiMenu, BiX, BiPlug, BiMessageRounded
 } from 'react-icons/bi';
-import '../pages/Dashboard.css';
+import './Sidebar.css';
 
 const sidebarLinks = [
   { label: 'Dashboard', icon: <BiBarChartAlt2 />, route: '/dashboard' },
@@ -30,6 +30,19 @@ export default function Sidebar({
 }) {
   const navigate = useNavigate();
   const [showIntegrations, setShowIntegrations] = useState(false);
+  const [showExpandHint, setShowExpandHint] = useState(false);
+
+  // Show expand hint after 3 seconds when sidebar is collapsed
+  useEffect(() => {
+    if (!sidebarOpen) {
+      const timer = setTimeout(() => {
+        setShowExpandHint(true);
+      }, 3000);
+      return () => clearTimeout(timer);
+    } else {
+      setShowExpandHint(false);
+    }
+  }, [sidebarOpen]);
 
   const handleSidebarClick = (label: string, route: string) => {
     setActiveSidebar(label);
@@ -49,26 +62,13 @@ export default function Sidebar({
   return (
     <aside className={`sidebar ${sidebarOpen ? 'sidebar-open' : 'sidebar-collapsed'}`}>
       <div className="sidebar-header">
-        <div className="logo-wrapper">
-          {sidebarOpen ? (
-            <img
-              src="/AppgallopLG.png"
-              alt="AppGallop Logo"
-              className="sidebar-logo-large"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none';
-              }}
-            />
-          ) : (
-            <img
-              src="/AppgallopSM.png"
-              alt="AppGallop Logo"
-              className="sidebar-logo-small"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none';
-              }}
-            />
-          )}
+        <div className="logo-wrapper" onClick={() => !sidebarOpen && setSidebarOpen(true)}>
+          <img
+            src={sidebarOpen ? "/image.png" : "/AppgallopSM.png"}
+            alt="AppGallop Logo"
+            className={sidebarOpen ? "sidebar-logo-large" : "sidebar-logo-small"}
+            title={!sidebarOpen ? "Click to expand sidebar" : ""}
+          />
         </div>
 
         <button
@@ -80,6 +80,26 @@ export default function Sidebar({
         </button>
       </div>
 
+      {/* Floating expand button when collapsed */}
+      {!sidebarOpen && showExpandHint && (
+        <div className="sidebar-expand-hint">
+          <button
+            className="expand-button"
+            onClick={() => setSidebarOpen(true)}
+            title="Expand Sidebar"
+          >
+            <BiChevronRight />
+          </button>
+        </div>
+      )}
+
+      {/* Expand instruction text */}
+      {!sidebarOpen && (
+        <div className="sidebar-expand-instruction">
+          <p>Click to expand</p>
+        </div>
+      )}
+
       <ul className="sidebar-links">
         {sidebarLinks.map((item) => (
           <li
@@ -88,6 +108,7 @@ export default function Sidebar({
             onClick={() => handleSidebarClick(item.label, item.route)}
             role="button"
             tabIndex={0}
+            data-tooltip={!sidebarOpen ? item.label : ''}
           >
             <span className="sidebar-icon">{item.icon}</span>
             {sidebarOpen && <span className="sidebar-label">{item.label}</span>}
@@ -103,6 +124,7 @@ export default function Sidebar({
           onClick={handleIntegrationClick}
           role="button"
           tabIndex={0}
+          data-tooltip={!sidebarOpen ? 'Integrations' : ''}
         >
           <span className="sidebar-icon"><BiPlug /></span>
           {sidebarOpen && <span className="sidebar-label">Integrations</span>}

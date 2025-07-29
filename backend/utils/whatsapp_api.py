@@ -7,6 +7,7 @@
 # File: backend/utils/whatsapp_api.py
 # This module handles WhatsApp Cloud API integration for sending and receiving messages. 
 # ==========================================
+<<<<<<< HEAD
 import os
 import numpy as np
 import cv2
@@ -55,6 +56,21 @@ WHATSAPP_API_URL = f"https://graph.facebook.com/{CURRENT_API_VERSION}/{WHATSAPP_
 def verify_webhook(mode: str, token: str, challenge: str):
     VERIFY_TOKEN = os.getenv("VERIFY_TOKEN")
     
+=======
+import requests
+import json
+import os
+from fastapi import Request, HTTPException
+from models.db_models import ChatHistory
+
+WHATSAPP_TOKEN = os.getenv("WHATSAPP_TOKEN")
+WHATSAPP_PHONE_ID = os.getenv("WHATSAPP_PHONE_ID")
+WHATSAPP_API_URL = f"https://graph.facebook.com/v17.0/{WHATSAPP_PHONE_ID}/messages"
+
+# ✅ Verify Webhook Token (GET)
+def verify_webhook(mode: str, token: str, challenge: str):
+    VERIFY_TOKEN = os.getenv("WHATSAPP_VERIFY_TOKEN", "my_secret_token")
+>>>>>>> radhika/feature
     if mode == "subscribe" and token == VERIFY_TOKEN:
         return int(challenge)
     raise HTTPException(status_code=403, detail="Webhook verification failed")
@@ -78,6 +94,7 @@ def verify_webhook(mode: str, token: str, challenge: str):
 
 #     return {"status": "received"}
 
+<<<<<<< HEAD
 
 
 async def download_image(url: str, token: str) -> bytes:
@@ -97,6 +114,9 @@ def extract_text_from_image(image_bytes: bytes) -> str:
 async def handle_incoming_message(req: Request, client_config: dict, db=None):
     count = 0
     
+=======
+async def handle_incoming_message(req: Request, client_config: dict, db=None):
+>>>>>>> radhika/feature
     payload = await req.json()
     entry = payload.get("entry", [])[0]
     changes = entry.get("changes", [])[0]
@@ -108,6 +128,7 @@ async def handle_incoming_message(req: Request, client_config: dict, db=None):
     if messages:
         message = messages[0]
         from_id = message["from"]
+<<<<<<< HEAD
         client_id = None
 
         # Match client config by phone ID
@@ -190,12 +211,44 @@ async def handle_incoming_message(req: Request, client_config: dict, db=None):
         if client_id and reply:
             config = client_config[client_id]
             await send_whatsapp_message_dynamic(
+=======
+        text = message.get("text", {}).get("body")
+        client_id = None
+
+        # Match the config for the right phone_id
+        for cid, config in client_config.items():
+            if config["phone_id"] == phone_id:
+                client_id = cid
+                break
+
+        print(f" Message from {from_id}: {text}")
+
+        # Save incoming message to DB
+        if db and client_id:
+            db.add(ChatHistory(
+                client_id=client_id,
+                sender="user",
+                user_number=from_id,
+                message=text,
+                direction="incoming"
+            ))
+            db.commit()
+
+        # Reply logic
+        reply = f"🤖 Bot: You said '{text}'"
+
+        # Send reply
+        if client_id:
+            config = client_config[client_id]
+            whatsapp_response = send_whatsapp_message_dynamic(
+>>>>>>> radhika/feature
                 token=config["token"],
                 phone_id=config["phone_id"],
                 to=from_id,
                 message=reply
             )
 
+<<<<<<< HEAD
             if db:
                 try:
                     db.add(ChatHistory(
@@ -210,6 +263,18 @@ async def handle_incoming_message(req: Request, client_config: dict, db=None):
                 except Exception as db_err:
                     await db.rollback()
                     print(f"❌ Error inserting bot reply: {db_err}")
+=======
+            # Save bot response
+            if db:
+                db.add(ChatHistory(
+                    client_id=client_id,
+                    sender="bot",
+                    user_number=from_id,
+                    message=reply,
+                    direction="outgoing"
+                ))
+                db.commit()
+>>>>>>> radhika/feature
 
     return {"status": "received"}
 
@@ -232,8 +297,12 @@ def send_whatsapp_message(to: str, message: str):
     return response.json()
 
 def send_whatsapp_message_dynamic(token: str, phone_id: str, to: str, message: str):
+<<<<<<< HEAD
     # url = f"https://graph.facebook.com/v18.0/{phone_id}/messages"
     url = f"{BASE_URL}/{phone_id}/messages"
+=======
+    url = f"https://graph.facebook.com/v17.0/{phone_id}/messages"
+>>>>>>> radhika/feature
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json"
@@ -248,6 +317,7 @@ def send_whatsapp_message_dynamic(token: str, phone_id: str, to: str, message: s
     if response.status_code != 200:
         print("WhatsApp API Error:", response.text)
     return response.json()
+<<<<<<< HEAD
 
 
 # async def send_whatsapp_message_dynamic(token, phone_id, to, message):
@@ -336,3 +406,5 @@ async def update_profile(token, phone_id, profile_data):
 
 
 
+=======
+>>>>>>> radhika/feature

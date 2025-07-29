@@ -39,31 +39,21 @@ app.add_middleware(
 # ✅ API routers 
 
 app.include_router(chat.router, prefix="/api/chat", tags=["Chat"])
-app.include_router(chat_routes.router, prefix="/api", tags=["Chat Sessions"])
+app.include_router(auth.router, prefix="/api/auth", tags=["Auth"])
+app.include_router(vchat.router, prefix="/api/vchat", tags=["VCHAT"])
 app.include_router(files.router, prefix="/api/files", tags=["Files"])
 app.include_router(qa_router, prefix="/api/qa", tags=["Q&A"])
 app.include_router(training.router, prefix="/api/training", tags=["Training"])
-app.include_router(websocket.router, tags=["WebSocket"])
-app.include_router(whatsapp.router, prefix="/whatsapp")
-app.include_router(auth_router, prefix="/api/auth", tags=["Auth"])
-# app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
-
-# ✅ Static file serving (for uploaded images, previews, etc.)
+# app.include_router(websocket.router,prefix="/", tags=["WebSocket"])
+app.include_router(whatsapp.router, prefix="/whatsapp", tags=["whatsapp Integration"])
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
 
 # ✅ Startup/shutdown tasks
 @app.on_event("startup")
 async def startup():
-    try:
-        await database.init_db()
-    except Exception as e:
-        print(f"Warning: Database initialization failed: {e}")
-        print("Continuing with MongoDB-only authentication...")
-    try:
-        setup_email_notifications()
-    except Exception as e:
-        print(f"Warning: Email setup failed: {e}")
-        print("Continuing without email notifications...")
+    await database.init_db()
+    setup_email_notifications()
 
 @app.on_event("shutdown")
 async def shutdown():
@@ -95,5 +85,3 @@ try:
 except Exception as e:
     logger.error(f"Error during application startup: {e}")
     raise
-
-
