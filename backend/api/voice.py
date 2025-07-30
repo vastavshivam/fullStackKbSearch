@@ -158,28 +158,44 @@ async def voice_chat(
     try:
         # First, convert speech to text
         audio_data = await audio_file.read()
-        
-        # Create a new UploadFile object for the speech-to-text function
         from io import BytesIO
         audio_stream = BytesIO(audio_data)
-        
-        # Recreate UploadFile for internal processing
         temp_upload = UploadFile(
             file=audio_stream,
             filename=audio_file.filename,
             headers=audio_file.headers
         )
-        
+
         # Convert to text
         speech_result = await speech_to_text(temp_upload, save_audio)
-        
-        if not speech_result.body:
-            raise HTTPException(status_code=500, detail="Failed to process speech")
-        
-        # Parse the speech result
+
+        # speech_to_text returns a FastAPI Response (JSONResponse)
+        # We need to extract the JSON content robustly
         import json
-        speech_data = json.loads(speech_result.body)
-        
+        speech_data = None
+        # Try to get the body as bytes or str
+        if hasattr(speech_result, 'body'):
+            body = speech_result.body
+            if isinstance(body, bytes):
+                try:
+                    speech_data = json.loads(body.decode('utf-8'))
+                except Exception:
+                    speech_data = None
+            elif isinstance(body, str):
+                try:
+                    speech_data = json.loads(body)
+                except Exception:
+                    speech_data = None
+        if speech_data is None:
+            # Try to get from .content if available
+            if hasattr(speech_result, 'content'):
+                try:
+                    speech_data = json.loads(speech_result.content)
+                except Exception:
+                    speech_data = None
+        if speech_data is None:
+            raise HTTPException(status_code=500, detail="Failed to parse speech-to-text response")
+
         if not speech_data.get("success") or not speech_data.get("text"):
             return JSONResponse(
                 status_code=200,
@@ -189,28 +205,48 @@ async def voice_chat(
                     "speech_result": speech_data
                 }
             )
-        
+
         # Get the transcribed text
         user_question = speech_data["text"].strip()
-        
-        # Send to chat API
+        if not user_question:
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "success": False,
+                    "message": "No text recognized from voice input.",
+                    "speech_result": speech_data
+                }
+            )
+
+        # Send to chat API (model answer)
         from api.qa import static_chat
-        chat_response = await static_chat({"question": user_question})
-        
+        try:
+            chat_response = await static_chat({"question": user_question})
+        except Exception as chat_exc:
+            logger.error(f"Chat model error: {str(chat_exc)}")
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "success": False,
+                    "message": "Failed to generate answer from model.",
+                    "user_text": user_question,
+                    "speech_result": speech_data
+                }
+            )
+
         return JSONResponse(
             status_code=200,
             content={
                 "success": True,
                 "user_text": user_question,
-                "bot_response": chat_response["answer"],
+                "bot_response": chat_response.get("answer", "No answer generated."),
                 "speech_confidence": speech_data.get("confidence", "unknown"),
-                "service_used": speech_data.get("service_used", "unknown"),
+                "service_used": speech_data.get("service_used", speech_data.get("service", "unknown")),
                 "audio_saved": speech_data.get("audio_saved", False),
                 "saved_path": speech_data.get("saved_path"),
                 "session_id": session_id
             }
         )
-        
     except Exception as e:
         logger.error(f"Voice chat error: {str(e)}")
         raise HTTPException(

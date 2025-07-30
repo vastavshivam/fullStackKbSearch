@@ -1,0 +1,84 @@
+# AI Knowledge Base Assistant: Business Requirements Document (BRD)
+
+## Product Vision
+
+The AI Knowledge Base Assistant is a market-ready, extensible platform that empowers businesses to deliver instant, accurate, and conversational support to users via voice and text. It combines advanced AI, real-time voice recognition, and workflow automation to streamline customer support, internal knowledge sharing, and product guidance. The platform is designed for white-labeling, multi-domain deployment, and seamless integration with existing tools, making it ideal for SaaS, enterprise, and consumer-facing applications.
+
+## Key Features
+- **Conversational AI**: Natural language understanding for both text and voice queries.
+- **Real-Time Voice Input**: Robust voice recognition with silence detection and fallback to backend transcription.
+- **Knowledge Base Integration**: Easily ingest, fine-tune, and update knowledge base data.
+- **Workflow Automation**: Visual workflow builder (n8n-style) for custom business logic, approvals, and integrations.
+- **Multi-Channel Support**: Web, mobile, WhatsApp, and more.
+- **Analytics & Feedback**: Track usage, sentiment, and user feedback for continuous improvement.
+- **White-Label & Extensible**: Custom branding, plugin marketplace, and API access.
+- **Token/Credit Billing**: Usage-based billing for SaaS and enterprise models.
+
+## Business Requirements
+
+### 1. User Experience
+- Intuitive chat and voice interface with real-time feedback.
+- 5-second silence auto-stop for voice input.
+- Error handling and fallback for browser limitations.
+- No intrusive popups (e.g., rating) unless enabled by admin.
+
+### 2. Knowledge Base Management
+- Import/export KB in CSV, JSONL, or via API.
+- Fine-tune AI on custom KB data (see sample below).
+- Sentiment tagging for responses.
+
+### 3. Workflow & Automation
+- Visual workflow builder for custom logic (drag-and-drop, triggers, actions).
+- Integration with external APIs (CRM, ticketing, etc.).
+- Domain/intent detection for routing queries.
+
+### 4. Extensibility & Integration
+- Plugin/extension system for new features.
+- White-labeling: custom branding, domains, and UI themes.
+- API and webhook support.
+
+### 5. Analytics & Feedback
+- Usage analytics dashboard.
+- Sentiment and feedback tracking.
+- Exportable reports.
+
+### 6. Security & Compliance
+- Role-based access control (RBAC).
+- Data encryption at rest and in transit.
+- GDPR and SOC2 readiness.
+
+### 7. Billing & Marketplace
+- Token/credit-based billing system.
+- Admin dashboard for usage and billing.
+- Marketplace for workflows, plugins, and KB packs.
+
+## Sample Fine-Tune Knowledge Base Data
+
+| Prompt                          | Response                                              | Sentiment  |
+|----------------------------------|-------------------------------------------------------|------------|
+| How to reset password?          | Go to settings and click 'Reset Password'.            | positive   |
+| App is crashing                 | Please reinstall the app and clear cache.             | neutral    |
+| How to change language?         | Go to settings and select 'Language'.                 | positive   |
+| App is slow                     | Try clearing cache or reinstalling the app.           | negative   |
+| How to delete account?          | Go to settings and click 'Delete Account'.            | neutral    |
+| App not responding              | Please restart the app or your device.                | negative   |
+| How to update profile?          | Go to profile settings and edit your information.     | positive   |
+| App features are great          | Thank you! We're glad you like them.                  | positive   |
+| How to report a bug?            | Please use the 'Report Bug' feature in settings.      | neutral    |
+| App is not loading              | Check your internet connection or try again later.    | negative   |
+
+*Full dataset available in `backend/training/data/fine_tune.jsonl`*
+
+---
+
+## Roadmap & Go-to-Market
+- **MVP**: Voice/text chat, KB import, basic workflow builder, analytics
+- **V1**: White-labeling, plugin system, billing, multi-channel support
+- **V2+**: Marketplace, advanced analytics, enterprise integrations
+
+## Contact & Support
+For more information, demos, or partnership inquiries, contact: [Your Company Contact Info]
+
+---
+
+*This document is provided as a business requirements and product vision reference for pitching, sales, and development alignment.*

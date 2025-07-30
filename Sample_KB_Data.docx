@@ -1,0 +1,11 @@
+Prompt,Response,Sentiment
+"How to reset password?","Go to settings and click 'Reset Password'.","positive"
+"App is crashing","Please reinstall the app and clear cache.","neutral"
+"How to change language?","Go to settings and select 'Language'.","positive"
+"App is slow","Try clearing cache or reinstalling the app.","negative"
+"How to delete account?","Go to settings and click 'Delete Account'.","neutral"
+"App not responding","Please restart the app or your device.","negative"
+"How to update profile?","Go to profile settings and edit your information.","positive"
+"App features are great","Thank you! We're glad you like them.","positive"
+"How to report a bug?","Please use the 'Report Bug' feature in settings.","neutral"
+"App is not loading","Check your internet connection or try again later.","negative"

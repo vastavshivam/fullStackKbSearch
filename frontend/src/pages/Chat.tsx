@@ -34,8 +34,9 @@ export default function Chat() {
   const [showFeedbackComment, setShowFeedbackComment] = useState<{[key: string]: boolean}>({});
   const [feedbackComments, setFeedbackComments] = useState<{[key: string]: string}>({});
   const [copiedMessageIndex, setCopiedMessageIndex] = useState<number | null>(null);
+  // Rating popup is disabled
   const [showRatingPopup, setShowRatingPopup] = useState(false);
-  const [hasShownRatingPopup, setHasShownRatingPopup] = useState(false);
+  const [hasShownRatingPopup, setHasShownRatingPopup] = useState(true);
   const [inactivityTimer, setInactivityTimer] = useState<NodeJS.Timeout | null>(null);
   const [hasMic, setHasMic] = useState(true);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -70,11 +71,8 @@ export default function Chat() {
     }
   };
 
-  // Dummy handler for voice button if not already defined
-  const handleVoiceClick = () => {
-    // Implement your voice logic here or integrate with VoiceAssistant
-    alert('Voice input not implemented in this demo.');
-  };
+  // Handler for voice input from VoiceAssistant
+  // (handleVoiceInput is already defined below and used for voice logic)
 
   const resetInactivityTimer = useCallback(() => {
     // Clear existing timer using a ref to avoid dependency issues
@@ -140,21 +138,7 @@ export default function Chat() {
     
     initSession();
     loadFeedbackStats();
-    
-    // Start inactivity timer
-    resetInactivityTimer();
-    
-    // Add event listeners for user activity
-    const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
-    const handleUserActivity = () => {
-      // Use callback to avoid direct dependency
-      resetInactivityTimer();
-    };
-    
-    activityEvents.forEach(event => {
-      document.addEventListener(event, handleUserActivity, true);
-    });
-    
+    // Rating popup is disabled, so skip inactivity timer and listeners
     // WebSocket connection
     let ws: WebSocket | null = null;
     try {
@@ -166,19 +150,8 @@ export default function Chat() {
     } catch (err) {
       console.error('WebSocket connection failed:', err);
     }
-    
     // Cleanup function
     return () => {
-      activityEvents.forEach(event => {
-        document.removeEventListener(event, handleUserActivity, true);
-      });
-      // Clean up any existing timer on unmount
-      setInactivityTimer((prevTimer) => {
-        if (prevTimer) {
-          clearTimeout(prevTimer);
-        }
-        return null;
-      });
       if (ws) {
         ws.close();
       }
@@ -545,7 +518,7 @@ export default function Chat() {
       
       setTimeout(() => {
         setFeedbackToast({show: false, message: '', type: 'success'});
-      }, 3000);
+      }, 3000 );
     }
   };
 
@@ -761,56 +734,55 @@ export default function Chat() {
           </div>
         )}
         
+
         <form className="chat-input" onSubmit={handleSend}>
-  <input
-    ref={fileInputRef}
-    type="file"
-    accept="image/*"
-    onChange={handleImageSelect}
-    style={{ display: 'none' }}
-  />
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImageSelect}
+            style={{ display: 'none' }}
+          />
 
-  <button
-    type="button"
-    onClick={() => fileInputRef.current?.click()}
-    className="image-upload-btn"
-    title="Upload Image"
-  >
-    📷
-  </button>
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="image-upload-btn"
+            title="Upload Image"
+          >
+            📷
+          </button>
 
-  <button
-    type="button"
-    className="voice-btn"
-    onClick={handleVoiceClick} // your voice logic
-    disabled={isLoading}
-  >
-    🎙️
-  </button>
+          {/* VoiceAssistant component for real-time voice input */}
+          <VoiceAssistant
+            onVoiceInput={handleVoiceInput}
+            isLoading={isLoading}
+            disabled={!hasMic || isLoading}
+          />
 
-  <input
-    type="text"
-    className="chat-text-input"
-    placeholder={selectedImage ? "Ask about your image..." : "Send a message or use voice..."}
-    value={input}
-    onChange={(e) => setInput(e.target.value)}
-    disabled={isLoading}
-    onKeyDown={(e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        handleSend(e);
-      }
-    }}
-  />
+          <input
+            type="text"
+            className="chat-text-input"
+            placeholder={selectedImage ? "Ask about your image..." : "Send a message or use voice..."}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            disabled={isLoading}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSend(e);
+              }
+            }}
+          />
 
-  <button
-    type="submit"
-    className="send-btn"
-    disabled={isLoading || (!input.trim() && !selectedImage)}
-  >
-    {isLoading ? 'Sending...' : 'Send'}
-  </button>
-</form>
+          <button
+            type="submit"
+            className="send-btn"
+            disabled={isLoading || (!input.trim() && !selectedImage)}
+          >
+            {isLoading ? 'Sending...' : 'Send'}
+          </button>
+        </form>
 
 {!hasMic && (
   <div className="voice-warning">
@@ -824,43 +796,7 @@ export default function Chat() {
       </div>
       
       {/* Rating Popup */}
-      {showRatingPopup && (
-        <div className="rating-popup-overlay">
-          <div className="rating-popup">
-            <div className="rating-popup-header">
-              <h3>How was your experience?</h3>
-              <button 
-                className="close-popup-btn"
-                onClick={handleCloseRatingPopup}
-              >
-                ×
-              </button>
-            </div>
-            <div className="rating-popup-content">
-              <p>Please rate your overall experience with AppGallop Assistant</p>
-              <div className="star-rating">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    className="star-btn"
-                    onClick={() => handleRatingSubmit(star)}
-                  >
-                    ⭐
-                  </button>
-                ))}
-              </div>
-              <div className="rating-actions">
-                <button 
-                  className="rating-action-btn later"
-                  onClick={handleCloseRatingPopup}
-                >
-                  Maybe Later
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Rating popup is disabled */}
     </div>
   );
 }
