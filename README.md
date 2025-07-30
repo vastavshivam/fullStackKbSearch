@@ -1,4 +1,4 @@
-# 🤖 AI Support Assistant
+# 🤖 AI Support Assistant========================
 
 A full-stack AI-powered support assistant platform, inspired by Bird.com, that allows users to:
 
