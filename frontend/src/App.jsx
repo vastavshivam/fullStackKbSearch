@@ -4,8 +4,7 @@ import './App.css';
 import Dashboard from './pages/Dashboard';
 import Chat from './pages/Chat';
 import KnowledgeBase from './pages/KnowledgeBase';
-import Login from './pages/Login';
-import Register from './pages/Register';
+import Landing from './pages/Landing';
 import Settings from './pages/Settings';
 import ChatWidget from './components/ChatWidget';
 import { WidgetConfigProvider, useWidgetConfig } from './components/WidgetConfigContext';
@@ -35,8 +34,8 @@ export default function App() {
         <Router>
           <div className="App">
             <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
+              {/* <Route path="/login" element={<Login />} /> */}
+              {/* <Route path="/register" element={<Register />} /> */}
               {/* Admin routes */}
               <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['admin']}><Layout><Dashboard /></Layout></ProtectedRoute>} />
               <Route path="/chat" element={<ProtectedRoute allowedRoles={['admin']}><Layout><Chat /></Layout></ProtectedRoute>} />
@@ -54,7 +53,7 @@ export default function App() {
               {/* Quote Page route */}
               <Route path="/quotes" element={<QuotePage />} />
               {/* Default redirect */}
-              <Route path="/" element={<Login />} />
+              <Route path="/" element={<Landing />} />
             </Routes>
             <ChatWidgetConditional />
           </div>
