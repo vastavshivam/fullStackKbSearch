@@ -2,14 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   BiBarChartAlt2, BiUser, BiRocket, BiGroup, BiEnvelope,
-  BiCog, BiCube, BiLayer, BiChevronRight, BiChevronDown, BiChevronUp, BiMenu, BiX, BiPlug, BiMessageRounded
+  BiCog, BiCube, BiLayer, BiChevronRight, BiChevronDown, BiChevronUp, BiMenu, BiX, BiPlug, BiMessageRounded, BiExtension, BiLogOut
 } from 'react-icons/bi';
+import { useAuth } from '../contexts/AuthContext';
 import './Sidebar.css';
 
 const sidebarLinks = [
   { label: 'Dashboard', icon: <BiBarChartAlt2 />, route: '/dashboard' },
   { label: 'Campaigns', icon: <BiRocket />, route: '/campaigns' },
   { label: 'Journeys', icon: <BiLayer />, route: '/Journeys' },
+  { label: 'Widgets', icon: <BiExtension style={{ color: '#28a745' }} />, route: '/widget-dashboard' },
   { label: 'Audience', icon: <BiGroup />, route: '/audience' },
   { label: 'Template', icon: <BiEnvelope />, route: '/template' },
   { label: 'Content', icon: <BiCube />, route: '/content' },
@@ -30,8 +32,14 @@ export default function Sidebar({
   setSidebarOpen: (open: boolean) => void
 }) {
   const navigate = useNavigate();
+  const { logout, user } = useAuth();
   const [showIntegrations, setShowIntegrations] = useState(false);
   const [showExpandHint, setShowExpandHint] = useState(false);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   // Show expand hint after 3 seconds when sidebar is collapsed
   useEffect(() => {
@@ -151,10 +159,47 @@ export default function Sidebar({
 
       {sidebarOpen && (
         <div className="sidebar-footer">
+          {/* User Info */}
+          <div className="user-info" style={{ 
+            padding: '12px 16px', 
+            borderTop: '1px solid #e2e8f0', 
+            marginBottom: '8px',
+            backgroundColor: '#f8fafc',
+            borderRadius: '8px'
+          }}>
+            <div style={{ fontSize: '14px', fontWeight: '600', color: '#1a202c' }}>
+              {user?.email || 'User'}
+            </div>
+            <div style={{ fontSize: '12px', color: '#718096', textTransform: 'capitalize' }}>
+              {user?.role || 'user'} Account
+            </div>
+          </div>
+          
           <Link to="/chat" className="action-button blue">Chat</Link>
           <Link to="/quotes" className="action-button" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: '#fff' }}>Quotes</Link>
           <Link to="/knowledge-base" className="action-button gray">Knowledge Base</Link>
           <Link to="/settings" className="action-button purple">Settings</Link>
+          
+          {/* Logout Button */}
+          <button 
+            onClick={handleLogout}
+            className="action-button"
+            style={{ 
+              background: '#dc3545', 
+              color: '#fff',
+              border: 'none',
+              cursor: 'pointer',
+              width: '100%',
+              marginTop: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px'
+            }}
+          >
+            <BiLogOut />
+            Logout
+          </button>
         </div>
       )}
     </aside>

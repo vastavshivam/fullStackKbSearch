@@ -1,14 +1,49 @@
-from fastapi import APIRouter, WebSocket, HTTPException
+from fastapi import APIRouter, WebSocket, HTTPException, UploadFile, File
+from pydantic import BaseModel
 from models.schemas import ChatMessage
 from db.crud import save_chat_message, get_conversation_context
 from services.rag import generate_response_with_rag
 import logging
+import base64
+import io
+from PIL import Image
+import google.generativeai as genai
+import os
+from typing import Optional
 
 # Optional: sentiment and embedding generators
 from utils.nlp import analyze_sentiment, compute_embedding
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
+
+# Configure Gemini API
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+if GEMINI_API_KEY:
+    genai.configure(api_key=GEMINI_API_KEY)
+    model = genai.GenerativeModel('gemini-1.5-flash')
+    vision_model = genai.GenerativeModel('gemini-1.5-pro-vision-latest')
+else:
+    logger.warning("GEMINI_API_KEY not found. Advanced AI features will be disabled.")
+
+# Widget chat message model
+class WidgetChatMessage(BaseModel):
+    message: str
+    client_id: str
+    session_id: str
+    user_id: str = "anonymous"
+    image_data: Optional[str] = None  # Base64 encoded image
+    has_voice: bool = False
+
+# Advanced widget chat message model
+class AdvancedWidgetMessage(BaseModel):
+    message: str
+    client_id: str
+    session_id: str
+    user_id: str = "anonymous"
+    message_type: str = "text"  # text, image, voice, mixed
+    image_data: Optional[str] = None
+    voice_data: Optional[str] = None
 
 @router.post("/send")
 async def send_message(msg: ChatMessage):
@@ -66,9 +101,38 @@ async def websocket_endpoint(websocket: WebSocket):
             await websocket.send_text(reply)
 
         except Exception as e:
-            print("❌ WebSocket error:", e)
-            await websocket.send_text("Something went wrong.")
+            logger.error(f"WebSocket error: {e}")
+            await websocket.send_text(f"❌ Error: {str(e)}")
             break
+
+# Widget-specific chat endpoint
+@router.post("/widget")
+async def widget_chat(msg: WidgetChatMessage):
+    """Handle chat messages from embedded widgets"""
+    try:
+        # ✨ Compute sentiment & embedding
+        sentiment = analyze_sentiment(msg.message)
+        embedding = compute_embedding(msg.message)
+
+        # ✨ Generate bot reply using RAG
+        reply = await generate_response_with_rag(msg.message)
+
+        # ✅ Save widget chat message
+        save_chat_message(
+            user_id=msg.user_id,
+            session_id=msg.session_id,
+            message=msg.message,
+            sender="user",
+            sentiment=sentiment,
+            embedding=embedding,
+            bot_reply=reply,
+            metadata={"client_id": msg.client_id, "source": "widget"}
+        )
+
+        return {"response": reply, "status": "success"}
+    except Exception as e:
+        logger.error(f"Widget chat error: {e}")
+        raise HTTPException(status_code=500, detail="Chat processing failed.")
 
 
 @router.post("/session")

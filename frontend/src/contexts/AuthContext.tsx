@@ -17,6 +17,8 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+export { AuthContext };
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
@@ -63,12 +65,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       const data = await response.json();
       
+      const userData = {
+        id: data.user?.id || '1',
+        email: data.user?.email || email,
+        role: data.user?.role || role
+      };
+      
       setToken(data.access_token);
-      setUser(data.user);
+      setUser(userData);
       
       // Store in localStorage
       localStorage.setItem('token', data.access_token);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      localStorage.setItem('user', JSON.stringify(userData));
       
       return true;
     } catch (error) {

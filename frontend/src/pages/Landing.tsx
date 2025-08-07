@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import './landing.css';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 
 export default function Landing() {
@@ -14,6 +15,15 @@ export default function Landing() {
   const [error, setError] = useState('');
   const location = useLocation();
   const navigate = useNavigate();
+  const { login, user, isAuthenticated } = useAuth();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      const redirectPath = user.role === 'admin' ? '/dashboard' : '/user-dashboard';
+      navigate(redirectPath);
+    }
+  }, [isAuthenticated, user, navigate]);
 
 
 
@@ -42,21 +52,14 @@ export default function Landing() {
     }
     try {
       if (modal === 'login') {
-        const res = await fetch('http://localhost:8004/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password, role })
-        });
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          setError(data.detail || 'Login failed.');
-          return;
+        const success = await login(email, password, role);
+        if (success) {
+          setError('');
+          closeModal();
+          // Navigation will be handled by useEffect above
+        } else {
+          setError('Login failed. Please check your credentials.');
         }
-        const data = await res.json();
-        localStorage.setItem('token', data.access_token);
-        localStorage.setItem('user', JSON.stringify(data.user || { email, role }));
-        setError('');
-        closeModal();
       } else if (modal === 'register') {
         const res = await fetch('http://localhost:8004/api/auth/register', {
           method: 'POST',
@@ -68,11 +71,11 @@ export default function Landing() {
           setError(data.detail || 'Registration failed.');
           return;
         }
-        // Optionally auto-login after register:
         const data = await res.json();
-        localStorage.setItem('user', JSON.stringify(data));
-        setError('');
-        closeModal();
+        setError('Registration successful! Please login.');
+        // Switch to login modal
+        setModal('login');
+        setPassword(''); // Clear password for security
       }
     } catch (err) {
       setError('Network error. Please try again.');

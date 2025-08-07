@@ -1,5 +1,5 @@
 from typing import Text
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Text, DateTime,func
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Text, DateTime, func, JSON
 from sqlalchemy.orm import relationship
 from database.database import Base
 from datetime import datetime
@@ -101,3 +101,74 @@ class ChatHistory(Base):
     message_type = Column(String, default="text")  # Optional: 'text', 'image', etc.
     direction = Column(String, nullable=False)  # 'incoming' or 'outgoing'
     timestamp = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class WidgetConfig(Base):
+    __tablename__ = "widget_configs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    client_id = Column(String, unique=True, index=True, nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)  # Optional: link to user
+    
+    # Basic Widget Settings
+    is_active = Column(Boolean, default=True)
+    widget_name = Column(String, default="AI Assistant")
+    domain = Column(String, nullable=True)
+    
+    # Configuration as JSON
+    config_data = Column(JSON, nullable=False)  # Store all widget configuration
+    
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    user = relationship("User", backref="widgets")
+    knowledge_base_docs = relationship("WidgetKnowledgeBase", back_populates="widget", cascade="all, delete-orphan")
+
+
+class WidgetKnowledgeBase(Base):
+    __tablename__ = "widget_knowledge_base"
+
+    id = Column(Integer, primary_key=True, index=True)
+    widget_id = Column(Integer, ForeignKey("widget_configs.id"), nullable=False)
+    
+    # Document Information
+    document_id = Column(String, unique=True, nullable=False)  # Hash-based ID
+    filename = Column(String, nullable=False)
+    content = Column(Text, nullable=False)
+    file_type = Column(String, nullable=False)
+    size_mb = Column(String, nullable=True)
+    
+    # Metadata
+    word_count = Column(Integer, default=0)
+    char_count = Column(Integer, default=0)
+    
+    # Timestamps
+    uploaded_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    widget = relationship("WidgetConfig", back_populates="knowledge_base_docs")
+
+
+class WidgetAnalytics(Base):
+    __tablename__ = "widget_analytics"
+
+    id = Column(Integer, primary_key=True, index=True)
+    client_id = Column(String, nullable=False, index=True)
+    
+    # Event Information
+    event_type = Column(String, nullable=False)  # chat_start, message_sent, etc.
+    session_id = Column(String, nullable=False)
+    user_id = Column(String, nullable=True)
+    
+    # Event Data
+    event_data = Column(JSON, nullable=True)  # Flexible event metadata
+    user_info = Column(JSON, nullable=True)  # User information
+    conversation_data = Column(JSON, nullable=True)  # Conversation details
+    
+    # Analytics
+    lead_score = Column(String, default="0.0")  # Store as string to avoid float issues
+    
+    # Timestamps
+    timestamp = Column(DateTime, default=datetime.utcnow)

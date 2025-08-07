@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevOS Neural Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="src/pages/Dashboard.css">
+    <style>
+        /* Demo-specific styles */
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        
+        .demo-data {
+            animation: float-up 0.6s ease forwards;
+        }
+        
+        .demo-data:nth-child(2) { animation-delay: 0.1s; }
+        .demo-data:nth-child(3) { animation-delay: 0.2s; }
+        .demo-data:nth-child(4) { animation-delay: 0.3s; }
+    </style>
+</head>
+<body>
+    <div class="dashboard-layout">
+        <!-- AI Command Center -->
+        <header class="command-center">
+            <div class="command-container">
+                <!-- AI Assistant Avatar -->
+                <div class="ai-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                
+                <!-- Command Input -->
+                <div class="command-input-container">
+                    <i class="fas fa-search command-icon"></i>
+                    <input 
+                        type="text" 
+                        class="command-input" 
+                        placeholder="Type anything... Create project, Install package, Deploy app, Ask AI assistant..."
+                    >
+                    
+                    <!-- Command Suggestions (Hidden by default) -->
+                    <div class="command-suggestions" style="display: none;">
+                        <div class="suggestion-item">
+                            <div class="suggestion-title">Create new React project</div>
+                            <div class="suggestion-description">Initialize a new React app with TypeScript</div>
+                        </div>
+                        <div class="suggestion-item">
+                            <div class="suggestion-title">Install Tailwind CSS</div>
+                            <div class="suggestion-description">Add Tailwind to current project</div>
+                        </div>
+                        <div class="suggestion-item">
+                            <div class="suggestion-title">Deploy to Vercel</div>
+                            <div class="suggestion-description">Deploy current project to Vercel</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <button class="action-btn primary">
+                        <i class="fas fa-plus"></i>
+                        New Project
+                    </button>
+                    <button class="action-btn">
+                        <i class="fas fa-upload"></i>
+                        Upload
+                    </button>
+                    <button class="action-btn">
+                        <i class="fas fa-book"></i>
+                        Docs
+                    </button>
+                </div>
+                
+                <!-- User Status -->
+                <div class="user-status">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Dashboard Content -->
+        <main class="main-dashboard">
+            <div class="dashboard-grid">
+                <!-- Command Response Area (Hidden by default) -->
+                <div class="command-response hidden">
+                    <h3>AI Response</h3>
+                    <p>Your command response will appear here...</p>
+                </div>
+
+                <!-- Live Stats Grid -->
+                <section class="stats-grid">
+                    <div class="stat-card demo-data">
+                        <div class="stat-icon">
+                            <i class="fas fa-project-diagram"></i>
+                        </div>
+                        <div class="stat-value">24</div>
+                        <div class="stat-label">Active Projects</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-arrow-up"></i>
+                            +12% this week
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card demo-data">
+                        <div class="stat-icon">
+                            <i class="fas fa-rocket"></i>
+                        </div>
+                        <div class="stat-value">156</div>
+                        <div class="stat-label">Deployments</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-arrow-up"></i>
+                            +8% this month
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card demo-data">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-value">1.2k</div>
+                        <div class="stat-label">Team Members</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-arrow-up"></i>
+                            +5 new
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Activity Feed -->
+                <aside class="activity-feed demo-data">
+                    <div class="activity-header">
+                        <h3>Live Activity</h3>
+                        <button class="action-btn">
+                            <i class="fas fa-bell"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="activity-list">
+                        <div class="activity-item">
+                            <div class="activity-avatar">
+                                <i class="fas fa-code"></i>
+                            </div>
+                            <div class="activity-content">
+                                <h4>New commit pushed</h4>
+                                <p>Updated dashboard components</p>
+                            </div>
+                            <div class="activity-time">2m ago</div>
+                        </div>
+                        
+                        <div class="activity-item">
+                            <div class="activity-avatar">
+                                <i class="fas fa-rocket"></i>
+                            </div>
+                            <div class="activity-content">
+                                <h4>Deployment successful</h4>
+                                <p>Production build completed</p>
+                            </div>
+                            <div class="activity-time">5m ago</div>
+                        </div>
+                        
+                        <div class="activity-item">
+                            <div class="activity-avatar">
+                                <i class="fas fa-user-plus"></i>
+                            </div>
+                            <div class="activity-content">
+                                <h4>New team member</h4>
+                                <p>Sarah joined the team</p>
+                            </div>
+                            <div class="activity-time">1h ago</div>
+                        </div>
+                        
+                        <div class="activity-item">
+                            <div class="activity-avatar">
+                                <i class="fas fa-bug"></i>
+                            </div>
+                            <div class="activity-content">
+                                <h4>Issue resolved</h4>
+                                <p>Fixed authentication bug</p>
+                            </div>
+                            <div class="activity-time">3h ago</div>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Projects Section -->
+                <section class="projects-section">
+                    <div class="section-header">
+                        <h2 class="section-title">Your Projects</h2>
+                        <button class="action-btn primary">
+                            <i class="fas fa-plus"></i>
+                            Create Project
+                        </button>
+                    </div>
+                    
+                    <div class="projects-grid">
+                        <div class="project-card demo-data">
+                            <div class="project-header">
+                                <div class="project-icon">
+                                    <i class="fab fa-react"></i>
+                                </div>
+                                <div class="project-status active">Active</div>
+                            </div>
+                            <h3 class="project-title">E-commerce Dashboard</h3>
+                            <p class="project-description">
+                                Modern React dashboard with real-time analytics and AI-powered insights
+                            </p>
+                            <div class="project-footer">
+                                <div class="project-tech">
+                                    <span class="tech-tag">React</span>
+                                    <span class="tech-tag">TypeScript</span>
+                                    <span class="tech-tag">Tailwind</span>
+                                </div>
+                                <div class="project-actions">
+                                    <button class="action-icon">
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </button>
+                                    <button class="action-icon">
+                                        <i class="fas fa-cog"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="project-card demo-data">
+                            <div class="project-header">
+                                <div class="project-icon">
+                                    <i class="fab fa-node-js"></i>
+                                </div>
+                                <div class="project-status building">Building</div>
+                            </div>
+                            <h3 class="project-title">AI Chat API</h3>
+                            <p class="project-description">
+                                RESTful API with natural language processing and machine learning capabilities
+                            </p>
+                            <div class="project-footer">
+                                <div class="project-tech">
+                                    <span class="tech-tag">Node.js</span>
+                                    <span class="tech-tag">Express</span>
+                                    <span class="tech-tag">MongoDB</span>
+                                </div>
+                                <div class="project-actions">
+                                    <button class="action-icon">
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </button>
+                                    <button class="action-icon">
+                                        <i class="fas fa-cog"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="project-card demo-data">
+                            <div class="project-header">
+                                <div class="project-icon">
+                                    <i class="fab fa-python"></i>
+                                </div>
+                                <div class="project-status deployed">Deployed</div>
+                            </div>
+                            <h3 class="project-title">ML Data Pipeline</h3>
+                            <p class="project-description">
+                                Automated data processing pipeline with machine learning model training
+                            </p>
+                            <div class="project-footer">
+                                <div class="project-tech">
+                                    <span class="tech-tag">Python</span>
+                                    <span class="tech-tag">TensorFlow</span>
+                                    <span class="tech-tag">Docker</span>
+                                </div>
+                                <div class="project-actions">
+                                    <button class="action-icon">
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </button>
+                                    <button class="action-icon">
+                                        <i class="fas fa-cog"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Quick Links -->
+                <section class="quick-links">
+                    <a href="#" class="quick-link">
+                        <div class="quick-link-icon">
+                            <i class="fas fa-book-open"></i>
+                        </div>
+                        <div class="quick-link-content">
+                            <h4>Documentation</h4>
+                            <p>Browse API docs & guides</p>
+                        </div>
+                    </a>
+                    
+                    <a href="#" class="quick-link">
+                        <div class="quick-link-icon">
+                            <i class="fas fa-palette"></i>
+                        </div>
+                        <div class="quick-link-content">
+                            <h4>Design System</h4>
+                            <p>UI components & templates</p>
+                        </div>
+                    </a>
+                    
+                    <a href="#" class="quick-link">
+                        <div class="quick-link-icon">
+                            <i class="fas fa-cloud"></i>
+                        </div>
+                        <div class="quick-link-content">
+                            <h4>Cloud Services</h4>
+                            <p>Manage deployments</p>
+                        </div>
+                    </a>
+                    
+                    <a href="#" class="quick-link">
+                        <div class="quick-link-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="quick-link-content">
+                            <h4>Analytics</h4>
+                            <p>Performance metrics</p>
+                        </div>
+                    </a>
+                </section>
+            </div>
+        </main>
+
+        <!-- Voice Command Indicator (Hidden by default) -->
+        <div class="voice-indicator">
+            <i class="fas fa-microphone"></i>
+        </div>
+
+        <!-- Toast Container -->
+        <div class="toast-container">
+            <!-- Toast notifications will appear here -->
+        </div>
+    </div>
+
+    <script>
+        // Demo JavaScript for interactivity
+        document.addEventListener('DOMContentLoaded', function() {
+            const commandInput = document.querySelector('.command-input');
+            const commandResponse = document.querySelector('.command-response');
+            const suggestions = document.querySelector('.command-suggestions');
+            const voiceIndicator = document.querySelector('.voice-indicator');
+            
+            // Show command suggestions on focus
+            commandInput.addEventListener('focus', function() {
+                suggestions.style.display = 'block';
+            });
+            
+            // Hide suggestions on blur (with delay for clicking)
+            commandInput.addEventListener('blur', function() {
+                setTimeout(() => {
+                    suggestions.style.display = 'none';
+                }, 200);
+            });
+            
+            // Handle command input
+            commandInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    const command = this.value.trim();
+                    if (command) {
+                        showCommandResponse(command);
+                        this.value = '';
+                        suggestions.style.display = 'none';
+                    }
+                }
+            });
+            
+            // Show command response
+            function showCommandResponse(command) {
+                commandResponse.classList.remove('hidden');
+                commandResponse.innerHTML = `
+                    <h3>🤖 AI Response</h3>
+                    <p><strong>Command:</strong> "${command}"</p>
+                    <p>Processing your request... This would integrate with your AI backend to provide intelligent responses and execute commands.</p>
+                    <div style="margin-top: 1rem;">
+                        <button class="action-btn" onclick="this.parentElement.parentElement.classList.add('hidden')">
+                            <i class="fas fa-times"></i>
+                            Close
+                        </button>
+                    </div>
+                `;
+            }
+            
+            // Demo: Show voice indicator occasionally
+            setInterval(() => {
+                if (Math.random() > 0.7) {
+                    voiceIndicator.classList.add('active');
+                    setTimeout(() => {
+                        voiceIndicator.classList.remove('active');
+                    }, 3000);
+                }
+            }, 10000);
+            
+            // Demo: Add toast notification
+            function showToast(type, title, message) {
+                const toastContainer = document.querySelector('.toast-container');
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.innerHTML = `
+                    <div class="toast-icon">
+                        <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation-triangle' : 'info'}"></i>
+                    </div>
+                    <div class="toast-content">
+                        <div class="toast-title">${title}</div>
+                        <div class="toast-message">${message}</div>
+                    </div>
+                `;
+                
+                toastContainer.appendChild(toast);
+                
+                // Remove toast after 4 seconds
+                setTimeout(() => {
+                    toast.remove();
+                }, 4000);
+            }
+            
+            // Demo: Show welcome toast
+            setTimeout(() => {
+                showToast('success', 'Welcome to DevOS!', 'Your neural development interface is ready.');
+            }, 1000);
+            
+            // Dark mode toggle (demo)
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey && e.key === 'd') {
+                    e.preventDefault();
+                    document.body.toggleAttribute('data-theme', 'dark');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

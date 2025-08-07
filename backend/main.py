@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 from api.qa import router as qa_router
 from api.auth import router as auth_router
 from api.image_processing import router as image_router
@@ -14,7 +14,7 @@ from api import quote_parser
 from database import database  # Assuming you have a database module for initialization
 
 from db import *
-from api import chat, auth, files, training, websocket
+from api import chat, auth, files, training, websocket, widget, dashboard
 from utils.email_notify import setup_email_notifications
 from routes import whatsapp_routes as whatsapp
 Base = declarative_base()
@@ -34,6 +34,7 @@ origins = [
     "http://localhost:8004",  # Backend port
     "http://127.0.0.1:8004",
     "http://localhost",
+    "*",  # Allow all origins for widget embeds
 ]
 
 # Allow CORS from frontend
@@ -41,7 +42,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
 )
 
@@ -55,6 +56,8 @@ app.include_router(feedback_router, prefix="/api/feedback", tags=["Feedback"])
 app.include_router(voice_router, prefix="/api/voice", tags=["Voice Assistant"])
 app.include_router(training.router, prefix="/api/training", tags=["Training"])
 app.include_router(websocket.router, tags=["WebSocket"])
+app.include_router(widget.router, prefix="/api/widget", tags=["Widget"])
+app.include_router(dashboard.router, tags=["Dashboard"])
 app.include_router(whatsapp.router, prefix="/whatsapp")
 app.include_router(auth_router, prefix="/api/auth", tags=["Auth"])
 app.include_router(quote_parser.router, prefix="/api")

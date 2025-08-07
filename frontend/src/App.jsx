@@ -7,6 +7,7 @@ import KnowledgeBase from './pages/KnowledgeBase';
 import Landing from './pages/Landing';
 import Settings from './pages/Settings';
 import ChatWidget from './components/ChatWidget';
+import WidgetDashboard from './components/WidgetDashboard';
 import { WidgetConfigProvider, useWidgetConfig } from './components/WidgetConfigContext';
 import UserDashboard from './pages/UserDashboard';
 import Campaigns from './pages/Campaigns';
@@ -46,6 +47,7 @@ export default function App() {
               <Route path="/journeys/:id" element={<ProtectedRoute allowedRoles={['admin']}><Layout><JourneyDetail /></Layout></ProtectedRoute>} />
               <Route path="/integrations" element={<ProtectedRoute allowedRoles={['admin']}><Layout><Integrations /></Layout></ProtectedRoute>} />
               <Route path="/template" element={<ProtectedRoute allowedRoles={['admin']}><Layout><TemplatePage /></Layout></ProtectedRoute>} />
+              <Route path="/widget-dashboard" element={<ProtectedRoute allowedRoles={['admin']}><Layout><WidgetDashboard /></Layout></ProtectedRoute>} />
               {/* User routes */}
               <Route path="/user-dashboard" element={<ProtectedRoute allowedRoles={['user', 'admin']}><Layout><UserDashboard /></Layout></ProtectedRoute>} />
               {/* Quote Editor route (no protection, for chat widget redirect) */}
@@ -62,6 +64,4 @@ export default function App() {
     </AuthProvider>
   );
 }
-// ...existing code...
-              {/* Default redirect */}
 

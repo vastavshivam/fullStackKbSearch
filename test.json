@@ -1,0 +1,83 @@
+[
+  {
+    "prompt": "What is Capital Meets Climate about?",
+    "response": "Explore how financed emissions shape climate impact and why they are critical for sustainable finance.",
+    "sentiment": "positive"
+  },
+  {
+    "prompt": "What is Supply Chain 2.0?",
+    "response": "An in-depth look at how integrating sustainability into supply chains enhances ESG performance, mitigates risks, and drives long-term business value.",
+    "sentiment": "positive"
+  },
+  {
+    "prompt": "What is Sustainable by Strategy?",
+    "response": "Learn how to build a strong ESG strategy that aligns with global sustainability goals, enhances stakeholder trust, mitigates risks, and drives long-term value.",
+    "sentiment": "positive"
+  },
+  {
+    "prompt": "What is Gaps to Gains about?",
+    "response": "This blog explores the importance of ESG gap assessments in today’s business landscape, outlining their role in enhancing compliance, building stakeholder trust, and driving sustainable growth.",
+    "sentiment": "positive"
+  },
+  {
+    "prompt": "What is Mastering Materiality about?",
+    "response": "This blog highlights the importance of ESG materiality assessments in helping businesses identify and prioritize the issues that matter most.",
+    "sentiment": "positive"
+  },
+  {
+    "prompt": "What is ESG Accountability in Action about?",
+    "response": "Learn why ESG compliance and reporting are essential for transparency, risk management, and sustainable growth. Stay ahead with strategic ESG disclosures.",
+    "sentiment": "positive"
+  },
+  {
+    "prompt": "What are the Terms of Use for Climethic's website?",
+    "response": "These Terms of Use apply to your use of https://www.climethic.com, operated by Charismatic Attic and its group entities. By using the website or services, you agree to be bound by these Terms, which qualify as an electronic record under the Information Technology Act, 2000.",
+    "sentiment": "neutral"
+  },
+  {
+    "prompt": "What Services does Climethic offer?",
+    "response": "Climethic offers a Platform (SaaS) for sustainability tools and Advisory Services including ESG strategy development, reporting support, materiality assessments, carbon management advice, and portfolio solutions.",
+    "sentiment": "positive"
+  },
+  {
+    "prompt": "What are the responsibilities related to User Accounts and Security?",
+    "response": "Users must provide accurate information during registration and maintain the confidentiality of their login details. Users are responsible for all activity under their account and must notify Climethic immediately of unauthorized use.",
+    "sentiment": "neutral"
+  },
+  {
+    "prompt": "What is the Client's responsibility regarding acceptable use?",
+    "response": "Clients must use the Services lawfully, ensure the quality and legality of Client Data, avoid introducing harmful software, and not attempt unauthorized access or reverse engineering of the platform.",
+    "sentiment": "neutral"
+  },
+  {
+    "prompt": "What are the fees and payment terms for Climethic's Services?",
+    "response": "Fees are specified in applicable agreements and must be paid according to payment terms. Prices exclude taxes, which are the client's responsibility. Climethic may update pricing with prior notice.",
+    "sentiment": "neutral"
+  },
+  {
+    "prompt": "How are Intellectual Property rights handled?",
+    "response": "Climethic owns IP rights for the Platform and methodologies, while clients retain ownership of their data but license it to Climethic to provide services. Deliverables are licensed to clients for internal use upon full payment.",
+    "sentiment": "neutral"
+  },
+  {
+    "prompt": "What confidentiality obligations do parties have?",
+    "response": "Both parties agree to keep confidential information private unless required by law or with written consent from the disclosing party.",
+    "sentiment": "neutral"
+  },
+  {
+    "prompt": "What disclaimers and limitations of liability does Climethic state?",
+    "response": "Climethic provides services 'as is' with no warranties on results. Liability is limited and does not cover indirect or consequential damages. Total liability is capped at fees paid in the prior 12 months.",
+    "sentiment": "neutral"
+  },
+  {
+    "prompt": "How can the agreement be terminated?",
+    "response": "Climethic may terminate access immediately for breach, and clients may terminate by providing written notice. Certain obligations survive termination.",
+    "sentiment": "neutral"
+  },
+  {
+    "prompt": "Which law governs these Terms?",
+    "response": "These Terms are governed by the laws of India, with disputes subject to courts in Haryana.",
+    "sentiment": "neutral"
+  }
+]
+ 

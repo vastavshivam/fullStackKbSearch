@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Widget Demo - Client Website</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        .hero {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        .hero h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .hero p {
+            font-size: 1.2em;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin: 60px 0;
+        }
+        .feature {
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .feature h3 {
+            margin-top: 0;
+            color: #fff;
+        }
+        .cta {
+            text-align: center;
+            margin: 60px 0;
+        }
+        .cta button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .cta button:hover {
+            background: #218838;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 80px;
+            padding-top: 40px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            opacity: 0.7;
+        }
+        .widget-note {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            max-width: 300px;
+            font-size: 0.9em;
+            z-index: 1000;
+        }
+        .widget-note .close {
+            float: right;
+            cursor: pointer;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-note" id="widget-note">
+        <span class="close" onclick="document.getElementById('widget-note').style.display='none'">&times;</span>
+        <strong>🎉 AI Widget Active!</strong><br>
+        Look for the blue chat button in the bottom-right corner. This is a live demo of the embedded AI assistant.
+    </div>
+
+    <div class="container">
+        <div class="hero">
+            <h1>🚀 TechCorp Solutions</h1>
+            <p>We build amazing software solutions for modern businesses. Our AI-powered tools help companies automate workflows and improve customer experiences.</p>
+        </div>
+
+        <div class="features">
+            <div class="feature">
+                <h3>🤖 AI Integration</h3>
+                <p>Seamlessly integrate artificial intelligence into your existing workflows with our cutting-edge tools and APIs.</p>
+            </div>
+            <div class="feature">
+                <h3>☁️ Cloud Solutions</h3>
+                <p>Scalable cloud infrastructure that grows with your business. Deploy globally with just a few clicks.</p>
+            </div>
+            <div class="feature">
+                <h3>📊 Analytics Dashboard</h3>
+                <p>Real-time insights and comprehensive analytics to help you make data-driven decisions for your business.</p>
+            </div>
+            <div class="feature">
+                <h3>🔧 Custom Development</h3>
+                <p>Tailored software solutions built specifically for your unique business requirements and challenges.</p>
+            </div>
+        </div>
+
+        <div class="cta">
+            <h2>Ready to Transform Your Business?</h2>
+            <p style="margin-bottom: 30px;">Get started with our solutions today and see the difference AI can make.</p>
+            <button onclick="alert('This is just a demo! Try the AI chat widget instead →')">Get Started Free</button>
+        </div>
+
+        <div class="footer">
+            <p>&copy; 2025 TechCorp Solutions. All rights reserved.</p>
+            <p>This is a demo website showing the AI Knowledge Base Widget in action.</p>
+        </div>
+    </div>
+
+    <!-- AI Knowledge Base Widget - This is what clients would embed -->
+<!-- AI Knowledge Base Widget -->
+<script async src="http://localhost:8004/api/widget/script/bb18312a-6dc7-41fe-9b43-9c376cde2efd"></script>
