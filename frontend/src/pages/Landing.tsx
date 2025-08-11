@@ -20,7 +20,14 @@ export default function Landing() {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated && user) {
-      const redirectPath = user.role === 'admin' ? '/dashboard' : '/user-dashboard';
+      let redirectPath = '/user-dashboard'; // default for user role
+      
+      if (user.role === 'admin') {
+        redirectPath = '/dashboard';
+      } else if (user.role === 'widget-admin') {
+        redirectPath = '/admin-dashboard';
+      }
+      
       navigate(redirectPath);
     }
   }, [isAuthenticated, user, navigate]);
@@ -192,6 +199,7 @@ export default function Landing() {
                 >
                   <option value="user">User</option>
                   <option value="admin">Admin</option>
+                  <option value="widget-admin">Widget Admin</option>
                 </select>
               </div>
               {error && <div className="modal-error">{error}</div>}

@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced AI Widget - Demo Integration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .demo-content {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .demo-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .integration-code {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+        }
+        .widget-info {
+            background: #e8f5e8;
+            border: 1px solid #4caf50;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .test-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f0f8ff;
+            border-radius: 5px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        #test-results {
+            margin-top: 15px;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-content">
+        <div class="demo-header">
+            <h1>🤖 Enhanced AI Widget Integration Demo</h1>
+            <p>This demo shows how to integrate the AI chatbot widget into your website</p>
+        </div>
+
+        <div class="widget-info">
+            <h3>📋 Current Widget Configuration</h3>
+            <div id="widget-config">Loading widget configuration...</div>
+        </div>
+
+        <h3>🔧 Integration Code</h3>
+        <p>Copy and paste this code into your website's HTML:</p>
+        
+        <div class="integration-code">
+            <pre id="integration-script">
+&lt;!-- AI Chatbot Widget Integration --&gt;
+&lt;script&gt;
+(function() {
+    // Widget Configuration
+    const WIDGET_CONFIG = {
+        clientId: 'bb18312a-6dc7-41fe-9b43-9c376cde2efd',
+        serverUrl: 'http://localhost:8004',
+        theme: 'auto',
+        position: 'bottom-right',
+        primaryColor: '#007bff',
+        title: 'AI Assistant',
+        welcomeMessage: 'Hello! How can I help you today?'
+    };
+
+    // Enhanced Widget Loader
+    function loadAIWidget() {
+        console.log('🤖 Loading Enhanced AI Widget...');
+        
+        // Create widget container
+        const widgetContainer = document.createElement('div');
+        widgetContainer.id = 'ai-widget-container';
+        widgetContainer.style.cssText = `
+            position: fixed;
+            ${WIDGET_CONFIG.position.includes('right') ? 'right: 20px;' : 'left: 20px;'}
+            ${WIDGET_CONFIG.position.includes('bottom') ? 'bottom: 20px;' : 'top: 20px;'}
+            z-index: 10000;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        `;
+        
+        // Create chat button
+        const chatButton = document.createElement('div');
+        chatButton.id = 'ai-chat-button';
+        chatButton.innerHTML = '💬';
+        chatButton.style.cssText = `
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: ${WIDGET_CONFIG.primaryColor};
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+        `;
+        
+        // Create chat window
+        const chatWindow = document.createElement('div');
+        chatWindow.id = 'ai-chat-window';
+        chatWindow.style.cssText = `
+            width: 350px;
+            height: 500px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+            display: none;
+            flex-direction: column;
+            position: absolute;
+            bottom: 80px;
+            right: 0;
+            overflow: hidden;
+        `;
+        
+        // Chat header
+        const chatHeader = document.createElement('div');
+        chatHeader.style.cssText = `
+            background: ${WIDGET_CONFIG.primaryColor};
+            color: white;
+            padding: 15px 20px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        `;
+        chatHeader.innerHTML = `
+            <span>${WIDGET_CONFIG.title}</span>
+            <span id="ai-close-button" style="cursor: pointer; font-size: 18px;">&times;</span>
+        `;
+        
+        // Chat messages area
+        const chatMessages = document.createElement('div');
+        chatMessages.id = 'ai-chat-messages';
+        chatMessages.style.cssText = `
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        `;
+        
+        // Welcome message
+        chatMessages.innerHTML = `
+            <div style="
+                background: white;
+                padding: 12px;
+                border-radius: 12px;
+                margin-bottom: 12px;
+                border-left: 3px solid ` + WIDGET_CONFIG.primaryColor + `;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            ">
+                ` + WIDGET_CONFIG.welcomeMessage + `
+            </div>
+        `;
+        
+        // Chat input area
+        const chatInputArea = document.createElement('div');
+        chatInputArea.style.cssText = `
+            padding: 15px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+        `;
+        
+        const chatInput = document.createElement('input');
+        chatInput.type = 'text';
+        chatInput.id = 'ai-chat-input';
+        chatInput.placeholder = 'Type your message...';
+        chatInput.style.cssText = `
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            outline: none;
+            font-size: 14px;
+        `;
+        
+        const sendButton = document.createElement('button');
+        sendButton.innerHTML = '➤';
+        sendButton.style.cssText = `
+            background: ${WIDGET_CONFIG.primaryColor};
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        `;
+        
+        // Assemble chat window
+        chatInputArea.appendChild(chatInput);
+        chatInputArea.appendChild(sendButton);
+        chatWindow.appendChild(chatHeader);
+        chatWindow.appendChild(chatMessages);
+        chatWindow.appendChild(chatInputArea);
+        
+        // Assemble widget
+        widgetContainer.appendChild(chatButton);
+        widgetContainer.appendChild(chatWindow);
+        document.body.appendChild(widgetContainer);
+        
+        // Event listeners
+        chatButton.addEventListener('click', toggleChat);
+        document.getElementById('ai-close-button').addEventListener('click', toggleChat);
+        sendButton.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+        
+        // Chat functionality
+        function toggleChat() {
+            const isVisible = chatWindow.style.display === 'flex';
+            chatWindow.style.display = isVisible ? 'none' : 'flex';
+            if (!isVisible) {
+                chatInput.focus();
+            }
+        }
+        
+        function sendMessage() {
+            const message = chatInput.value.trim();
+            if (!message) return;
+            
+            // Add user message
+            addMessage(message, 'user');
+            chatInput.value = '';
+            
+            // Add typing indicator
+            const typingId = 'typing-' + Date.now();
+            addMessage('AI is thinking...', 'bot', typingId);
+            
+            // Send to enhanced API
+            fetch(`${WIDGET_CONFIG.serverUrl}/api/enhanced-widget/enhanced-chat`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: message,
+                    client_id: WIDGET_CONFIG.clientId,
+                    session_id: `session_${Date.now()}`,
+                    user_id: 'anonymous',
+                    include_kb: true,
+                    max_kb_results: 3
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Remove typing indicator
+                const typingElement = document.getElementById(typingId);
+                if (typingElement) typingElement.remove();
+                
+                // Add AI response
+                let response = data.response;
+                if (data.used_knowledge_base && data.kb_sources.length > 0) {
+                    response += `\n\n📚 Sources: ${data.kb_sources.join(', ')}`;
+                }
+                addMessage(response, 'bot');
+            })
+            .catch(error => {
+                console.error('Chat error:', error);
+                // Remove typing indicator
+                const typingElement = document.getElementById(typingId);
+                if (typingElement) typingElement.remove();
+                
+                addMessage('Sorry, there was an error processing your request. Please try again.', 'bot');
+            });
+        }
+        
+        function addMessage(text, sender, id = null) {
+            const messageDiv = document.createElement('div');
+            if (id) messageDiv.id = id;
+            
+            const isUser = sender === 'user';
+            messageDiv.style.cssText = `
+                background: ${isUser ? WIDGET_CONFIG.primaryColor : 'white'};
+                color: ${isUser ? 'white' : '#333'};
+                padding: 12px 15px;
+                border-radius: 12px;
+                margin-bottom: 12px;
+                max-width: 80%;
+                word-wrap: break-word;
+                ${isUser ? 'margin-left: auto; text-align: right;' : 'margin-right: auto;'}
+                ${!isUser ? 'box-shadow: 0 2px 8px rgba(0,0,0,0.1);' : ''}
+                ${sender === 'bot' && text.includes('thinking') ? 'font-style: italic; opacity: 0.7;' : ''}
+            `;
+            
+            messageDiv.innerHTML = text.replace(/\n/g, '<br>');
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        console.log('✅ Enhanced AI Widget loaded successfully');
+    }
+    
+    // Load widget when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadAIWidget);
+    } else {
+        loadAIWidget();
+    }
+})();
+&lt;/script&gt;
+            </pre>
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 Test Widget Integration</h3>
+            <p>Test the widget functionality before integrating:</p>
+            
+            <button onclick="testWidgetConfig()">Test Widget Config</button>
+            <button onclick="testKnowledgeBase()">Test Knowledge Base</button>
+            <button onclick="testChatAPI()">Test Chat API</button>
+            <button onclick="loadWidget()">Load Widget</button>
+            
+            <div id="test-results">
+                <p>Click buttons above to run tests...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CLIENT_ID = 'bb18312a-6dc7-41fe-9b43-9c376cde2efd';
+        const SERVER_URL = 'http://localhost:8004';
+
+        // Load widget configuration on page load
+        window.addEventListener('DOMContentLoaded', loadWidgetConfig);
+
+        async function loadWidgetConfig() {
+            try {
+                const response = await fetch(`${SERVER_URL}/api/enhanced-widget/chat/test/${CLIENT_ID}`);
+                const data = await response.json();
+                
+                const configDiv = document.getElementById('widget-config');
+                if (data.error) {
+                    configDiv.innerHTML = `
+                        <div style="color: red;">
+                            <strong>❌ Error:</strong> ${data.error}
+                        </div>
+                    `;
+                } else {
+                    configDiv.innerHTML = `
+                        <div style="color: green;">
+                            <strong>✅ Widget Status:</strong><br>
+                            • Client ID: ${data.client_id}<br>
+                            • Configuration: ${data.config_exists ? 'Found' : 'Missing'}<br>
+                            • Knowledge Base: ${data.knowledge_base_documents} documents<br>
+                            • Gemini API: ${data.gemini_api_status}<br>
+                            • Last Updated: ${new Date(data.timestamp).toLocaleString()}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('widget-config').innerHTML = `
+                    <div style="color: red;">
+                        <strong>❌ Connection Error:</strong> Unable to connect to backend server.
+                    </div>
+                `;
+            }
+        }
+
+        async function testWidgetConfig() {
+            const resultDiv = document.getElementById('test-results');
+            resultDiv.innerHTML = '<p>🔄 Testing widget configuration...</p>';
+            
+            try {
+                const response = await fetch(`${SERVER_URL}/api/widget/config/${CLIENT_ID}`, {
+                    headers: {
+                        'Authorization': 'Bearer demo_token_123'
+                    }
+                });
+                
+                if (response.ok) {
+                    const config = await response.json();
+                    resultDiv.innerHTML = `
+                        <div style="color: green;">
+                            <strong>✅ Widget Configuration Test Passed</strong><br>
+                            • AI Enabled: ${config.ai_enabled ? 'Yes' : 'No'}<br>
+                            • Chat Title: ${config.chat_title}<br>
+                            • Theme: ${config.theme}<br>
+                            • Primary Color: ${config.primary_color}
+                        </div>
+                    `;
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div style="color: red;">
+                        <strong>❌ Widget Configuration Test Failed</strong><br>
+                        Error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        async function testKnowledgeBase() {
+            const resultDiv = document.getElementById('test-results');
+            resultDiv.innerHTML = '<p>🔄 Testing knowledge base...</p>';
+            
+            try {
+                const response = await fetch(`${SERVER_URL}/api/enhanced-widget/chat/test/${CLIENT_ID}`);
+                const data = await response.json();
+                
+                if (data.knowledge_base_documents > 0) {
+                    resultDiv.innerHTML = `
+                        <div style="color: green;">
+                            <strong>✅ Knowledge Base Test Passed</strong><br>
+                            • Documents: ${data.knowledge_base_documents}<br>
+                            • Preview: ${data.kb_preview.map(doc => `${doc.filename} (${doc.content_length} chars)`).join(', ')}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div style="color: orange;">
+                            <strong>⚠️ Knowledge Base Test</strong><br>
+                            No knowledge base documents found. Upload some files through the dashboard.
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div style="color: red;">
+                        <strong>❌ Knowledge Base Test Failed</strong><br>
+                        Error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        async function testChatAPI() {
+            const resultDiv = document.getElementById('test-results');
+            resultDiv.innerHTML = '<p>🔄 Testing chat API...</p>';
+            
+            try {
+                const response = await fetch(`${SERVER_URL}/api/enhanced-widget/enhanced-chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: 'Hello, this is a test message',
+                        client_id: CLIENT_ID,
+                        session_id: 'test_session',
+                        user_id: 'test_user',
+                        include_kb: true,
+                        max_kb_results: 3
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <div style="color: green;">
+                            <strong>✅ Chat API Test Passed</strong><br>
+                            • Response: "${data.response.substring(0, 100)}${data.response.length > 100 ? '...' : ''}"<br>
+                            • Used Knowledge Base: ${data.used_knowledge_base ? 'Yes' : 'No'}<br>
+                            • Sources: ${data.kb_sources.join(', ') || 'None'}<br>
+                            • Response Time: ${data.response_time_ms}ms
+                        </div>
+                    `;
+                } else {
+                    throw new Error(data.error || 'Unknown error');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div style="color: red;">
+                        <strong>❌ Chat API Test Failed</strong><br>
+                        Error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        function loadWidget() {
+            // Remove existing widget if present
+            const existingWidget = document.getElementById('ai-widget-container');
+            if (existingWidget) {
+                existingWidget.remove();
+            }
+            
+            // Load the widget script directly
+            eval(document.getElementById('integration-script').textContent.replace(/&lt;/g, '<').replace(/&gt;/g, '>'));
+            
+            document.getElementById('test-results').innerHTML = `
+                <div style="color: green;">
+                    <strong>✅ Widget Loaded</strong><br>
+                    The AI chatbot widget should now appear in the bottom-right corner of this page.
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

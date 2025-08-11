@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -11,10 +13,13 @@ from fastapi.responses import JSONResponse
 import logging
 from api import quote_parser
 
+# Load environment variables
+load_dotenv()
+
 from database import database  # Assuming you have a database module for initialization
 
 from db import *
-from api import chat, auth, files, training, websocket, widget, dashboard
+from api import chat, auth, files, training, websocket, widget, dashboard, enhanced_widget_chat
 from utils.email_notify import setup_email_notifications
 from routes import whatsapp_routes as whatsapp
 Base = declarative_base()
@@ -57,6 +62,7 @@ app.include_router(voice_router, prefix="/api/voice", tags=["Voice Assistant"])
 app.include_router(training.router, prefix="/api/training", tags=["Training"])
 app.include_router(websocket.router, tags=["WebSocket"])
 app.include_router(widget.router, prefix="/api/widget", tags=["Widget"])
+app.include_router(enhanced_widget_chat.router, prefix="/api/enhanced-widget", tags=["Enhanced Widget Chat"])
 app.include_router(dashboard.router, tags=["Dashboard"])
 app.include_router(whatsapp.router, prefix="/whatsapp")
 app.include_router(auth_router, prefix="/api/auth", tags=["Auth"])

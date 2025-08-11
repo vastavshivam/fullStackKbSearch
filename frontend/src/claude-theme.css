@@ -1,0 +1,127 @@
+/* Claude Theme CSS Variables */
+:root {
+  --background: #fff;
+  --foreground: oklch(0.52 0.13 144.17);
+  --primary: #3e2723;
+  --secondary: #f5f5f5;
+  --accent: #ff9800;
+  --border: #e0e0e0;
+  --tab-bg: #f3edea;
+  --tab-active-bg: #e0cfc2;
+  --tab-inactive-bg: #f3edea;
+  --tab-text: #3e2723;
+  --font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+  --font-size: 16px;
+  --font-weight: 400;
+}
+
+.dark {
+  --background: hsl(222.2 84% 4.9%);
+  --foreground: hsl(37.50 36.36% 95.69%);
+  --primary: rgb(46, 125, 50);
+  --secondary: #23272f;
+  --accent: #ffb300;
+  --border: #333;
+  --tab-bg: #23272f;
+  --tab-active-bg: #2e3a2f;
+  --tab-inactive-bg: #23272f;
+  --tab-text: #e0e0e0;
+  --font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+  --font-size: 16px;
+  --font-weight: 400;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-family);
+  font-size: var(--font-size);
+  font-weight: var(--font-weight);
+  transition: background 0.3s, color 0.3s;
+}
+
+.tab {
+  background: var(--tab-bg);
+  color: var(--tab-text);
+  border-bottom: 2px solid var(--border);
+  padding: 0.75em 1.5em;
+  cursor: pointer;
+  font-family: var(--font-family);
+  font-size: 1em;
+  transition: background 0.3s, color 0.3s;
+}
+
+.tab.active {
+  background: var(--tab-active-bg);
+  color: var(--primary);
+  border-bottom: 2px solid var(--primary);
+}
+
+.tab.inactive {
+  background: var(--tab-inactive-bg);
+  color: var(--tab-text);
+}
+
+.dashboard, .admin-dashboard, .user-dashboard {
+  background: var(--secondary);
+  color: var(--foreground);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(60,60,60,0.06);
+  padding: 2em;
+  margin: 2em auto;
+  max-width: 1200px;
+  font-family: var(--font-family);
+}
+
+button, .btn {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.75em 1.5em;
+  font-family: var(--font-family);
+  font-size: 1em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+button:hover, .btn:hover {
+  background: var(--accent);
+  color: var(--primary);
+}
+
+input, textarea, select {
+  background: var(--secondary);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.5em 1em;
+  font-family: var(--font-family);
+  font-size: 1em;
+  margin-bottom: 1em;
+  transition: border 0.2s;
+}
+
+input:focus, textarea:focus, select:focus {
+  border: 1.5px solid var(--primary);
+  outline: none;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--primary);
+  font-family: var(--font-family);
+  font-weight: 600;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+a:hover {
+  color: var(--primary);
+}
+
+/* Add more as needed for all UI elements */

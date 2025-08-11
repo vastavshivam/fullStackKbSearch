@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useWidgetConfig, WidgetFont, WidgetPosition } from '../components/WidgetConfigContext';
+import { useAuth } from '../contexts/AuthContext';
 import { uploadFile } from '../services/api';
 import './UserDashboard.css'; // Import the CSS file
 
@@ -31,6 +32,7 @@ interface WidgetConfig {
 
 const UserDashboard: React.FC = () => {
   const navigate = useNavigate();
+  const { logout } = useAuth(); // Get logout function from AuthContext
   const [file, setFile] = useState<File | null>(null);
   const { config, setConfig } = useWidgetConfig();
   const [activeTab, setActiveTab] = useState(0);
@@ -108,11 +110,8 @@ const UserDashboard: React.FC = () => {
   };
 
   const handleLogout = () => {
-    // Clear any authentication tokens or user data
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("userRole");
-    localStorage.removeItem("userData");
-    
+    // Use AuthContext logout function to properly clear authentication state
+    logout();
     // Navigate to login page
     navigate("/");
   };

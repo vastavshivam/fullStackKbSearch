@@ -17,9 +17,12 @@ import jwt
 
 # Database and services
 from services.simple_widget_service import widget_service
+from services.rag import generate_response_with_rag
+
+# Force reload marker - updated
 
 # Configure Gemini AI
-GEMINI_API_KEY = "AIzaSyD1T3nf1zMMTRU6a6pRlRrOukV4Bgbcmp0"
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
     print("✅ Gemini AI configured successfully for widget")
@@ -77,9 +80,12 @@ class WidgetConfig(BaseModel):
     chat_title: str = "AI Assistant"
     welcome_message: str = "Hello! How can I help you today?"
     knowledge_base_ids: List[str] = []
+    knowledge_base_priority: bool = True  # Enable knowledge base by default
     allowed_domains: List[str] = []
     analytics_enabled: bool = True
     is_active: bool = True
+    ai_enabled: bool = True  # Enable AI features
+    fallback_response: str = "I'm sorry, I'm currently not available. Please try again later."
     rate_limit: int = 100  # messages per hour
     max_file_size: int = 10  # MB
     enabled_features: List[str] = ["chat", "voice", "file_upload", "feedback"]
@@ -371,6 +377,15 @@ async def create_or_update_widget_config(config: WidgetConfig, user_email: str =
             "data": config.dict()
         })
         
+        # Broadcast update to dashboard listeners
+        await broadcast_to_client("dashboard", {
+            "type": "widget_update",
+            "data": {
+                "client_id": config.client_id,
+                "config": config.dict()
+            }
+        })
+        
         return {"message": "Widget configuration saved to database", "client_id": config.client_id, "user_email": user_email}
     else:
         raise HTTPException(status_code=500, detail="Failed to save widget configuration")
@@ -461,6 +476,219 @@ async def toggle_widget_status(client_id: str, toggle_request: ToggleRequest):
     }
 
 
+@router.post("/chat/kb-only/{client_id}")
+async def chat_knowledge_base_only(client_id: str, request: Request):
+    """Knowledge base only chat endpoint - no external API calls"""
+    
+    # Helper function to extract key terms from questions
+    def extract_key_term(question):
+        """Extract main topic from question"""
+        question_words = {'what', 'how', 'why', 'where', 'when', 'who', 'is', 'are', 'does', 'do', 'can', 'will'}
+        words = question.lower().split()
+        key_words = [word for word in words if word not in question_words and len(word) > 3]
+        return ' '.join(key_words[:3]) if key_words else 'this topic'
+    
+    # Try to parse message from different sources
+    message = ""
+    try:
+        # Try JSON body first
+        data = await request.json()
+        message = data.get("message", "")
+    except Exception:
+        try:
+            # Fallback: try form data
+            form = await request.form()
+            message = form.get("message", "")
+        except Exception:
+            # Last fallback: try query parameters
+            message = request.query_params.get("message", "")
+    
+    if not message:
+        return {"response": "Please provide a message to search the knowledge base."}
+    
+    try:
+        from models.vector_store import get_top_k_docs
+        docs = await get_top_k_docs(message, k=5, client_id=client_id)
+        
+        if docs:
+            # Analyze the question to determine response type
+            question_lower = message.lower()
+            
+            # Determine question type for better formatting
+            is_what_question = any(word in question_lower for word in ['what', 'define', 'definition', 'meaning'])
+            is_how_question = any(word in question_lower for word in ['how', 'process', 'steps', 'procedure'])
+            is_why_question = any(word in question_lower for word in ['why', 'reason', 'because', 'purpose'])
+            is_where_question = any(word in question_lower for word in ['where', 'location', 'contact'])
+            is_when_question = any(word in question_lower for word in ['when', 'time', 'schedule'])
+            
+            # Filter and rank documents by relevance
+            relevant_docs = []
+            for doc in docs:
+                content = doc.get('content', '').lower()
+                source = doc.get('source', '')
+                
+                # Calculate relevance score based on keyword overlap
+                question_words = set(question_lower.split())
+                content_words = set(content.split())
+                relevance_score = len(question_words.intersection(content_words))
+                
+                # Boost score for exact matches
+                for word in question_words:
+                    if len(word) > 3 and word in content:
+                        relevance_score += 2
+                
+                if relevance_score > 0:
+                    relevant_docs.append({
+                        'doc': doc,
+                        'score': relevance_score,
+                        'source': source
+                    })
+            
+            # Sort by relevance score
+            relevant_docs.sort(key=lambda x: x['score'], reverse=True)
+            
+            if relevant_docs:
+                # Format response based on question type
+                if is_what_question:
+                    # Definition-style response
+                    best_doc = relevant_docs[0]['doc']
+                    content = best_doc.get('content', '')[:300]
+                    source = relevant_docs[0]['source'].replace('_', ' ').replace('.pdf', '').title()
+                    
+                    response = f"**{extract_key_term(message)} Definition:**\n\n"
+                    response += f"{content}\n\n"
+                    if len(relevant_docs) > 1:
+                        additional = relevant_docs[1]['doc'].get('content', '')[:200]
+                        response += f"**Additional Information:**\n{additional}\n\n"
+                    response += f"*Source: {source}*"
+                    
+                elif is_how_question:
+                    # Process/procedure response
+                    response = f"**How to {extract_key_term(message)}:**\n\n"
+                    for i, doc_info in enumerate(relevant_docs[:2], 1):
+                        content = doc_info['doc'].get('content', '')[:250]
+                        source = doc_info['source'].replace('_', ' ').replace('.pdf', '').title()
+                        response += f"**Step {i}:** {content}\n\n"
+                    response += "*Follow these guidelines from our knowledge base*"
+                    
+                elif is_why_question:
+                    # Explanation response
+                    response = f"**Why {extract_key_term(message)}:**\n\n"
+                    best_doc = relevant_docs[0]['doc']
+                    content = best_doc.get('content', '')[:350]
+                    response += f"{content}\n\n"
+                    response += "**Key Benefits:**\n"
+                    if len(relevant_docs) > 1:
+                        additional = relevant_docs[1]['doc'].get('content', '')[:150]
+                        response += f"• {additional}\n\n"
+                    response += "*This explains the importance and rationale*"
+                    
+                elif is_where_question:
+                    # Contact/location response
+                    response = "**Contact Information:**\n\n"
+                    for doc_info in relevant_docs[:2]:
+                        content = doc_info['doc'].get('content', '')
+                        if any(contact_word in content.lower() for contact_word in ['email', 'contact', 'phone', 'address']):
+                            response += f"{content[:200]}\n\n"
+                    response += "*Contact us for more information*"
+                    
+                else:
+                    # General response with better structure
+                    key_term = extract_key_term(message)
+                    response = f"**About {key_term}:**\n\n"
+                    
+                    best_doc = relevant_docs[0]['doc']
+                    content = best_doc.get('content', '')[:300]
+                    source = relevant_docs[0]['source'].replace('_', ' ').replace('.pdf', '').title()
+                    
+                    response += f"**Overview:**\n{content}\n\n"
+                    
+                    if len(relevant_docs) > 1:
+                        additional = relevant_docs[1]['doc'].get('content', '')[:200]
+                        response += f"**Additional Details:**\n{additional}\n\n"
+                    
+                    response += f"*Source: {source}*"
+                
+                return {
+                    "response": response,
+                    "metadata": {
+                        "used_knowledge_base": True,
+                        "knowledge_base_documents": len(relevant_docs),
+                        "question_type": "definition" if is_what_question else "process" if is_how_question else "explanation" if is_why_question else "contact" if is_where_question else "general",
+                        "relevance_scores": [doc['score'] for doc in relevant_docs[:3]]
+                    }
+                }
+            else:
+                return {
+                    "response": "I couldn't find specific information about your question in our knowledge base. Could you try rephrasing your question or asking about Climethic's services, ESG solutions, or sustainability consulting?",
+                    "metadata": {
+                        "used_knowledge_base": False,
+                        "knowledge_base_documents": len(docs),
+                        "suggestion": "Try asking about Climethic services, ESG, sustainability, or environmental consulting"
+                    }
+                }
+        else:
+            return {
+                "response": "I don't have any relevant information in the knowledge base for your question. Please try asking about our services or contact us directly.",
+                "metadata": {
+                    "used_knowledge_base": False,
+                    "knowledge_base_documents": 0
+                }
+            }
+            
+    except Exception as e:
+        logger.error(f"Knowledge base search error: {e}")
+        return {
+            "response": "I'm having trouble accessing the knowledge base right now. Please try again or contact support.",
+            "metadata": {
+                "error": True,
+                "error_type": "knowledge_base_error",
+                "source": "knowledge_base_only"
+            }
+        }
+
+
+# --- TEST ENDPOINT FOR KNOWLEDGE BASE ---
+
+@router.get("/test-kb/{client_id}")
+async def test_knowledge_base(client_id: str, message: str = "what is climethic"):
+    """Test endpoint to verify knowledge base access"""
+    try:
+        from models.vector_store import get_top_k_docs
+        docs = await get_top_k_docs(message, k=3, client_id=client_id)
+        
+        if docs:
+            response_parts = []
+            response_parts.append(f"✅ Knowledge Base Test Results:\n")
+            response_parts.append(f"Query: '{message}'")
+            response_parts.append(f"Found {len(docs)} documents")
+            
+            for i, doc in enumerate(docs[:2], 1):
+                content = doc.get('content', '')[:200]
+                source = doc.get('source', 'Document')
+                response_parts.append(f"\n{i}. Source: {source}")
+                response_parts.append(f"   Content: {content}...")
+            
+            return {
+                "status": "success",
+                "response": "\n".join(response_parts),
+                "documents_found": len(docs)
+            }
+        else:
+            return {
+                "status": "no_results", 
+                "response": "No documents found in knowledge base",
+                "documents_found": 0
+            }
+            
+    except Exception as e:
+        return {
+            "status": "error",
+            "response": f"Error accessing knowledge base: {str(e)}",
+            "documents_found": 0
+        }
+
+
 # --- ADVANCED GEMINI AI ENDPOINT ---
 
 @router.post("/chat/gemini/{client_id}")
@@ -483,6 +711,53 @@ async def chat_gemini(client_id: str, message: str = "", voice: Optional[UploadF
         return {"response": "AI service not configured. Please contact administrator."}
     
     try:
+        # Use RAG service for knowledge base search if message is provided
+        if message and config.knowledge_base_priority:
+            try:
+                # Try to get response from RAG service with vector search
+                rag_response = await generate_response_with_rag(message, client_id)
+                
+                # If RAG service returns a meaningful response, use it
+                if rag_response and "I don't have access to any knowledge base files" not in rag_response:
+                    return {
+                        "response": rag_response,
+                        "metadata": {
+                            "used_knowledge_base": True,
+                            "knowledge_base_documents": "vector_store",
+                            "source": "rag_service"
+                        }
+                    }
+            except Exception as rag_error:
+                logger.warning(f"RAG service error: {rag_error}")
+                # Try direct vector search as fallback
+                try:
+                    from models.vector_store import get_top_k_docs
+                    docs = await get_top_k_docs(message, k=3, client_id=client_id)
+                    if docs:
+                        # Create a response from the documents
+                        response_parts = []
+                        response_parts.append(f"Based on the knowledge base documents:\n")
+                        for i, doc in enumerate(docs[:2], 1):
+                            content = doc.get('content', '')[:300]
+                            source = doc.get('source', 'Document')
+                            response_parts.append(f"{i}. {content}... (Source: {source})")
+                        
+                        direct_response = "\n\n".join(response_parts)
+                        direct_response += "\n\n(Note: Showing direct knowledge base content)"
+                        
+                        return {
+                            "response": direct_response,
+                            "metadata": {
+                                "used_knowledge_base": True,
+                                "knowledge_base_documents": len(docs),
+                                "source": "direct_vector_search"
+                            }
+                        }
+                except Exception as vector_error:
+                    logger.warning(f"Vector search fallback failed: {vector_error}")
+                    # Continue to traditional fallback
+        
+        # Fallback to traditional approach if RAG doesn't work
         # Get client's knowledge base from database
         db_kb_documents = widget_service.get_knowledge_base_documents(client_id)
         # Also check in-memory for backward compatibility
@@ -1108,7 +1383,7 @@ async def get_widget_script(client_id: str, request: Request):
         if (imageFile) formData.append('image', imageFile);
         
         // Call AI endpoint
-        fetch(serverUrl + '/api/widget/chat/gemini/' + clientId, {{
+        fetch(serverUrl + '/api/widget/chat/kb-only/' + clientId, {{
             method: 'POST',
             body: formData
         }})

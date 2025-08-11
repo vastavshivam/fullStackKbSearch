@@ -54,26 +54,9 @@ const WidgetDashboard = () => {
     const newTheme = !isLightMode;
     setIsLightMode(newTheme);
     
-    // Show notification
+    // Show notification without animation
     setShowThemeNotification(true);
     setTimeout(() => setShowThemeNotification(false), 2000);
-    
-    // Add animation effect to toggle button
-    if (themeToggleRef.current) {
-      themeToggleRef.current.classList.add('toggle-active');
-      setTimeout(() => {
-        themeToggleRef.current?.classList.remove('toggle-active');
-      }, 800);
-    }
-
-    // Add theme switch effect to entire dashboard
-    const widgetDashboard = document.querySelector('.widget-dashboard');
-    if (widgetDashboard) {
-      widgetDashboard.style.transform = 'scale(0.98)';
-      setTimeout(() => {
-        widgetDashboard.style.transform = 'scale(1)';
-      }, 200);
-    }
   };
 
   // Helper function for authenticated API calls
@@ -110,6 +93,15 @@ const WidgetDashboard = () => {
       
       if (message.type === 'analytics_update') {
         updateAnalytics(message.data);
+      } else if (message.type === 'config_update') {
+        // Handle config updates - refresh widgets list and selected widget
+        fetchWidgets();
+        if (selectedWidget && message.data.client_id === selectedWidget.client_id) {
+          setSelectedWidget({ ...selectedWidget, ...message.data });
+        }
+      } else if (message.type === 'widget_update') {
+        // Handle any widget updates
+        fetchWidgets();
       }
     };
     
@@ -269,15 +261,6 @@ const WidgetDashboard = () => {
         </div>
       )}
 
-      <header className="dashboard-header">
-        <h1>🔧 Widget Dashboard</h1>
-        <div className="connection-status">
-          <span className={`status-indicator ${isConnected ? 'connected' : 'disconnected'}`}>
-            {isConnected ? '🟢 Live' : '🔴 Disconnected'}
-          </span>
-        </div>
-      </header>
-
       <div className="dashboard-content">
         <aside className="sidebar">
           <div className="widget-list">
@@ -386,6 +369,7 @@ const WidgetDetailsView = ({ widget, analytics, onUpdateConfig, onUploadKB, apiB
 
       <div className="tab-content">
         <ActiveComponent 
+          key={`${activeTab}-${JSON.stringify(config).length}`}
           config={config}
           analytics={analytics}
           onConfigChange={handleConfigChange}
@@ -910,12 +894,15 @@ const ConfigTab = ({ config, onConfigChange }) => {
         )}
 
         {activeSection === 'ai' && (
-          <div className="config-section">
-            <h3>🤖 AI Configuration</h3>
+          <div className="config-section ai-config-enhanced">
+            <div className="ai-config-header">
+              <h3>🤖 AI Configuration</h3>
+              <p>Configure advanced AI behavior and capabilities for your widget</p>
+            </div>
             
             {/* Core AI Settings */}
             <div className="config-group">
-              <h4>Core AI Settings</h4>
+              <h4>🧠 Core AI Settings</h4>
               
               <div className="config-item">
                 <label>AI Model</label>
@@ -923,11 +910,14 @@ const ConfigTab = ({ config, onConfigChange }) => {
                   value={config.ai_model || 'gemini-1.5-flash'} 
                   onChange={(e) => onConfigChange('ai_model', e.target.value)}
                 >
-                  <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
-                  <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
-                  <option value="gpt-4">GPT-4</option>
-                  <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                  <option value="gemini-1.5-flash">Gemini 1.5 Flash (Fast)</option>
+                  <option value="gemini-1.5-pro">Gemini 1.5 Pro (Advanced)</option>
+                  <option value="gpt-4">GPT-4 (OpenAI)</option>
+                  <option value="gpt-3.5-turbo">GPT-3.5 Turbo (OpenAI)</option>
+                  <option value="claude-3-opus">Claude 3 Opus (Anthropic)</option>
+                  <option value="claude-3-sonnet">Claude 3 Sonnet (Anthropic)</option>
                 </select>
+                <small>Choose the AI model that best fits your needs and budget</small>
               </div>
 
               <div className="config-item">
@@ -936,8 +926,9 @@ const ConfigTab = ({ config, onConfigChange }) => {
                   type="text"
                   value={config.ai_personality || ''}
                   onChange={(e) => onConfigChange('ai_personality', e.target.value)}
-                  placeholder="e.g., Professional, Friendly, Technical, Casual"
+                  placeholder="e.g., Professional, Friendly, Technical, Casual, Expert"
                 />
+                <small>Define the character and style of your AI assistant</small>
               </div>
 
               <div className="config-item">
@@ -945,9 +936,10 @@ const ConfigTab = ({ config, onConfigChange }) => {
                 <textarea
                   value={config.system_prompt || ''}
                   onChange={(e) => onConfigChange('system_prompt', e.target.value)}
-                  placeholder="Define how the AI should behave and respond to users..."
+                  placeholder="Define how the AI should behave, its role, and core instructions..."
                   rows={4}
                 />
+                <small>The fundamental instructions that shape AI behavior</small>
               </div>
 
               <div className="config-item">
@@ -955,98 +947,34 @@ const ConfigTab = ({ config, onConfigChange }) => {
                 <textarea
                   value={config.custom_instructions || ''}
                   onChange={(e) => onConfigChange('custom_instructions', e.target.value)}
-                  placeholder="Additional specific instructions for the AI..."
+                  placeholder="Additional specific instructions, constraints, or guidelines..."
                   rows={3}
                 />
-              </div>
-            </div>
-
-            {/* Voice Settings */}
-            <div className="config-group">
-              <h4>Voice & Speech</h4>
-              
-              <div className="config-item">
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={config.voice_enabled || false}
-                    onChange={(e) => onConfigChange('voice_enabled', e.target.checked)}
-                  />
-                  Enable Voice Recording
-                </label>
+                <small>Specific instructions tailored to your use case</small>
               </div>
 
               <div className="config-item">
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={config.auto_send_voice || false}
-                    onChange={(e) => onConfigChange('auto_send_voice', e.target.checked)}
-                  />
-                  Auto-send Voice Messages
-                </label>
-              </div>
-
-              <div className="config-item">
-                <label>Voice Transcription Language</label>
+                <label>Knowledge Domain Focus</label>
                 <select 
-                  value={config.voice_transcription_language || 'en-US'} 
-                  onChange={(e) => onConfigChange('voice_transcription_language', e.target.value)}
+                  value={config.knowledge_domain || 'general'} 
+                  onChange={(e) => onConfigChange('knowledge_domain', e.target.value)}
                 >
-                  <option value="en-US">English (US)</option>
-                  <option value="en-GB">English (UK)</option>
-                  <option value="es-ES">Spanish</option>
-                  <option value="fr-FR">French</option>
-                  <option value="de-DE">German</option>
-                  <option value="it-IT">Italian</option>
-                  <option value="pt-BR">Portuguese (Brazil)</option>
-                  <option value="ja-JP">Japanese</option>
-                  <option value="ko-KR">Korean</option>
-                  <option value="zh-CN">Chinese (Simplified)</option>
+                  <option value="general">General Knowledge</option>
+                  <option value="technical">Technical/IT</option>
+                  <option value="medical">Medical/Healthcare</option>
+                  <option value="legal">Legal</option>
+                  <option value="finance">Finance/Banking</option>
+                  <option value="education">Education</option>
+                  <option value="retail">Retail/E-commerce</option>
+                  <option value="support">Customer Support</option>
                 </select>
+                <small>Optimize AI responses for specific domain expertise</small>
               </div>
             </div>
 
-            {/* Image Analysis */}
+            {/* Advanced Response Control */}
             <div className="config-group">
-              <h4>Image Analysis</h4>
-              
-              <div className="config-item">
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={config.image_analysis_enabled || false}
-                    onChange={(e) => onConfigChange('image_analysis_enabled', e.target.checked)}
-                  />
-                  Enable Image Analysis
-                </label>
-              </div>
-
-              <div className="config-item">
-                <label>Image Analysis Instructions</label>
-                <textarea
-                  value={config.image_analysis_instructions || ''}
-                  onChange={(e) => onConfigChange('image_analysis_instructions', e.target.value)}
-                  placeholder="Instructions for how to analyze images..."
-                  rows={2}
-                />
-              </div>
-
-              <div className="config-item">
-                <label>Max Image Size (MB)</label>
-                <input
-                  type="number"
-                  value={config.max_image_size || 5}
-                  onChange={(e) => onConfigChange('max_image_size', parseInt(e.target.value))}
-                  min={1}
-                  max={20}
-                />
-              </div>
-            </div>
-
-            {/* Response Settings */}
-            <div className="config-group">
-              <h4>Response Behavior</h4>
+              <h4>⚙️ Response Control & Quality</h4>
               
               <div className="config-item">
                 <label>Temperature ({config.temperature || 0.7})</label>
@@ -1058,7 +986,46 @@ const ConfigTab = ({ config, onConfigChange }) => {
                   value={config.temperature || 0.7}
                   onChange={(e) => onConfigChange('temperature', parseFloat(e.target.value))}
                 />
-                <small>Controls randomness in responses (0 = predictable, 1 = creative)</small>
+                <small>Controls creativity: 0 = predictable and focused, 1 = creative and varied</small>
+              </div>
+
+              <div className="config-item">
+                <label>Top P ({config.top_p || 0.9})</label>
+                <input
+                  type="range"
+                  min="0.1"
+                  max="1"
+                  step="0.1"
+                  value={config.top_p || 0.9}
+                  onChange={(e) => onConfigChange('top_p', parseFloat(e.target.value))}
+                />
+                <small>Nucleus sampling: controls diversity of word choices</small>
+              </div>
+
+              <div className="config-item">
+                <label>Frequency Penalty ({config.frequency_penalty || 0})</label>
+                <input
+                  type="range"
+                  min="-2"
+                  max="2"
+                  step="0.1"
+                  value={config.frequency_penalty || 0}
+                  onChange={(e) => onConfigChange('frequency_penalty', parseFloat(e.target.value))}
+                />
+                <small>Reduces repetition: positive values discourage repeated phrases</small>
+              </div>
+
+              <div className="config-item">
+                <label>Presence Penalty ({config.presence_penalty || 0})</label>
+                <input
+                  type="range"
+                  min="-2"
+                  max="2"
+                  step="0.1"
+                  value={config.presence_penalty || 0}
+                  onChange={(e) => onConfigChange('presence_penalty', parseFloat(e.target.value))}
+                />
+                <small>Encourages new topics: positive values promote topic diversity</small>
               </div>
 
               <div className="config-item">
@@ -1068,8 +1035,9 @@ const ConfigTab = ({ config, onConfigChange }) => {
                   value={config.max_response_length || 500}
                   onChange={(e) => onConfigChange('max_response_length', parseInt(e.target.value))}
                   min={50}
-                  max={2000}
+                  max={4000}
                 />
+                <small>Maximum number of words in AI responses</small>
               </div>
 
               <div className="config-item">
@@ -1078,15 +1046,39 @@ const ConfigTab = ({ config, onConfigChange }) => {
                   value={config.response_tone || 'balanced'} 
                   onChange={(e) => onConfigChange('response_tone', e.target.value)}
                 >
-                  <option value="professional">Professional</option>
-                  <option value="friendly">Friendly</option>
-                  <option value="casual">Casual</option>
-                  <option value="technical">Technical</option>
-                  <option value="empathetic">Empathetic</option>
-                  <option value="balanced">Balanced</option>
+                  <option value="professional">Professional & Formal</option>
+                  <option value="friendly">Friendly & Approachable</option>
+                  <option value="casual">Casual & Conversational</option>
+                  <option value="technical">Technical & Precise</option>
+                  <option value="empathetic">Empathetic & Supportive</option>
+                  <option value="authoritative">Authoritative & Confident</option>
+                  <option value="educational">Educational & Explanatory</option>
+                  <option value="balanced">Balanced & Adaptive</option>
                 </select>
+                <small>The overall tone and style of AI responses</small>
               </div>
 
+              <div className="config-item">
+                <label>Response Format Preference</label>
+                <select 
+                  value={config.response_format || 'adaptive'} 
+                  onChange={(e) => onConfigChange('response_format', e.target.value)}
+                >
+                  <option value="adaptive">Adaptive (Auto-choose)</option>
+                  <option value="bullet_points">Bullet Points</option>
+                  <option value="numbered_lists">Numbered Lists</option>
+                  <option value="paragraphs">Paragraphs</option>
+                  <option value="structured">Structured (Headers + Content)</option>
+                  <option value="conversational">Conversational Flow</option>
+                </select>
+                <small>Preferred structure for AI responses</small>
+              </div>
+            </div>
+
+            {/* Knowledge Base & Sources */}
+            <div className="config-group">
+              <h4>📚 Knowledge Base Integration</h4>
+              
               <div className="config-item">
                 <label>
                   <input
@@ -1096,23 +1088,64 @@ const ConfigTab = ({ config, onConfigChange }) => {
                   />
                   Include Knowledge Base Sources
                 </label>
+                <small>Show references to source documents in responses</small>
+              </div>
+
+              <div className="config-item">
+                <label>Source Citation Style</label>
+                <select 
+                  value={config.citation_style || 'inline'} 
+                  onChange={(e) => onConfigChange('citation_style', e.target.value)}
+                >
+                  <option value="inline">Inline Citations [1]</option>
+                  <option value="footnote">Footnote Style</option>
+                  <option value="parenthetical">(Source Name)</option>
+                  <option value="link_only">Links Only</option>
+                  <option value="none">No Citations</option>
+                </select>
+                <small>How to display source references in responses</small>
+              </div>
+
+              <div className="config-item">
+                <label>Knowledge Confidence Threshold ({config.confidence_threshold || 0.7})</label>
+                <input
+                  type="range"
+                  min="0.3"
+                  max="1"
+                  step="0.1"
+                  value={config.confidence_threshold || 0.7}
+                  onChange={(e) => onConfigChange('confidence_threshold', parseFloat(e.target.value))}
+                />
+                <small>Minimum confidence required to use knowledge base information</small>
               </div>
 
               <div className="config-item">
                 <label>
                   <input
                     type="checkbox"
-                    checked={config.enable_follow_up_questions || false}
-                    onChange={(e) => onConfigChange('enable_follow_up_questions', e.target.checked)}
+                    checked={config.prefer_recent_content || false}
+                    onChange={(e) => onConfigChange('prefer_recent_content', e.target.checked)}
                   />
-                  Suggest Follow-up Questions
+                  Prefer Recent Content
                 </label>
+                <small>Prioritize newer documents in knowledge base searches</small>
+              </div>
+
+              <div className="config-item">
+                <label>Fallback Response</label>
+                <textarea
+                  value={config.fallback_response || ''}
+                  onChange={(e) => onConfigChange('fallback_response', e.target.value)}
+                  placeholder="Response when AI cannot find relevant information..."
+                  rows={2}
+                />
+                <small>Message shown when no relevant knowledge is found</small>
               </div>
             </div>
 
-            {/* Conversation Settings */}
+            {/* Conversation Management */}
             <div className="config-group">
-              <h4>Conversation Management</h4>
+              <h4>💬 Conversation Management</h4>
               
               <div className="config-item">
                 <label>Context Memory Length</label>
@@ -1121,9 +1154,9 @@ const ConfigTab = ({ config, onConfigChange }) => {
                   value={config.context_memory_length || 10}
                   onChange={(e) => onConfigChange('context_memory_length', parseInt(e.target.value))}
                   min={1}
-                  max={50}
+                  max={100}
                 />
-                <small>Number of previous messages to remember</small>
+                <small>Number of previous messages to remember (affects context understanding)</small>
               </div>
 
               <div className="config-item">
@@ -1135,22 +1168,216 @@ const ConfigTab = ({ config, onConfigChange }) => {
                   />
                   Show Conversation Starters
                 </label>
+                <small>Display suggested questions to help users begin conversations</small>
               </div>
 
               <div className="config-item">
-                <label>Fallback Response</label>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={config.enable_follow_up_questions || false}
+                    onChange={(e) => onConfigChange('enable_follow_up_questions', e.target.checked)}
+                  />
+                  Suggest Follow-up Questions
+                </label>
+                <small>AI will suggest related questions to continue the conversation</small>
+              </div>
+
+              <div className="config-item">
+                <label>Conversation Timeout (minutes)</label>
+                <input
+                  type="number"
+                  value={config.conversation_timeout || 30}
+                  onChange={(e) => onConfigChange('conversation_timeout', parseInt(e.target.value))}
+                  min={5}
+                  max={1440}
+                />
+                <small>Auto-reset conversation context after inactivity</small>
+              </div>
+
+              <div className="config-item">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={config.enable_context_awareness || true}
+                    onChange={(e) => onConfigChange('enable_context_awareness', e.target.checked)}
+                  />
+                  Enable Context Awareness
+                </label>
+                <small>AI remembers and references previous parts of the conversation</small>
+              </div>
+
+              <div className="config-item">
+                <label>Session Greeting Message</label>
                 <textarea
-                  value={config.fallback_response || ''}
-                  onChange={(e) => onConfigChange('fallback_response', e.target.value)}
-                  placeholder="Response when AI cannot answer a question..."
+                  value={config.greeting_message || ''}
+                  onChange={(e) => onConfigChange('greeting_message', e.target.value)}
+                  placeholder="Welcome message shown when users start a new conversation..."
                   rows={2}
                 />
+                <small>Custom greeting displayed at the start of new conversations</small>
+              </div>
+            </div>
+
+            {/* Voice & Speech Settings */}
+            <div className="config-group">
+              <h4>🎤 Voice & Speech Features</h4>
+              
+              <div className="config-item">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={config.voice_enabled || false}
+                    onChange={(e) => onConfigChange('voice_enabled', e.target.checked)}
+                  />
+                  Enable Voice Recording
+                </label>
+                <small>Allow users to send voice messages</small>
+              </div>
+
+              <div className="config-item">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={config.auto_send_voice || false}
+                    onChange={(e) => onConfigChange('auto_send_voice', e.target.checked)}
+                  />
+                  Auto-send Voice Messages
+                </label>
+                <small>Automatically send voice messages when recording stops</small>
+              </div>
+
+              <div className="config-item">
+                <label>Voice Transcription Language</label>
+                <select 
+                  value={config.voice_transcription_language || 'en-US'} 
+                  onChange={(e) => onConfigChange('voice_transcription_language', e.target.value)}
+                >
+                  <option value="en-US">English (US)</option>
+                  <option value="en-GB">English (UK)</option>
+                  <option value="es-ES">Spanish (Spain)</option>
+                  <option value="es-MX">Spanish (Mexico)</option>
+                  <option value="fr-FR">French</option>
+                  <option value="de-DE">German</option>
+                  <option value="it-IT">Italian</option>
+                  <option value="pt-BR">Portuguese (Brazil)</option>
+                  <option value="pt-PT">Portuguese (Portugal)</option>
+                  <option value="ja-JP">Japanese</option>
+                  <option value="ko-KR">Korean</option>
+                  <option value="zh-CN">Chinese (Simplified)</option>
+                  <option value="zh-TW">Chinese (Traditional)</option>
+                  <option value="ar-SA">Arabic</option>
+                  <option value="hi-IN">Hindi</option>
+                  <option value="ru-RU">Russian</option>
+                </select>
+                <small>Language for voice-to-text transcription</small>
+              </div>
+
+              <div className="config-item">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={config.enable_text_to_speech || false}
+                    onChange={(e) => onConfigChange('enable_text_to_speech', e.target.checked)}
+                  />
+                  Enable Text-to-Speech
+                </label>
+                <small>AI can read responses aloud to users</small>
+              </div>
+
+              <div className="config-item">
+                <label>Voice Speed ({config.voice_speed || 1.0}x)</label>
+                <input
+                  type="range"
+                  min="0.5"
+                  max="2.0"
+                  step="0.1"
+                  value={config.voice_speed || 1.0}
+                  onChange={(e) => onConfigChange('voice_speed', parseFloat(e.target.value))}
+                />
+                <small>Speed of text-to-speech playback</small>
+              </div>
+            </div>
+
+            {/* Image Analysis */}
+            <div className="config-group">
+              <h4>🖼️ Image Analysis & Vision</h4>
+              
+              <div className="config-item">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={config.image_analysis_enabled || false}
+                    onChange={(e) => onConfigChange('image_analysis_enabled', e.target.checked)}
+                  />
+                  Enable Image Analysis
+                </label>
+                <small>Allow AI to analyze and understand uploaded images</small>
+              </div>
+
+              <div className="config-item">
+                <label>Image Analysis Instructions</label>
+                <textarea
+                  value={config.image_analysis_instructions || ''}
+                  onChange={(e) => onConfigChange('image_analysis_instructions', e.target.value)}
+                  placeholder="Specific instructions for analyzing images (e.g., focus on text, objects, charts)..."
+                  rows={2}
+                />
+                <small>Guide how the AI should analyze images</small>
+              </div>
+
+              <div className="config-item">
+                <label>Max Image Size (MB)</label>
+                <input
+                  type="number"
+                  value={config.max_image_size || 5}
+                  onChange={(e) => onConfigChange('max_image_size', parseInt(e.target.value))}
+                  min={1}
+                  max={50}
+                />
+                <small>Maximum file size for uploaded images</small>
+              </div>
+
+              <div className="config-item">
+                <label>Supported Image Formats</label>
+                <div className="checkbox-group">
+                  {['jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'].map(format => (
+                    <label key={format} className="checkbox-item">
+                      <input
+                        type="checkbox"
+                        checked={(config.supported_image_formats || ['jpeg', 'png', 'gif']).includes(format)}
+                        onChange={(e) => {
+                          const formats = config.supported_image_formats || ['jpeg', 'png', 'gif'];
+                          if (e.target.checked) {
+                            onConfigChange('supported_image_formats', [...formats, format]);
+                          } else {
+                            onConfigChange('supported_image_formats', formats.filter(f => f !== format));
+                          }
+                        }}
+                      />
+                      {format.toUpperCase()}
+                    </label>
+                  ))}
+                </div>
+                <small>Which image formats to accept for analysis</small>
+              </div>
+
+              <div className="config-item">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={config.enable_ocr || false}
+                    onChange={(e) => onConfigChange('enable_ocr', e.target.checked)}
+                  />
+                  Enable OCR (Text Recognition)
+                </label>
+                <small>Extract and process text from images</small>
               </div>
             </div>
 
             {/* Advanced AI Features */}
             <div className="config-group">
-              <h4>Advanced Features</h4>
+              <h4>🚀 Advanced AI Features</h4>
               
               <div className="config-item">
                 <label>
@@ -1161,6 +1388,7 @@ const ConfigTab = ({ config, onConfigChange }) => {
                   />
                   Enable Sentiment Analysis
                 </label>
+                <small>Analyze user emotions and adapt responses accordingly</small>
               </div>
 
               <div className="config-item">
@@ -1172,6 +1400,7 @@ const ConfigTab = ({ config, onConfigChange }) => {
                   />
                   Enable Intent Detection
                 </label>
+                <small>Automatically detect user intentions and goals</small>
               </div>
 
               <div className="config-item">
@@ -1183,6 +1412,43 @@ const ConfigTab = ({ config, onConfigChange }) => {
                   />
                   Enable Auto Translation
                 </label>
+                <small>Automatically translate messages to/from different languages</small>
+              </div>
+
+              <div className="config-item">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={config.enable_language_detection || false}
+                    onChange={(e) => onConfigChange('enable_language_detection', e.target.checked)}
+                  />
+                  Enable Language Detection
+                </label>
+                <small>Automatically detect the language of user messages</small>
+              </div>
+
+              <div className="config-item">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={config.enable_profanity_filter || true}
+                    onChange={(e) => onConfigChange('enable_profanity_filter', e.target.checked)}
+                  />
+                  Enable Profanity Filter
+                </label>
+                <small>Filter inappropriate content from conversations</small>
+              </div>
+
+              <div className="config-item">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={config.enable_analytics_tracking || true}
+                    onChange={(e) => onConfigChange('enable_analytics_tracking', e.target.checked)}
+                  />
+                  Enable Analytics Tracking
+                </label>
+                <small>Track conversation metrics and user engagement</small>
               </div>
 
               <div className="config-item">
@@ -1200,7 +1466,129 @@ const ConfigTab = ({ config, onConfigChange }) => {
                   <option value="ja">Japanese</option>
                   <option value="ko">Korean</option>
                   <option value="zh">Chinese</option>
+                  <option value="ar">Arabic</option>
+                  <option value="hi">Hindi</option>
+                  <option value="ru">Russian</option>
                 </select>
+                <small>Primary language for AI responses</small>
+              </div>
+            </div>
+
+            {/* Performance & Rate Limiting */}
+            <div className="config-group">
+              <h4>⚡ Performance & Rate Limiting</h4>
+              
+              <div className="config-item">
+                <label>Response Timeout (seconds)</label>
+                <input
+                  type="number"
+                  value={config.response_timeout || 30}
+                  onChange={(e) => onConfigChange('response_timeout', parseInt(e.target.value))}
+                  min={5}
+                  max={120}
+                />
+                <small>Maximum time to wait for AI response</small>
+              </div>
+
+              <div className="config-item">
+                <label>Rate Limit (requests per minute)</label>
+                <input
+                  type="number"
+                  value={config.rate_limit_per_minute || 20}
+                  onChange={(e) => onConfigChange('rate_limit_per_minute', parseInt(e.target.value))}
+                  min={1}
+                  max={1000}
+                />
+                <small>Maximum requests per user per minute</small>
+              </div>
+
+              <div className="config-item">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={config.enable_response_caching || true}
+                    onChange={(e) => onConfigChange('enable_response_caching', e.target.checked)}
+                  />
+                  Enable Response Caching
+                </label>
+                <small>Cache similar questions for faster responses</small>
+              </div>
+
+              <div className="config-item">
+                <label>Cache Duration (hours)</label>
+                <input
+                  type="number"
+                  value={config.cache_duration_hours || 24}
+                  onChange={(e) => onConfigChange('cache_duration_hours', parseInt(e.target.value))}
+                  min={1}
+                  max={168}
+                />
+                <small>How long to cache responses</small>
+              </div>
+
+              <div className="config-item">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={config.enable_streaming_responses || false}
+                    onChange={(e) => onConfigChange('enable_streaming_responses', e.target.checked)}
+                  />
+                  Enable Streaming Responses
+                </label>
+                <small>Stream responses word-by-word for faster perceived performance</small>
+              </div>
+            </div>
+
+            {/* Safety & Moderation */}
+            <div className="config-group">
+              <h4>🛡️ Safety & Moderation</h4>
+              
+              <div className="config-item">
+                <label>Content Safety Level</label>
+                <select 
+                  value={config.safety_level || 'medium'} 
+                  onChange={(e) => onConfigChange('safety_level', e.target.value)}
+                >
+                  <option value="strict">Strict (Most Restrictive)</option>
+                  <option value="medium">Medium (Balanced)</option>
+                  <option value="permissive">Permissive (Least Restrictive)</option>
+                </select>
+                <small>How strictly to filter potentially harmful content</small>
+              </div>
+
+              <div className="config-item">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={config.enable_user_blocking || true}
+                    onChange={(e) => onConfigChange('enable_user_blocking', e.target.checked)}
+                  />
+                  Enable User Blocking
+                </label>
+                <small>Allow blocking of problematic users</small>
+              </div>
+
+              <div className="config-item">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={config.log_conversations || false}
+                    onChange={(e) => onConfigChange('log_conversations', e.target.checked)}
+                  />
+                  Log Conversations for Review
+                </label>
+                <small>Save conversations for quality assurance and moderation</small>
+              </div>
+
+              <div className="config-item">
+                <label>Prohibited Topics</label>
+                <textarea
+                  value={config.prohibited_topics || ''}
+                  onChange={(e) => onConfigChange('prohibited_topics', e.target.value)}
+                  placeholder="List topics the AI should not discuss (one per line)..."
+                  rows={3}
+                />
+                <small>Topics the AI should avoid or redirect away from</small>
               </div>
             </div>
           </div>
@@ -1570,52 +1958,300 @@ const AnalyticsTab = ({ analytics }) => {
   );
 };
 
-const KnowledgeBaseTab = ({ onUploadKB }) => (
-  <div className="knowledge-tab">
-    <h3>📚 Knowledge Base Management</h3>
-    
-    <div className="upload-section">
-      <h4>Upload Documents</h4>
-      <p>Upload documents to train your AI assistant. Supported formats: PDF, TXT, DOCX, CSV, JSON, JSONL</p>
-      
-      <div className="file-upload">
-        <input
-          type="file"
-          multiple
-          accept=".pdf,.txt,.docx,.csv,.json,.jsonl"
-          onChange={(e) => onUploadKB(e.target.files)}
-          className="file-input"
-        />
-        <div className="upload-info">
-          <p>Drag and drop files here or click to browse</p>
-          <small>📄 Documents: PDF, TXT, DOCX, CSV | 🧠 Knowledge: JSON, JSONL</small>
-        </div>
-      </div>
-    </div>
+const KnowledgeBaseTab = ({ onUploadKB }) => {
+  const [files, setFiles] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [qaExamples, setQaExamples] = useState([
+    { question: "What is your return policy?", answer: "We offer a 30-day return policy for all items." },
+    { question: "How do I track my order?", answer: "You can track your order using the tracking number sent to your email." }
+  ]);
+  const [newQuestion, setNewQuestion] = useState('');
+  const [newAnswer, setNewAnswer] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const fileInputRef = useRef(null);
 
-    <div className="kb-status">
-      <h4>Current Knowledge Base</h4>
-      <div className="kb-stats">
-        <div className="stat">
-          <span className="label">Documents:</span>
-          <span className="value">15</span>
+  const handleFileSelect = (e) => {
+    setFiles(e.target.files);
+  };
+
+  const handleUpload = async () => {
+    if (!files) {
+      alert("Please select files first!");
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      await onUploadKB(files);
+      
+      // Add uploaded files to the list
+      const newFiles = Array.from(files).map(file => ({
+        name: file.name,
+        status: 'processed',
+        size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
+        type: file.type.split('/')[1] || 'unknown',
+        chunks: Math.ceil(file.size / 1000),
+        embeddings: true
+      }));
+      
+      setUploadedFiles(prev => [...prev, ...newFiles]);
+      setFiles(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    } catch (error) {
+      console.error('Upload failed:', error);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const addQAExample = () => {
+    if (newQuestion && newAnswer) {
+      setQaExamples([...qaExamples, { question: newQuestion, answer: newAnswer }]);
+      setNewQuestion('');
+      setNewAnswer('');
+    }
+  };
+
+  const handleSemanticSearch = async () => {
+    if (!searchQuery) return;
+    
+    try {
+      // Mock semantic search results for now
+      const mockResults = [
+        {
+          content: `Relevant information about "${searchQuery}" from uploaded documents...`,
+          source: "document1.pdf",
+          similarity: 0.95
+        },
+        {
+          content: `Additional context regarding "${searchQuery}" found in knowledge base...`,
+          source: "document2.txt", 
+          similarity: 0.87
+        }
+      ];
+      setSearchResults(mockResults);
+    } catch (error) {
+      console.error('Search failed:', error);
+    }
+  };
+
+  return (
+    <div className="knowledge-tab">
+      <div className="kb-header">
+        <h3>🧠 AI Knowledge Base - Vector Embeddings & Semantic Search</h3>
+        <p>Transform your documents into intelligent AI responses with vector embeddings and semantic understanding</p>
+      </div>
+
+      {/* Priority Section 1: Knowledge Base Upload */}
+      <div className="kb-upload-section primary-section">
+        <div className="section-header">
+          <h4>📤 Upload & Process Documents</h4>
+          <p>Upload any document type - PDFs, CSVs, TXT, JSON, JSONL. The AI will extract data, create vector embeddings, and transform it into usable knowledge.</p>
         </div>
-        <div className="stat">
-          <span className="label">Total Size:</span>
-          <span className="value">2.3 MB</span>
+
+        <div className="upload-area">
+          <div className="upload-zone">
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              onChange={handleFileSelect}
+              accept=".pdf,.txt,.json,.jsonl,.csv,.xlsx,.docx"
+              className="file-input"
+              id="kb-file-upload"
+            />
+            <label htmlFor="kb-file-upload" className="upload-label">
+              <div className="upload-icon">📄</div>
+              <div className="upload-text">
+                <strong>Drop files here or click to browse</strong>
+                <span>Supports PDF, TXT, JSON, JSONL, CSV, XLSX, DOCX</span>
+                <small>Files will be processed into vector embeddings automatically</small>
+              </div>
+            </label>
+          </div>
+
+          {files && (
+            <div className="selected-files">
+              <h5>Selected Files:</h5>
+              {Array.from(files).map((file, index) => (
+                <div key={index} className="file-item">
+                  <span className="file-name">{file.name}</span>
+                  <span className="file-size">({(file.size / 1024 / 1024).toFixed(2)} MB)</span>
+                  <span className="file-type">{file.type.split('/')[1] || 'unknown'}</span>
+                </div>
+              ))}
+              <button 
+                className="upload-btn primary-btn" 
+                onClick={handleUpload}
+                disabled={isUploading}
+              >
+                {isUploading ? '🔄 Processing...' : '🚀 Upload & Create Embeddings'}
+              </button>
+            </div>
+          )}
         </div>
-        <div className="stat">
-          <span className="label">Last Updated:</span>
-          <span className="value">2 hours ago</span>
+      </div>
+
+      {/* Priority Section 2: Q&A Training Examples */}
+      <div className="qa-training-section">
+        <div className="section-header">
+          <h4>🎯 Q&A Training Examples</h4>
+          <p>Define question-answer patterns to train the AI on how to transform and respond to your data</p>
+        </div>
+
+        <div className="qa-input">
+          <div className="input-row">
+            <div className="input-group">
+              <label>Sample Question:</label>
+              <input
+                type="text"
+                value={newQuestion}
+                onChange={(e) => setNewQuestion(e.target.value)}
+                placeholder="e.g., What is our return policy?"
+                className="qa-input-field"
+              />
+            </div>
+            <div className="input-group">
+              <label>Expected Answer Format:</label>
+              <textarea
+                value={newAnswer}
+                onChange={(e) => setNewAnswer(e.target.value)}
+                placeholder="e.g., Based on our policy document, we offer..."
+                className="qa-textarea"
+                rows={3}
+              />
+            </div>
+          </div>
+          <button className="add-qa-btn" onClick={addQAExample}>
+            ➕ Add Training Example
+          </button>
+        </div>
+
+        <div className="qa-examples">
+          <h5>Training Examples:</h5>
+          {qaExamples.map((example, index) => (
+            <div key={index} className="qa-example">
+              <div className="qa-question">
+                <strong>Q:</strong> {example.question}
+              </div>
+              <div className="qa-answer">
+                <strong>A:</strong> {example.answer}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Priority Section 3: Semantic Search Testing */}
+      <div className="semantic-search-section">
+        <div className="section-header">
+          <h4>🔍 Test Semantic Search & Similarity</h4>
+          <p>Test how well your AI can find and understand information from your knowledge base</p>
+        </div>
+
+        <div className="search-area">
+          <div className="search-input">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Ask a question to test the knowledge base understanding..."
+              className="search-field"
+            />
+            <button className="search-btn" onClick={handleSemanticSearch}>
+              🧠 Semantic Search
+            </button>
+          </div>
+
+          {searchResults.length > 0 && (
+            <div className="search-results">
+              <h5>AI Understanding Results:</h5>
+              {searchResults.map((result, index) => (
+                <div key={index} className="search-result">
+                  <div className="result-content">{result.content}</div>
+                  <div className="result-meta">
+                    <span className="result-source">📄 {result.source}</span>
+                    <span className="result-similarity">🎯 {(result.similarity * 100).toFixed(1)}% match</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Status Section: Processed Files */}
+      <div className="processed-files-section">
+        <div className="section-header">
+          <h4>📊 Knowledge Base Status</h4>
+          <p>Monitor your processed documents and vector embedding status</p>
+        </div>
+
+        <div className="kb-stats-grid">
+          <div className="stat-card">
+            <div className="stat-value">15</div>
+            <div className="stat-label">Documents</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-value">2.3 MB</div>
+            <div className="stat-label">Total Size</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-value">1,247</div>
+            <div className="stat-label">Vector Chunks</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-value">✅ Active</div>
+            <div className="stat-label">Embeddings</div>
+          </div>
+        </div>
+
+        <div className="files-grid">
+          {uploadedFiles.map((file, index) => (
+            <div key={index} className="file-card">
+              <div className="file-header">
+                <span className="file-name">{file.name}</span>
+                <span className={`file-status ${file.status}`}>{file.status}</span>
+              </div>
+              <div className="file-details">
+                <div className="file-detail">
+                  <span>Size:</span>
+                  <span>{file.size}</span>
+                </div>
+                <div className="file-detail">
+                  <span>Type:</span>
+                  <span>{file.type}</span>
+                </div>
+                <div className="file-detail">
+                  <span>Chunks:</span>
+                  <span>{file.chunks}</span>
+                </div>
+                <div className="file-detail">
+                  <span>Embeddings:</span>
+                  <span>{file.embeddings ? '✅ Generated' : '⏳ Processing'}</span>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const EmbedTab = ({ config, apiBase }) => {
+  const [lastUpdated, setLastUpdated] = useState(new Date());
   const embedCode = `<!-- AI Knowledge Base Widget -->
 <script async src="${apiBase}/api/widget/script/${config.client_id}"></script>`;
+
+  // Update last updated time when config changes
+  React.useEffect(() => {
+    setLastUpdated(new Date());
+  }, [config]);
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(embedCode);
@@ -1624,7 +2260,12 @@ const EmbedTab = ({ config, apiBase }) => {
 
   return (
     <div className="embed-tab">
-      <h3>🔗 Embed Your Widget</h3>
+      <div className="embed-header">
+        <h3>🔗 Embed Your Widget</h3>
+        <div className="last-updated">
+          🔄 Last updated: {lastUpdated.toLocaleTimeString()}
+        </div>
+      </div>
       
       <div className="embed-section">
         <p>Copy and paste this code into your website's HTML, preferably before the closing &lt;/body&gt; tag:</p>
@@ -1650,6 +2291,9 @@ const EmbedTab = ({ config, apiBase }) => {
       <div className="preview-section">
         <h4>Live Preview</h4>
         <p>Your widget is live at: <strong>{config.domain || 'Configure domain in settings'}</strong></p>
+        <div className="preview-info">
+          <small>Widget ID: {config.client_id}</small>
+        </div>
       </div>
     </div>
   );

@@ -99,7 +99,7 @@
 
 ### **Advanced Capabilities**
 - 🚀 **Auto-Scaling**: Cloud-ready deployment with container support
-- 🚀 **Database Flexibility**: PostgreSQL, Supabase, MongoDB support
+- 🚀 **Database Flexibility**: PostgreSQL, MongoDB support
 - 🚀 **CDN Integration**: Fast file uploads and global content delivery
 - 🚀 **Security First**: End-to-end encryption and secure data handling
 - 🚀 **Monitoring**: Real-time performance and error tracking
@@ -118,16 +118,6 @@
    - Employee onboarding and training
    - Policy and procedure guidance
    - Technical documentation access
-
-3. **E-commerce Product Support**
-   - Product information and specifications
-   - Order tracking and shipping information
-   - Return and refund policy guidance
-
-4. **Educational Institutions**
-   - Student support and course information
-   - Admissions and enrollment guidance
-   - Academic policy clarification
 
 ### **Success Metrics**
 - **Response Time**: Sub-second AI responses

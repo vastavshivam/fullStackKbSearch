@@ -17,6 +17,7 @@ class UserBase(BaseModel):
 class RoleEnum(str, Enum):
     user = "user"
     admin = "admin"
+    widget_admin = "widget-admin"
 
 class LoginRequest(BaseModel):
     email: str

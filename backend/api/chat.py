@@ -114,8 +114,9 @@ async def widget_chat(msg: WidgetChatMessage):
         sentiment = analyze_sentiment(msg.message)
         embedding = compute_embedding(msg.message)
 
-        # ✨ Generate bot reply using RAG
-        reply = await generate_response_with_rag(msg.message)
+        # ✨ Generate bot reply using RAG with client-specific knowledge base
+        from services.rag import generate_widget_response
+        reply = await generate_widget_response(msg.message, msg.client_id)
 
         # ✅ Save widget chat message
         save_chat_message(

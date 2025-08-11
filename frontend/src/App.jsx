@@ -10,6 +10,7 @@ import ChatWidget from './components/ChatWidget';
 import WidgetDashboard from './components/WidgetDashboard';
 import { WidgetConfigProvider, useWidgetConfig } from './components/WidgetConfigContext';
 import UserDashboard from './pages/UserDashboard';
+import AdminDashboard from './pages/AdminDashboard';
 import Campaigns from './pages/Campaigns';
 import Journeys from './pages/Journeys';
 import JourneyDetail from './pages/JourneyDetail';
@@ -37,6 +38,10 @@ export default function App() {
             <Routes>
               {/* <Route path="/login" element={<Login />} /> */}
               {/* <Route path="/register" element={<Register />} /> */}
+              
+              {/* Super Admin routes - Widget Configuration */}
+              <Route path="/admin-dashboard" element={<ProtectedRoute allowedRoles={['widget-admin']}><AdminDashboard /></ProtectedRoute>} />
+              
               {/* Admin routes */}
               <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['admin']}><Layout><Dashboard /></Layout></ProtectedRoute>} />
               <Route path="/chat" element={<ProtectedRoute allowedRoles={['admin']}><Layout><Chat /></Layout></ProtectedRoute>} />
