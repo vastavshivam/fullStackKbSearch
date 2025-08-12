@@ -1,67 +1,36 @@
-# === FastAPI Core ===
 fastapi==0.110.0
 uvicorn[standard]==0.27.0
 python-dotenv==1.0.0
-
-# === Database ===
 SQLAlchemy==2.0.29
 psycopg2-binary==2.9.9
 pymongo==4.7.1
-
-# === Auth & Security ===
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
 python-multipart==0.0.9
 PyJWT==2.8.0
-
-# === AI & ML ===
 google-generativeai==0.3.2
-
-# === File Handling ===
 pandas==2.2.2
 openpyxl==3.1.2
 xlrd==2.0.1
-
-# === HuggingFace & NLP ===
 transformers==4.41.1
 datasets==2.19.1
 sentence-transformers==2.7.0
-accelerate==0.30.1
-torch==2.3.0
 scipy==1.13.0
-
-# === Summarization Model ===
-torchvision==0.18.0
-torchtext==0.18.0
-
-# === Vector DB ===
-faiss-cpu==1.7.4
-chromadb==0.5.0  # Optional if using Chroma instead of FAISS
-
-# === Task Scheduling (Optional) ===
+chromadb==0.5.0
 celery==5.3.6
 redis==5.0.1
-
-# === Email/Slack Notify ===
 flask
 slack_sdk>=3.27.0
 email-validator==2.1.1
-
-# === Image Processing & OCR ===
 Pillow==10.2.0
-pytesseract==0.3.10
-opencv-python==4.9.0.80
-
-# === Voice & Audio Processing ===
+# pytesseract==0.3.10
+# opencv-python==4.9.0.80
+# torch==2.3.0
+# torchvision==0.18.0
+# torchtext==0.18.0
+# faiss-cpu==1.7.4
+# pyaudio==0.2.11
+# librosa==0.10.1
 SpeechRecognition==3.10.0
-pyaudio==0.2.11
 pydub==0.25.1
-librosa==0.10.1
-
-# === Utilities ===
-python-dotenv==1.0.1
-aiofiles==23.2.1
-python-jose
- 
-# === Supabase Client ===
-supabase==2.0.3
+gunicorn
