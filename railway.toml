@@ -1,2 +1,6 @@
 [build]
 rootDirectory = "backend"
+[build]
+builder = "Nixpacks"
+[build.env]
+PYTHON_VERSION = "3.11.9"
