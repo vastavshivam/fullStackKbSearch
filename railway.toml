@@ -2,4 +2,4 @@
 rootDirectory = "backend"
 
 [deploy]
-startCommand = "cd backend && python -m venv --copies /opt/venv && . /opt/venv/bin/activate && pip install -r requirements.txt && python main.py"
+startCommand = "pip install --no-cache-dir -r requirements.txt && uvicorn main:app --host 0.0.0.0 --port 8004"
