@@ -1,3 +1,45 @@
+# User registration fallback for SQLite
+def save_user_sqlite(user_data):
+    """Save user registration to SQLite database."""
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        # Create users table if it doesn't exist
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                email TEXT NOT NULL UNIQUE,
+                hashed_password TEXT NOT NULL,
+                role TEXT,
+                is_active BOOLEAN,
+                created_at TEXT
+            )
+        ''')
+        # Check if user already exists
+        cursor.execute('SELECT id FROM users WHERE email = ?', (user_data["email"],))
+        if cursor.fetchone():
+            conn.close()
+            raise Exception("User already exists")
+        # Insert new user
+        cursor.execute('''
+            INSERT INTO users (name, email, hashed_password, role, is_active, created_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (
+            user_data["name"],
+            user_data["email"],
+            user_data["hashed_password"],
+            user_data["role"],
+            user_data["is_active"],
+            user_data["created_at"]
+        ))
+        user_id = cursor.lastrowid
+        conn.commit()
+        conn.close()
+        return str(user_id)
+    except Exception as e:
+        print(f"Failed to save user to SQLite: {e}")
+        raise e
 import sqlite3
 import os
 from datetime import datetime

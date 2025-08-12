@@ -138,7 +138,7 @@ class UserCreate(BaseModel):
     name: str
     email: EmailStr
     password: str
-    role: RoleEnum = Field(default=RoleEnum.user)
+    role: str = Field(default="user")
 
 class UserOut(BaseModel):
     id: int

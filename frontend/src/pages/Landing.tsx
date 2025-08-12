@@ -57,9 +57,11 @@ export default function Landing() {
       setError('Please fill all fields.');
       return;
     }
+    // Always send a valid role (default to 'user' if empty or invalid)
+    let safeRole = role && typeof role === 'string' && role.trim() !== '' ? role : 'user';
     try {
       if (modal === 'login') {
-        const success = await login(email, password, role);
+        const success = await login(email, password, safeRole);
         if (success) {
           setError('');
           closeModal();
@@ -71,7 +73,7 @@ export default function Landing() {
         const res = await fetch('http://localhost:8004/api/auth/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email, password, role })
+          body: JSON.stringify({ name, email, password, role: safeRole })
         });
         if (!res.ok) {
           const data = await res.json().catch(() => ({}));
