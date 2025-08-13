@@ -27,7 +27,7 @@ const ModernWidgetDashboard: React.FC = () => {
   const [analytics, setAnalytics] = useState<any>({});
   const [knowledgeBase, setKnowledgeBase] = useState<File | null>(null);
 
-  const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8004';
+  const API_BASE = process.env.REACT_APP_API_URL || 'https://4tgzh3l5-8004.inc1.devtunnels.ms';
 
   // Helper function for authenticated API calls
   const getAuthHeaders = () => {

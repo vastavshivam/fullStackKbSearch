@@ -119,7 +119,7 @@ export default function Chat() {
       } catch (err: any) {
         console.error('Failed to create session:', err);
         if (err.code === 'ERR_NETWORK' || err.message?.includes('CORS')) {
-          setMessages([{ sender: 'bot', text: "⚠️ Connection issue detected. Please check if the backend server is running on http://localhost:8004" }]);
+          setMessages([{ sender: 'bot', text: "⚠️ Connection issue detected. Please check if the backend server is running on https://4tgzh3l5-8004.inc1.devtunnels.ms" }]);
         } else {
           setSessionId(''); // Chat will still work without session
           setMessages([{ sender: 'bot', text: "Welcome to AppGallop! ✨ (Session creation failed, but you can still chat)" }]);

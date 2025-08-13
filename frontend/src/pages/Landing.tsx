@@ -70,7 +70,7 @@ export default function Landing() {
           setError('Login failed. Please check your credentials.');
         }
       } else if (modal === 'register') {
-        const res = await fetch('http://localhost:8004/api/auth/register', {
+  const res = await fetch('https://4tgzh3l5-8004.inc1.devtunnels.ms/api/auth/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, email, password, role: safeRole })

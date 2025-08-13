@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE = 'http://localhost:8004';
+const API_BASE = 'https://4tgzh3l5-8004.inc1.devtunnels.ms';
 
 export async function processImageForQuote(file: File) {
   const formData = new FormData();

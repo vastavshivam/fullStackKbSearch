@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 // Use absolute URL for backend API
-const API_BASE = 'http://localhost:8004';
+const API_BASE = 'https://4tgzh3l5-8004.inc1.devtunnels.ms';
 
 export const uploadFile = (formData) => {
   return axios.post(`${API_BASE}/api/files/upload`, formData, {

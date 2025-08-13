@@ -13,7 +13,7 @@ const WidgetDashboard = () => {
   const [showThemeNotification, setShowThemeNotification] = useState(false);
   const themeToggleRef = useRef(null);
 
-  const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8004';
+  const API_BASE = process.env.REACT_APP_API_URL || 'https://4tgzh3l5-8004.inc1.devtunnels.ms';
 
   // Theme management
   useEffect(() => {
@@ -2245,13 +2245,18 @@ const KnowledgeBaseTab = ({ onUploadKB }) => {
 
 const EmbedTab = ({ config, apiBase }) => {
   const [lastUpdated, setLastUpdated] = useState(new Date());
-  const embedCode = `<!-- AI Knowledge Base Widget -->
-<script async src="${apiBase}/api/widget/script/${config.client_id}"></script>`;
+  const [embedCode, setEmbedCode] = useState('');
 
-  // Update last updated time when config changes
-  React.useEffect(() => {
+  // Fetch the embed code from backend
+  useEffect(() => {
+    if (!config.client_id) return;
+    fetch(`${apiBase}/api/widget/embed/${config.client_id}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.embed_code) setEmbedCode(data.embed_code.trim());
+      });
     setLastUpdated(new Date());
-  }, [config]);
+  }, [config, apiBase]);
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(embedCode);
@@ -2271,8 +2276,8 @@ const EmbedTab = ({ config, apiBase }) => {
         <p>Copy and paste this code into your website's HTML, preferably before the closing &lt;/body&gt; tag:</p>
         
         <div className="code-block">
-          <pre>{embedCode}</pre>
-          <button onClick={copyToClipboard} className="copy-btn">
+          <pre>{embedCode || 'Loading...'}</pre>
+          <button onClick={copyToClipboard} className="copy-btn" disabled={!embedCode}>
             📋 Copy Code
           </button>
         </div>

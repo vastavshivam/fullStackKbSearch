@@ -80,10 +80,10 @@ const UserDashboard: React.FC = () => {
   "font": "${config.widgetFont}",
   "mascot": "${config.profileMascot}",
   "hasKnowledgeBase": false,
-  "apiUrl": "http://127.0.0.1:5001"
+  "apiUrl": "https://4tgzh3l5-8004.inc1.devtunnels.ms"
 };
 </script>
-<script src="http://127.0.0.1:5001/widget.js"></script>`;
+<script src="https://4tgzh3l5-8004.inc1.devtunnels.ms/widget.js"></script>`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(installScript);
@@ -136,10 +136,10 @@ const UserDashboard: React.FC = () => {
     "font": "${config.widgetFont}",
     "mascot": "${config.profileMascot}",
     "hasKnowledgeBase": false,
-    "apiUrl": "http://127.0.0.1:5001"
+  "apiUrl": "https://4tgzh3l5-8004.inc1.devtunnels.ms"
   };
   </script>
-  <script src="http://127.0.0.1:5001/widget.js"></script>`;
+  <script src="https://4tgzh3l5-8004.inc1.devtunnels.ms/widget.js"></script>`;
   };
 
   const renderWidgetSettings = () => (

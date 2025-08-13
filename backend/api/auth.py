@@ -1,3 +1,4 @@
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta, datetime
@@ -5,7 +6,6 @@ from database.database import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
 from db import crud
 from models import schemas
-
 import hashlib
 from mongo.models import MONGODB_AVAILABLE, SQLITE_AVAILABLE, mongo_db
 from sqlite_fallback import save_user_sqlite
@@ -42,8 +42,9 @@ async def login(data: schemas.LoginRequest):
                 "user": user_data
             }
 
-        # Use plain text password for SQLite fallback (no hashing)
-        print(f"[DEBUG] Login attempt for: {data.email}, password: {data.password}")
+        # Hash the password for SQLite fallback
+        hashed_password = hashlib.sha256(data.password.encode()).hexdigest()
+        print(f"[DEBUG] Login attempt for: {data.email}, password: {data.password}, hashed_password: {hashed_password}")
         user = None
         print(f"[DEBUG] Forcing SQLite fallback for login (ignoring MongoDB)")
         import sqlite3, os
@@ -60,9 +61,13 @@ async def login(data: schemas.LoginRequest):
         print(f"[DEBUG] All roles in SQLite: {all_roles}")
         # Print received role
         print(f"[DEBUG] Received role: '{data.role}' (raw), Normalized: '{data.role.strip().lower()}'")
-        # Now do the actual lookup (require normalized role match, plain password)
+        # Now do the actual lookup (force normalized role match, hashed password)
         normalized_role = data.role.strip().lower()
-        cursor.execute('''SELECT id, name, email, role, is_active FROM users WHERE email = ? AND hashed_password = ? AND LOWER(TRIM(role)) = ?''', (data.email, data.password, normalized_role))
+        # Handle Enum-like values from frontend (e.g., 'RoleEnum.widget_admin')
+        if normalized_role.startswith('roleenum.'):
+            normalized_role = normalized_role.replace('roleenum.', '').replace('_', '-')
+        print(f"[DEBUG] Using normalized role for DB lookup: '{normalized_role}'")
+        cursor.execute('''SELECT id, name, email, role, is_active FROM users WHERE email = ? AND hashed_password = ? AND LOWER(TRIM(role)) = ?''', (data.email, hashed_password, normalized_role))
         row = cursor.fetchone()
         print(f"[DEBUG] SQLite user lookup result: {row}")
         conn.close()
